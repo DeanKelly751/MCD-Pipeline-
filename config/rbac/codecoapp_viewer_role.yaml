@@ -1,0 +1,27 @@
+# permissions for end users to view codecoapps.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: codecoapp-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: codecoapp-operator
+    app.kubernetes.io/part-of: codecoapp-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: codecoapp-viewer-role
+rules:
+- apiGroups:
+  - codeco.he-codeco.eu
+  resources:
+  - codecoapps
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - codeco.he-codeco.eu
+  resources:
+  - codecoapps/status
+  verbs:
+  - get

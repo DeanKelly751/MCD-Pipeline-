@@ -1,0 +1,79 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.1
+  creationTimestamp: null
+  name: codecoapps.codeco.he-codeco.eu
+spec:
+  group: codeco.he-codeco.eu
+  names:
+    kind: CodecoApp
+    listKind: CodecoAppList
+    plural: codecoapps
+    singular: codecoapp
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: CodecoApp is the Schema for the codecoapps API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: CodecoAppSpec defines the desired state of CodecoApp
+            properties:
+              name:
+                description: Name is an used to identify the CODECO application. Edit
+                  codecoapp_types.go to remove/update
+                type: string
+              qosclass:
+                description: QosClass is used to identify the CODECO application QoS.
+                  Edit codecoapp_types.go to remove/update
+                enum:
+                - High
+                - Medium
+                - Dev
+                type: string
+              securityclass:
+                description: SecurityClass is used to identify the CODECO application
+                  security class. Edit codecoapp_types.go to remove/update
+                enum:
+                - Gold
+                - Silver
+                - BestEffort
+                type: string
+            type: object
+          status:
+            description: CodecoAppStatus defines the observed state of CodecoApp
+            properties:
+              errorMsg:
+                description: ErrorMsg describes the CODECO application error. Edit
+                  codecoapp_types.go to remove/update
+                type: string
+              status:
+                description: Status expresses the CODECO application status by the
+                  CODECO framework. Edit codecoapp_types.go to remove/update
+                enum:
+                - OK
+                - Warning
+                - Error
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

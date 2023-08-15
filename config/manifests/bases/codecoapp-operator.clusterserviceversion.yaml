@@ -1,0 +1,48 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: codecoapp-operator.v0.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: CodecoApp is the Schema for the codecoapps API
+      displayName: Codeco App
+      kind: CodecoApp
+      name: codecoapps.codeco.he-codeco.eu
+      version: v1alpha1
+  description: Codeco application operator - deploy an application on the CODECO platform
+  displayName: CodecoApp
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - codeco
+  links:
+  - name: Codecoapp Operator
+    url: https://codecoapp-operator.domain
+  maintainers:
+  - email: jsalomon@redhat.com
+    name: Josh Salomon
+  maturity: alpha
+  provider:
+    name: he-codeco.eu
+    url: https://he-codeco.eu
+  version: 0.0.0

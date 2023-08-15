@@ -1,0 +1,15 @@
+apiVersion: codeco.he-codeco.eu/v1alpha1
+kind: CodecoApp
+metadata:
+  labels:
+    app.kubernetes.io/name: codecoapp2
+    app.kubernetes.io/instance: codecoapp-sample
+    app.kubernetes.io/part-of: codecoapp-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: codecoapp-operator
+  name: codecoapp-sample
+spec:
+  name: My CODECO App
+  qosclass: Dev
+  
+  # TODO(user): Add fields here
