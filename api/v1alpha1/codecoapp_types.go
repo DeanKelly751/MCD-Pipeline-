@@ -76,7 +76,7 @@ type CodecoAppStatus struct {
 	// Status expresses the CODECO application status by the CODECO framework. Edit codecoapp_types.go to remove/update
 	Status CodecoStatus `json:"status,omitempty"`
 	// ErrorMsg describes the CODECO application error. Edit codecoapp_types.go to remove/update
-	ErrorMsg string `json:"errorMsg,omitempty"`
+	ErrorMsg string `json:"errormsg,omitempty"`
 }
 
 //+kubebuilder:object:root=true

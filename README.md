@@ -18,17 +18,13 @@ You’ll need a Kubernetes cluster to run against. You can use [KIND](https://si
 **Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
 
 ### Running on the cluster
-1. Install Instances of Custom Resources:
 
-```sh
-kubectl apply -f config/samples/
-```
-
-2. Build and push your image to the location specified by `IMG`:
+1. Build and push your image to the location specified by `IMG`:
 
 ```sh
 make docker-build docker-push IMG=<some-registry>/codecoapp-operator:tag
 ```
+
 **Note I:** This is required only after code changes in the operator.   
 **Note II:** For _kind_ k8s cluster there is a need to push also the controller to a registry, 
 do the following for loading it (a one time step) - this is needed if the cluster can't
@@ -36,12 +32,35 @@ access images on _localhost_
 
     > docker push localhost/controller:latest <some-registry>/controller
     
-3. Deploy the controller to the cluster with the image specified by `IMG`:
+2. Deploy the controller to the cluster with the image specified by `IMG`:
 
 ```sh
 make deploy IMG=<some-registry>/controller:latest
 ```
 
+After successful deployment you should see a pod, a service, a deployment and a replicaset in the odecoapp-operator-system namespace - for example:
+```sh
+  >kubectl get all -n codecoapp-operator-system
+  NAME                                                         READY   STATUS    RESTARTS   AGE
+  pod/codecoapp-operator-controller-manager-8664b86964-6k9t4   2/2     Running   0          11s
+
+  NAME                                                            TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+  service/codecoapp-operator-controller-manager-metrics-service   ClusterIP   11.11.11.111   <none>        8443/TCP   11s
+
+  NAME                                                    READY   UP-TO-DATE   AVAILABLE   AGE
+  deployment.apps/codecoapp-operator-controller-manager   1/1     1            1           11s
+
+  NAME                                                               DESIRED   CURRENT   READY   AGE
+  replicaset.apps/codecoapp-operator-controller-manager-8664b86964   1         1         1       11s
+```
+
+The pod should be in _Running_ state and ready 
+
+3. Install Instances of Custom Resources:
+
+```sh
+kubectl apply -f config/samples/
+```
 ### Uninstall CRDs
 To delete the CRDs from the cluster:
 

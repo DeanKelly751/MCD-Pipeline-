@@ -60,6 +60,7 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 		return ctrl.Result{}, err
 	}
+	// TODO(user): your logic here
 
 	if codecoAppCR.Status.Status == "" {
 		codecoAppCR.Status.Status = codecov1alpha1.OK
@@ -67,10 +68,16 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		// intentionally do nothing
 	}
 
-	fmt.Printf("CodecoApp: %v\n", codecoAppCR)
-	// TODO(user): your logic here
+	if codecoAppCR.Status.ErrorMsg == "" {
+		codecoAppCR.Status.ErrorMsg = "No errors"
+	} else {
+		// intentionally do nothing
+	}
 
-	return ctrl.Result{}, nil
+	fmt.Printf("CodecoApp: %v\n", codecoAppCR)
+
+	err := r.Status().Update(ctx, codecoAppCR)
+	return ctrl.Result{}, err
 }
 
 // SetupWithManager sets up the controller with the Manager.
