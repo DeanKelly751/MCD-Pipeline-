@@ -105,6 +105,7 @@ A check that the PoC operator that is installed from this rep is working - this 
     metadata:
       resourceVersion: ""
     ```
+
 ### Uninstall CRDs
 To delete the CRDs from the cluster:
 
@@ -118,6 +119,17 @@ UnDeploy the controller from the cluster:
 ```sh
 make undeploy
 ```
+
+### Customizing the deployment/undeployment process
+
+If you need to customize the deployment process (for example, deploy your own component with the CODECO operator), you can add your customization to the scripts in the ./scripts directory. These are shell scripts that are executed during the deployment and undeployment process.
+
+- `post_deploy.sh` is executed before the deployment and can be used to install dependencies  
+>>**Note:** This script is executed before the namespace `codecoapp-operator-system` is created
+- `post_undeploy.sh` is executed after the CODECO operator deplyment and can be used to install additional components, for example CODECO platform sub components (so the `make deploy` command installs the entire CPDECO platform)
+- `pre_undeploy.sh` is executed before removing the CODECO operator and is the best place to uninstall additional compoenent that were installed in the `post_undeploy.sh` script.
+- `post_undeploy.sh` is executed after the CODECO operator was removes and is a good place for last minutes cleanups.  
+>>**Note:** This script is executed before the namespace `codecoapp-operator-system` is created
 
 ## Contributing
 // TODO(user): Add detailed information on how you would like others to contribute to this project
