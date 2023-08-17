@@ -63,6 +63,19 @@ spec:
                 description: ErrorMsg describes the CODECO application error. Edit
                   codecoapp_types.go to remove/update
                 type: string
+              metrics:
+                description: CodecoAppStatusMetrics defines the observed metrics of
+                  CodecoApp
+                properties:
+                  avgload:
+                    format: int64
+                    type: integer
+                  networkavgload:
+                    format: int64
+                    type: integer
+                  numpods:
+                    type: integer
+                type: object
               status:
                 description: Status expresses the CODECO application status by the
                   CODECO framework. Edit codecoapp_types.go to remove/update
@@ -71,6 +84,8 @@ spec:
                 - Warning
                 - Error
                 type: string
+            required:
+            - metrics
             type: object
         type: object
     served: true

@@ -61,6 +61,50 @@ The pod should be in _Running_ state and ready
 ```sh
 kubectl apply -f config/samples/
 ```
+
+#### Checking that the operator works (temp)
+
+A check that the PoC operator that is installed from this rep is working - this may change in the future it just represents the PoC minimal functionality implemented now
+
+1. Retrieve the CR deployed in the previous step 
+
+        > kubectl get codecoapps.codeco.he-codeco.eu -o yaml
+
+1. In the retrieved resource you should see the status with the `errormsg` field (this field is visible only after the operator handles the resource)
+
+    ```yaml
+    apiVersion: v1
+    items:
+    - apiVersion: codeco.he-codeco.eu/v1alpha1
+      kind: CodecoApp
+      metadata:
+        annotations:
+          kubectl.kubernetes.io/last-applied-configuration: |
+            {"apiVersion":"codeco.he-codeco.eu/v1alpha1","kind":"CodecoApp","metadata":{"annotations":{},"labels":{"app.kubernetes.io/created-by":"codecoapp-operator","app.kubernetes.io/instance":"codecoapp-sample","app.kubernetes.io/managed-by":"kustomize","app.kubernetes.io/name":"codecoapp2","app.kubernetes.io/part-of":"codecoapp-operator"},"name":"codecoapp-sample","namespace":"default"},"spec":{"name":"My CODECO App","qosclass":"Dev"}}
+        creationTimestamp: "2023-08-17T09:06:12Z"
+        generation: 1
+        labels:
+          app.kubernetes.io/created-by: codecoapp-operator
+          app.kubernetes.io/instance: codecoapp-sample
+          app.kubernetes.io/managed-by: kustomize
+          app.kubernetes.io/name: codecoapp2
+          app.kubernetes.io/part-of: codecoapp-operator
+        name: codecoapp-sample
+        namespace: default
+        resourceVersion: "109117"
+        uid: 558568c9-70e0-42ad-9495-16db33d6f35e
+      spec:
+        name: My CODECO App
+        qosclass: Dev
+      status:
+        ## The next line appears only after the operator handles the resource
+        errormsg: No errors
+        metrics: {}
+        status: OK
+    kind: List
+    metadata:
+      resourceVersion: ""
+    ```
 ### Uninstall CRDs
 To delete the CRDs from the cluster:
 

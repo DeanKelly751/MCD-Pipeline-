@@ -66,6 +66,13 @@ type CodecoAppSpec struct {
 	SecurityClass CocdcoSecurityClass `json:"securityclass,omitempty"`
 }
 
+// CodecoAppStatusMetrics defines the observed metrics of CodecoApp
+type CodecoAppStatusMetrics struct {
+	Numpods        int    `json:"numpods,omitempty"`
+	AvgLoad        uint64 `json:"avgload,omitempty"`
+	NetworkAvgLoad uint64 `json:"networkavgload,omitempty"`
+}
+
 // CodecoAppStatus defines the observed state of CodecoApp
 type CodecoAppStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
@@ -76,7 +83,8 @@ type CodecoAppStatus struct {
 	// Status expresses the CODECO application status by the CODECO framework. Edit codecoapp_types.go to remove/update
 	Status CodecoStatus `json:"status,omitempty"`
 	// ErrorMsg describes the CODECO application error. Edit codecoapp_types.go to remove/update
-	ErrorMsg string `json:"errormsg,omitempty"`
+	ErrorMsg string                 `json:"errormsg,omitempty"`
+	Metrics  CodecoAppStatusMetrics `json:"metrics"`
 }
 
 //+kubebuilder:object:root=true
