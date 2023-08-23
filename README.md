@@ -22,7 +22,7 @@ You’ll need a Kubernetes cluster to run against. You can use [KIND](https://si
 1. Build and push your image to the location specified by `IMG`:
 
 ```sh
-make docker-build docker-push IMG=<some-registry>/codecoapp-operator:tag
+> make docker-build docker-push IMG=<some-registry>/codecoapp-operator:tag
 ```
 
 **Note I:** This is required only after code changes in the operator.   
@@ -30,17 +30,19 @@ make docker-build docker-push IMG=<some-registry>/codecoapp-operator:tag
 do the following for loading it (a one time step) - this is needed if the cluster can't
 access images on _localhost_ 
 
-    > docker push localhost/controller:latest <some-registry>/controller
-    
+```sh
+> docker push localhost/controller:latest <some-registry>/controller
+```
+
 2. Deploy the controller to the cluster with the image specified by `IMG`:
 
 ```sh
-make deploy IMG=<some-registry>/controller:latest
+> make deploy IMG=<some-registry>/controller:latest
 ```
 
 After successful deployment you should see a pod, a service, a deployment and a replicaset in the odecoapp-operator-system namespace - for example:
 ```sh
-  >kubectl get all -n codecoapp-operator-system
+  > kubectl get all -n codecoapp-operator-system
   NAME                                                         READY   STATUS    RESTARTS   AGE
   pod/codecoapp-operator-controller-manager-8664b86964-6k9t4   2/2     Running   0          11s
 
@@ -59,7 +61,7 @@ The pod should be in _Running_ state and ready
 3. Install Instances of Custom Resources:
 
 ```sh
-kubectl apply -f config/samples/
+> kubectl apply -f config/samples/
 ```
 
 #### Checking that the operator works (temp)
@@ -110,14 +112,14 @@ A check that the PoC operator that is installed from this rep is working - this 
 To delete the CRDs from the cluster:
 
 ```sh
-make uninstall
+> make uninstall
 ```
 
 ### Undeploy controller
 UnDeploy the controller from the cluster:
 
 ```sh
-make undeploy
+> make undeploy
 ```
 
 ### Customizing the deployment/undeployment process
@@ -144,13 +146,13 @@ which provide a reconcile function responsible for synchronizing resources until
 1. Install the CRDs into the cluster:
 
 ```sh
-make install
+> make install
 ```
 
 2. Run your controller (this will run in the foreground, so switch to a new terminal if you want to leave it running):
 
 ```sh
-make run
+> make run
 ```
 
 **NOTE:** You can also run this in one step by running: `make install run`
@@ -159,7 +161,7 @@ make run
 If you are editing the API definitions, generate the manifests such as CRs or CRDs using:
 
 ```sh
-make manifests
+> make manifests
 ```
 
 **NOTE:** Run `make --help` for more information on all potential `make` targets
