@@ -1,4 +1,4 @@
-module github.com/JoshSalomon/codecoapp-operator
+module gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm
 
 go 1.19
 

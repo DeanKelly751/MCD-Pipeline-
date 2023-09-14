@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	codecov1alpha1 "github.com/JoshSalomon/codecoapp-operator/api/v1alpha1"
-	"github.com/JoshSalomon/codecoapp-operator/controllers"
+	codecov1alpha1 "gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm/api/v1alpha1"
+	"gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm/controllers"
 	//+kubebuilder:scaffold:imports
 )
 

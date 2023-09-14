@@ -9,7 +9,7 @@ plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
 projectName: codecoapp-operator
-repo: github.com/JoshSalomon/codecoapp-operator
+repo: gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm
 resources:
 - api:
     crdVersion: v1
@@ -18,6 +18,6 @@ resources:
   domain: he-codeco.eu
   group: codeco
   kind: CodecoApp
-  path: github.com/JoshSalomon/codecoapp-operator/api/v1alpha1
+  path: gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm/api/v1alpha1
   version: v1alpha1
 version: "3"

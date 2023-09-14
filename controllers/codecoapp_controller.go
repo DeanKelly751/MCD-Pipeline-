@@ -27,7 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	codecov1alpha1 "github.com/JoshSalomon/codecoapp-operator/api/v1alpha1"
+	codecov1alpha1 "gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm/api/v1alpha1"
 )
 
 // CodecoAppReconciler reconciles a CodecoApp object

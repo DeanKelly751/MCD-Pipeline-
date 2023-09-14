@@ -30,7 +30,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	codecov1alpha1 "github.com/JoshSalomon/codecoapp-operator/api/v1alpha1"
+	codecov1alpha1 "gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm/api/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
 
