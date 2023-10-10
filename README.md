@@ -25,13 +25,14 @@ You’ll need a Kubernetes cluster to run against. You can use [KIND](https://si
 > make docker-build docker-push IMG=<some-registry>/codecoapp-operator:tag
 ```
 
-**Note I:** This is required only after code changes in the operator.   
-**Note II:** For _kind_ k8s cluster there is a need to push also the controller to a registry, 
-do the following for loading it (a one time step) - this is needed if the cluster can't
-access images on _localhost_ 
+**Note I:** This is required only after code changes in the operator.
+**Note II:** For <some-registry>, choose from a local registry, which also needs to be made visible in your cluster, to a remote registry, e.g., Docker hub or Podman.
+**Note III:** For _kind_ k8s cluster there is a need to push also the controller to the registry.
+Run the following step as a one time step (tested with Docker hub) - this is needed if the cluster can't access images on _localhost_
 
 ```sh
-> docker push localhost/controller:latest <some-registry>/controller
+> docker tag controller:latest <some-registry>/controller:tag
+> docker push <some-registry>/controller:tag
 ```
 
 2. Deploy the controller to the cluster with the image specified by `IMG`:
@@ -55,6 +56,8 @@ After successful deployment you should see a pod, a service, a deployment and a 
   NAME                                                               DESIRED   CURRENT   READY   AGE
   replicaset.apps/codecoapp-operator-controller-manager-8664b86964   1         1         1       11s
 ```
+
+**Note IV:** For _STATUS_ errors, inspect if the error is not related to the access to your registry. For example, if the error message refers to the correct registry or registry URL, and if your credentials are working.
 
 The pod should be in _Running_ state and ready 
 
