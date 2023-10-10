@@ -26,7 +26,7 @@ You’ll need a Kubernetes cluster to run against. You can use [KIND](https://si
 ```
 
 **Note I:** This is required only after code changes in the operator.  
-**Note II:** For <some-registry>, choose from a local registry, which also needs to be made visible in your cluster, to a remote registry, e.g., Docker hub or Podman.  
+**Note II:** For `<some-registry>`, choose from a local registry, which also needs to be made visible in your cluster, to a remote registry, e.g., Docker hub or Podman.  
 **Note III:** For _kind_ k8s cluster there is a need to push also the controller to the registry.  
 Run the following step as a one time step (tested with Docker hub) - this is needed if the cluster can't access images on _localhost_
 
