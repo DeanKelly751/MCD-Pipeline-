@@ -47,6 +47,40 @@ const (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+// CodecoAppResource defines the resource consumption of CodecoApp
+type CodecoAppResource struct {
+	//+kubebuilder:validation:Minimum=0
+	//+kubebuilder:validation:default=100
+	CpuUsagePct uint64 `json:"cpu-usage-pct,omitempty"`
+
+	//+kubebuilder:validation:Minimum=0
+	//+kubebuilder:validation:default=8
+	MemUsageGB uint64 `json:"mem-usage-GB,omitempty"`
+
+	//+kubebuilder:validation:Minimum=0
+	//+kubebuilder:validation:default=25
+	NWBandwidthMbs uint64 `json:"nwbandwidth-Mbs,omitempty"`
+
+	//+kubebuilder:validation:Minimum=0
+	//+kubebuilder:validation:default=10
+	NWLatencyMs uint64 `json:"nwlatency-ms,omitempty"`
+}
+
+// CodecoAppMSSpec defines the desired state of CodecoApp micro service
+type CodecoAppMSSpec struct {
+	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
+
+	// Name is an used to identify the CODECO micro service. Edit codecoapp_types.go to remove/update
+	Name string `json:"name"`
+
+	// A reference to the PodSpec of the microservice. Edit codecoapp_types.go to remove/update
+	PodSpecName string `json:"podspecname"`
+
+	// RequiredResources is used to identify the CODECO micro service required resources. Edit codecoapp_types.go to remove/update
+	RequiredResources CodecoAppResource `json:"required-resources,omitempty"`
+}
+
 // CodecoAppSpec defines the desired state of CodecoApp
 type CodecoAppSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
@@ -59,6 +93,10 @@ type CodecoAppSpec struct {
 
 	// QosClass is used to identify the CODECO application QoS. Edit codecoapp_types.go to remove/update
 	QosClass CodecoQosClass `json:"qosclass,omitempty"`
+
+	//+kubebuilder:validation:MinItems=1
+	// MCSpecs is used to identify the CODECO micro services which compose the application. Edit codecoapp_types.go to remove/update
+	MCSpecs []CodecoAppMSSpec `json:"codecoapp-msspec,omitempty"`
 
 	//+kubebuilder:validation:Enum=Gold;Silver;BestEffort
 

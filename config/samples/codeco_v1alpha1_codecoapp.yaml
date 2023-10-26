@@ -11,5 +11,24 @@ metadata:
 spec:
   name: My CODECO App
   qosclass: Dev
-  
+  codecoapp-msspec: [
+    {
+      name: "CODECO micro service 1",
+      podspecname: "MicroService1",
+      required-resources: {
+        cpu-usage-pct: 200,
+        mem-usage-GB: 120,
+        nwbandwidth-Mbs: 10
+      }
+    },
+    {
+      name: "CODECO micro service 2",
+      podspecname: "MicroService2",
+      required-resources: {
+        cpu-usage-pct: 150,
+        mem-usage-GB: 80,
+        nwbandwidth-Mbs: 20
+      }
+    },
+  ]  
   # TODO(user): Add fields here

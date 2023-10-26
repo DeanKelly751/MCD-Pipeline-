@@ -35,6 +35,49 @@ spec:
           spec:
             description: CodecoAppSpec defines the desired state of CodecoApp
             properties:
+              codecoapp-msspec:
+                description: MCSpecs is used to identify the CODECO micro services
+                  which compose the application. Edit codecoapp_types.go to remove/update
+                items:
+                  description: CodecoAppMSSpec defines the desired state of CodecoApp
+                    micro service
+                  properties:
+                    name:
+                      description: Name is an used to identify the CODECO micro service.
+                        Edit codecoapp_types.go to remove/update
+                      type: string
+                    podspecname:
+                      description: A reference to the PodSpec of the microservice.
+                        Edit codecoapp_types.go to remove/update
+                      type: string
+                    required-resources:
+                      description: RequiredResources is used to identify the CODECO
+                        micro service required resources. Edit codecoapp_types.go
+                        to remove/update
+                      properties:
+                        cpu-usage-pct:
+                          format: int64
+                          minimum: 0
+                          type: integer
+                        mem-usage-GB:
+                          format: int64
+                          minimum: 0
+                          type: integer
+                        nwbandwidth-Mbs:
+                          format: int64
+                          minimum: 0
+                          type: integer
+                        nwlatency-ms:
+                          format: int64
+                          minimum: 0
+                          type: integer
+                      type: object
+                  required:
+                  - name
+                  - podspecname
+                  type: object
+                minItems: 1
+                type: array
               name:
                 description: Name is an used to identify the CODECO application. Edit
                   codecoapp_types.go to remove/update
