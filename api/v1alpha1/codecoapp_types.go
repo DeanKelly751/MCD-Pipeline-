@@ -49,21 +49,17 @@ const (
 
 // CodecoAppResource defines the resource consumption of CodecoApp
 type CodecoAppResource struct {
-	//+kubebuilder:validation:Minimum=0
 	//+kubebuilder:validation:default=100
-	CpuUsagePct uint64 `json:"cpu-usage-pct,omitempty"`
+	CpuUsagePct string `json:"cpu,omitempty"`
 
-	//+kubebuilder:validation:Minimum=0
 	//+kubebuilder:validation:default=8
-	MemUsageGB uint64 `json:"mem-usage-GB,omitempty"`
+	MemUsageGB string `json:"mem,omitempty"`
 
-	//+kubebuilder:validation:Minimum=0
 	//+kubebuilder:validation:default=25
-	NWBandwidthMbs uint64 `json:"nwbandwidth-Mbs,omitempty"`
+	NWBandwidthMbs string `json:"nwbandwidth,omitempty"`
 
-	//+kubebuilder:validation:Minimum=0
 	//+kubebuilder:validation:default=10
-	NWLatencyMs uint64 `json:"nwlatency-ms,omitempty"`
+	NWLatencyMs string `json:"nwlatency,omitempty"`
 }
 
 // CodecoAppMSSpec defines the desired state of CodecoApp micro service

@@ -16,18 +16,18 @@ spec:
       name: "CODECO micro service 1",
       podspecname: "MicroService1",
       required-resources: {
-        cpu-usage-pct: 200,
-        mem-usage-GB: 120,
-        nwbandwidth-Mbs: 10
+        cpu:          "2",
+        mem:          120G,
+        nwbandwidth:  10M
       }
     },
     {
       name: "CODECO micro service 2",
       podspecname: "MicroService2",
       required-resources: {
-        cpu-usage-pct: 150,
-        mem-usage-GB: 80,
-        nwbandwidth-Mbs: 20
+        cpu:          1500m,
+        mem:          80G,
+        nwbandwidth:  20M
       }
     },
   ]  

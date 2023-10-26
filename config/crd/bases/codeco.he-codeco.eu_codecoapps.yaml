@@ -55,22 +55,14 @@ spec:
                         micro service required resources. Edit codecoapp_types.go
                         to remove/update
                       properties:
-                        cpu-usage-pct:
-                          format: int64
-                          minimum: 0
-                          type: integer
-                        mem-usage-GB:
-                          format: int64
-                          minimum: 0
-                          type: integer
-                        nwbandwidth-Mbs:
-                          format: int64
-                          minimum: 0
-                          type: integer
-                        nwlatency-ms:
-                          format: int64
-                          minimum: 0
-                          type: integer
+                        cpu:
+                          type: string
+                        mem:
+                          type: string
+                        nwbandwidth:
+                          type: string
+                        nwlatency:
+                          type: string
                       type: object
                   required:
                   - name
