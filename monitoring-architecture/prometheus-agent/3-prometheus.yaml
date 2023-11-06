@@ -1,0 +1,39 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: prometheus-agent
+  namespace: monitoring-agent
+spec:
+  containers:
+  - args:
+    - --config.file=/etc/prometheus/config_out/prometheus.env.yaml
+    - --storage.agent.path=/prometheus
+    - --enable-feature=agent
+    - --web.enable-lifecycle
+    name: prometheus
+  replicas: 1
+  remoteWrite: 
+  - url: 'http://prometheus-operated.monitoring.svc.cluster.local:9090/api/v1/write'
+  externalLabels: {}
+  image: quay.io/prometheus/prometheus:v2.47.0
+  podMonitorNamespaceSelector: {}
+  podMonitorSelector: {}
+  probeNamespaceSelector: {}
+  probeSelector: {}
+  resources:
+    requests:
+      memory: 400Mi
+  ruleNamespaceSelector: {}
+  securityContext:
+    fsGroup: 2000
+    runAsNonRoot: true
+    runAsUser: 1000
+  serviceAccountName: prometheus-agent
+  serviceMonitorSelector:
+    matchLabels:
+      prometheus: prometheus-agent
+  serviceMonitorNamespaceSelector:
+    matchLabels:
+      monitoring: prometheus
+  version: 2.47.0
+  additionalScrapeConfigs: {}

@@ -1,0 +1,16 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: kepler-exporter
+  namespace: monitoring
+  labels:
+    prometheus: prometheus-agent
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kepler
+      app.kubernetes.io/component: exporter
+  endpoints:
+    - interval: 1m
+      port: http
