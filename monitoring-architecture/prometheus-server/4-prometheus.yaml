@@ -25,8 +25,5 @@ spec:
     runAsNonRoot: false
     runAsUser: 0
   storage:
-    volumeClaimTemplate:
-      spec:
-        resources:
-          requests:
-            storage: 20Gi
+    emptyDir:
+      sizeLimit: 5Gi
