@@ -37,6 +37,11 @@ Prometheus agents scrape metrics from different endpoints exposed by service mon
 kubectl apply -f prometheus-agent
 ```
 
+In order to make the prometheus server available to the outside, portf-forwarding can be used:
+```bash
+k port-forward svc/prometheus-operated -n monitoring 9090:9090
+```
+
 ## Kube-state-metrics
 Kube-state-metrics listens to the Kubernetes API server and generates metrics about the state of the object. To deploy it:
 ```bash
