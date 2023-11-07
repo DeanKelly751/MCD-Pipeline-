@@ -36,4 +36,3 @@ spec:
     matchLabels:
       monitoring: prometheus
   version: 2.47.0
-  additionalScrapeConfigs: {}
