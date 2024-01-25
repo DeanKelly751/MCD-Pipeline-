@@ -1,0 +1,22 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mdm-api-monitor
+  namespace: mdm
+  labels:
+    prometheus: prometheus-agent
+spec:
+  namespaceSelector:
+    matchNames:
+      - mdm
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mdm-api
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: mdm-api
+      app.kubernetes.io/version: 1.0.1
+      helm.sh/chart: mdm-api-1.0.1
+  endpoints:
+    - port: mdm-api
+      path: /metrics
