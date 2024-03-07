@@ -35,6 +35,10 @@ spec:
           spec:
             description: CodecoAppSpec defines the desired state of CodecoApp
             properties:
+              appenergylimit:
+                type: string
+              appfailuretolerance:
+                type: string
               codecoapp-msspec:
                 description: MCSpecs is used to identify the CODECO micro services
                   which compose the application. Edit codecoapp_types.go to remove/update
@@ -70,6 +74,8 @@ spec:
                   type: object
                 minItems: 1
                 type: array
+              complianceclass:
+                type: string
               name:
                 description: Name is an used to identify the CODECO application. Edit
                   codecoapp_types.go to remove/update
@@ -94,11 +100,7 @@ spec:
           status:
             description: CodecoAppStatus defines the observed state of CodecoApp
             properties:
-              errormsg:
-                description: ErrorMsg describes the CODECO application error. Edit
-                  codecoapp_types.go to remove/update
-                type: string
-              metrics:
+              appmetrics:
                 description: CodecoAppStatusMetrics defines the observed metrics of
                   CodecoApp
                 properties:
@@ -111,6 +113,26 @@ spec:
                   numpods:
                     type: integer
                 type: object
+              errormsg:
+                description: ErrorMsg describes the CODECO application error. Edit
+                  codecoapp_types.go to remove/update
+                type: string
+              nodemetrics:
+                description: Observed and Aggregated metrics from Codeco App Nodes
+                properties:
+                  node_cpu:
+                    type: string
+                  node_energy:
+                    type: string
+                  node_failure:
+                    type: string
+                  node_memory:
+                    type: string
+                  node_name:
+                    type: string
+                  node_security:
+                    type: string
+                type: object
               status:
                 description: Status expresses the CODECO application status by the
                   CODECO framework. Edit codecoapp_types.go to remove/update
@@ -120,7 +142,8 @@ spec:
                 - Error
                 type: string
             required:
-            - metrics
+            - appmetrics
+            - nodemetrics
             type: object
         type: object
     served: true

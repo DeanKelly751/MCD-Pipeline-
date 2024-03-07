@@ -28,6 +28,13 @@ const (
 	BestEffort CodecoQosClass = "BestEffort"
 )
 
+type CodecoComplianceClass string
+
+const (
+	Compliant    CodecoComplianceClass = "Compliant"
+	NonCompliant CodecoComplianceClass = "Non-Compliant"
+)
+
 type CocdcoSecurityClass string
 
 const (
@@ -97,7 +104,10 @@ type CodecoAppSpec struct {
 	//+kubebuilder:validation:Enum=Gold;Silver;BestEffort
 
 	// SecurityClass is used to identify the CODECO application security class. Edit codecoapp_types.go to remove/update
-	SecurityClass CocdcoSecurityClass `json:"securityclass,omitempty"`
+	SecurityClass    CocdcoSecurityClass   `json:"securityclass,omitempty"`
+	ComplianceClass  CodecoComplianceClass `json:"complianceclass,omitempty"`
+	AppEnergyLimit   string                `json:"appenergylimit,omitempty"`
+	FailureTolerance string                `json:"appfailuretolerance,omitempty"`
 }
 
 // CodecoAppStatusMetrics defines the observed metrics of CodecoApp
@@ -105,6 +115,16 @@ type CodecoAppStatusMetrics struct {
 	Numpods        int    `json:"numpods,omitempty"`
 	AvgLoad        uint64 `json:"avgload,omitempty"`
 	NetworkAvgLoad uint64 `json:"networkavgload,omitempty"`
+}
+
+// Observed and Aggregated metrics from Codeco App Nodes
+type CodecoAppNodeStatusMetrics struct {
+	NodeName                 string `json:"node_name,omitempty"`
+	AvgCpuUsage              string `json:"node_cpu,omitempty"`
+	AvgMemoryUsage           string `json:"node_memory,omitempty"`
+	AvgNodeFailureTelerance  string `json:"node_failure,omitempty"`
+	AvgNodeEnergyExpenditure string `json:"node_energy,omitempty"`
+	AvgNodeSecurity          string `json:"node_security,omitempty"`
 }
 
 // CodecoAppStatus defines the observed state of CodecoApp
@@ -117,8 +137,11 @@ type CodecoAppStatus struct {
 	// Status expresses the CODECO application status by the CODECO framework. Edit codecoapp_types.go to remove/update
 	Status CodecoStatus `json:"status,omitempty"`
 	// ErrorMsg describes the CODECO application error. Edit codecoapp_types.go to remove/update
-	ErrorMsg string                 `json:"errormsg,omitempty"`
-	Metrics  CodecoAppStatusMetrics `json:"metrics"`
+	ErrorMsg string `json:"errormsg,omitempty"`
+	//Observed and Aggregated metrics from Codeco App Nodes
+	NodeMetrics CodecoAppNodeStatusMetrics `json:"nodemetrics"`
+
+	AppMetrics CodecoAppStatusMetrics `json:"appmetrics"`
 }
 
 //+kubebuilder:object:root=true
