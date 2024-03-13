@@ -13,9 +13,9 @@ application on the CODECO platforme. The CRD for the application deployment is
 *CodecoApp*.
 * _Cluster admin_ - TBD
 
-On deployment, a 3 node kind cluster will be configured and set up. 
-We will then use ACM to install the other 4 project components; SWM, MDM, PDLC & NetMA
-Our post_deploy.sh script will then configure the cluster to suit the needs of not only ACM, but of all CODECO components
+* On deployment, a 3 node kind cluster will be configured and set up. 
+* We will then use ACM to install the other 4 project components; SWM, MDM, PDLC & NetMA
+* Our post_deploy.sh script will then configure the cluster to suit the needs of not only ACM, but of all CODECO components
 
 ## Getting Started
 You’ll need a Kind installed on your machine. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.  
