@@ -43,3 +43,11 @@ cd pdlc-pp
 # sudo python3 ca_crd_extractor.py
 cd ..
 echo "........................................Finished installing PDLC..............................................."
+echo "........................................Installing NetMA..............................................."
+cd secure-connectivity
+sudo kubectl taint nodes kind-control-plane node-role.kubernetes.io/control-plane:NoSchedule-
+sudo kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick.yml
+cat ../multus-cni/deployments/multus-daemonset-thick.yml | kubectl apply -f -
+sudo kubectl create -f ./deployments/l2sm-deployment.yaml
+cd ..
+echo "........................................Finished installing NetMA..............................................."
