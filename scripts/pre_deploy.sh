@@ -2,6 +2,8 @@
 ## This script is executed before the CODECO operator deployment starts. It is used to install dependencies or
 ## other components' dependencies
 sudo kind create cluster --config kind-config.yaml
+
+cd ..
 git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/scheduling-and-workload-migration-swm/qos-scheduler.git
 git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/metadata-manager-mdm/mdm-api.git
 git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/privacy-preserving-decentralised-learning-and-context-awareness-pdlc/context-awareness/pdlc-pp.git
