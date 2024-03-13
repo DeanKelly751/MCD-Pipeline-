@@ -37,7 +37,7 @@ You’ll need a Kind installed on your machine. You can use [KIND](https://sigs.
 Run the following step as a one time step (tested with Docker hub) - this is needed if the cluster can't access images on _localhost_
 
 ```sh
-> docker tag controller:latest <some-registry>/controller:tag
+> docker tag controller:latest <some-registry>/codecoapp-operator:tag
 > docker push <some-registry>/controller:tag
 ```
 
