@@ -14,7 +14,7 @@ echo ".....................Installing MDM....................................."
 cd mdm-api
 export MDM_NAMESPACE=mdm
 export MDM_CONTEXT=kind-kind
-sudo kubectl --context=$MDM_CONTEXT create namespace $MDM_NAMESPACE
+kubectl --context=$MDM_CONTEXT create namespace $MDM_NAMESPACE
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add neo4j https://helm.neo4j.com/neo4j
 sed -i "s/<storageclassName>/standard/g" "./deployment/zookeeper-helm.yaml"
@@ -22,7 +22,7 @@ sed -i "s/<storageclassName>/standard/g" "./deployment/neo4j-helm.yaml"
 helm --kube-context=$MDM_CONTEXT install mdm-zookeeper -n $MDM_NAMESPACE  bitnami/zookeeper  -f ./deployment/zookeeper-helm.yaml
 helm --kube-context=$MDM_CONTEXT install mdm-kafka -n $MDM_NAMESPACE bitnami/kafka --version 21.1.1 -f ./deployment/kafka-helm.yaml
 helm --kube-context=$MDM_CONTEXT install mdm-neo4j -n $MDM_NAMESPACE neo4j/neo4j-standalone -f ./deployment/neo4j-helm.yaml
-sudo kubectl --context=$MDM_CONTEXT -n $MDM_NAMESPACE exec -i mdm-kafka-0 -- /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server mdm-kafka-0:9093 --create --topic json-events --config cleanup.policy=compact
+kubectl --context=$MDM_CONTEXT -n $MDM_NAMESPACE exec -i mdm-kafka-0 -- /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server mdm-kafka-0:9093 --create --topic json-events --config cleanup.policy=compact
 helm --kube-context=$MDM_CONTEXT -n $MDM_NAMESPACE install mdm-controller ./controller/src/helm -f ./controller/src/helm/values.yaml
 helm --kube-context=$MDM_CONTEXT -n $MDM_NAMESPACE install mdm-api ./mdm-api/src/helm -f ./mdm-api/src/helm/values.yaml
 cd ..
@@ -45,9 +45,9 @@ cd ..
 echo "........................................Finished installing PDLC..............................................."
 echo "........................................Installing NetMA..............................................."
 cd secure-connectivity
-sudo kubectl taint nodes kind-control-plane node-role.kubernetes.io/control-plane:NoSchedule-
-sudo kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick.yml
+kubectl taint nodes kind-control-plane node-role.kubernetes.io/control-plane:NoSchedule-
+kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick.yml
 cat ../multus-cni/deployments/multus-daemonset-thick.yml | kubectl apply -f -
-sudo kubectl create -f ./deployments/l2sm-deployment.yaml
+kubectl create -f ./deployments/l2sm-deployment.yaml
 cd ..
 echo "........................................Finished installing NetMA..............................................."
