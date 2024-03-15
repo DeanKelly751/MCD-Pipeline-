@@ -145,11 +145,11 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// WAIT 8secs just to ensure UPDATE has completed
-	fmt.Printf("\n\n ------ Waiting 8 seconds ------- %v\n\n", uperr)
+	fmt.Printf("\n\n ------ Waiting 8 seconds -------\n\n")
 	time.Sleep(8 * time.Second)
 
 	if err := r.Get(ctx, client.ObjectKey{Namespace: "default", Name: "app1"}, qos_scheduler_app2); err != nil {
-		fmt.Printf("\n\nError Returning SWM CRD: %v\n\n", uperr)
+		fmt.Printf("\n\nError Returning SWM CRD: %v\n\n", err)
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			return ctrl.Result{}, nil
