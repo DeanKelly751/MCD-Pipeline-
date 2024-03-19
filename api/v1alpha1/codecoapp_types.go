@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -28,19 +29,30 @@ const (
 	BestEffort CodecoQosClass = "BestEffort"
 )
 
+type CodecoFailureTolerance string
+
+const (
+	HighFailure CodecoFailureTolerance = "High"
+	MedFailure  CodecoFailureTolerance = "Medium"
+	LowFailure  CodecoFailureTolerance = "Low"
+)
+
 type CodecoComplianceClass string
 
 const (
-	Compliant    CodecoComplianceClass = "Compliant"
-	NonCompliant CodecoComplianceClass = "Non-Compliant"
+	HighComliance CodecoComplianceClass = "High"
+	MedCompliance CodecoComplianceClass = "Medium"
+	LowCompliance CodecoComplianceClass = "Low"
 )
 
 type CocdcoSecurityClass string
 
 const (
 	High   CocdcoSecurityClass = "High"
+	Good   CocdcoSecurityClass = "Good"
 	Medium CocdcoSecurityClass = "Medium"
-	Dev    CocdcoSecurityClass = "Dev"
+	Low    CocdcoSecurityClass = "Low"
+	None   CocdcoSecurityClass = "None"
 )
 
 type CodecoStatus string
@@ -49,6 +61,13 @@ const (
 	OK      CodecoStatus = "OK"
 	Warning CodecoStatus = "Warning"
 	Error   CodecoStatus = "Error"
+)
+
+type NetworkServiceClass string
+
+const (
+	ServiceClassBestEffort = "BESTEFFORT"
+	ServiceClassAssured    = "ASSURED"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -75,13 +94,80 @@ type CodecoAppMSSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Name is an used to identify the CODECO micro service. Edit codecoapp_types.go to remove/update
-	Name string `json:"name"`
+	ServiceName string `json:"serviceName"`
+
+	// service channels
+	ServiceChannels []CodecoChannels `json:"serviceChannels"`
 
 	// A reference to the PodSpec of the microservice. Edit codecoapp_types.go to remove/update
-	PodSpecName string `json:"podspecname"`
+	PodSpec v1.PodSpec `json:"podspec,omitempty"`
 
 	// RequiredResources is used to identify the CODECO micro service required resources. Edit codecoapp_types.go to remove/update
-	RequiredResources CodecoAppResource `json:"required-resources,omitempty"`
+	RequiredResources CodecoAppResource `json:"requiredResources,omitempty"`
+}
+
+// ServiceId is a combination of a service name and an application name.
+
+type ServiceId struct {
+	// +kubebuilder:validation:Pattern=^[a-z]+([-a-z0-9]+)$
+	ServiceName string `json:"serviceName,omitempty"`
+	AppName     string `json:"appName,omitempty"`
+
+	// The port where the application listens for Channel data.
+	// This has to be the same as the containerPort on the relevant container.
+	Port int `json:"port,omitempty"`
+}
+
+type ChannelSettings struct {
+	// All NetworkChannel requirements can be specified like a Kubernetes
+	// resource.Quantity. This means you can specify a bandwidth of 10MBit/s by
+	// writing "10M".
+
+	// Bandwidth specifies the traffic requirements for the Channel.
+	// It is specified in bit/s, e.g. 5M means 5Mbit/s.
+	// If you specify only the bandwidth but leave framesize and sendinterval
+	// blank, the system will request a default framesize of 500 byte for you.
+	// If that is not what you want, you need to request the framesize explicitly.
+	// +optional
+	// +kubebuilder:validation:Pattern:=^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+	MinBandwidth string `json:"bandwidth,omitempty"`
+
+	// The maximum tolerated latency (end to end) on this channel in seconds.
+	// "1" means "one second", "10e-3" means "10 milliseconds".
+	// +optional
+	// +kubebuilder:validation:Pattern:=^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+	MaxDelay string `json:"maxDelay,omitempty"`
+
+	// Framesize specifies the number of bytes that are sent in one go.
+	// As an example, specifying a Framesize of 1K and a SendInterval of 10e-3 (i.e. 10ms),
+	// the effective bandwidth is 100kByte/s or 800kbit/s.
+	// +optional
+	// +kubebuilder:validation:Pattern:=^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+	Framesize string `json:"frameSize,omitempty"`
+
+	// The SendInterval specifies the interval between two consecutive frames sent over this channel, in sedonds.
+	// "10e-6" means "10 microseconds".
+	// This value should not exceed 10e-3 aka 10ms. The code will cap it at 10ms if you specify a larger value.
+	// +optional
+	// +kubebuilder:validation:Pattern:=^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+	SendInterval string `json:"sendInterval,omitempty"`
+}
+
+type CodecoChannels struct {
+	ChannelName string `json:"chanelName,omitempty"`
+
+	// OtherWorkload identifies the target workload of the connection
+	// via its application name and workload basename.
+	OtherService ServiceId `json:"otherService"`
+
+	// A communication service Class for this channel.
+	// Currently, two service classes are supported, 'BESTEFFORT' and 'ASSURED'.
+	// Service classes are mapped to network infrastructure type by the QoS Scheduler.
+	// +optional
+	ServiceClass NetworkServiceClass `json:"serviceClass,omitempty"`
+
+	// +optional
+	AdvancedChannelSettings ChannelSettings `json:"advancedChannelSettings,omitempty"`
 }
 
 // CodecoAppSpec defines the desired state of CodecoApp
@@ -90,24 +176,25 @@ type CodecoAppSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Name is an used to identify the CODECO application. Edit codecoapp_types.go to remove/update
-	Name string `json:"name,omitempty"`
+	AppName string `json:"appName,omitempty"`
 
-	//+kubebuilder:validation:Enum=High;Medium;Dev
-
+	//+kubebuilder:validation:Enum=Gold;Silver;BestEffort
 	// QosClass is used to identify the CODECO application QoS. Edit codecoapp_types.go to remove/update
-	QosClass CodecoQosClass `json:"qosclass,omitempty"`
+	QosClass CodecoQosClass `json:"qosClass,omitempty"`
 
 	//+kubebuilder:validation:MinItems=1
 	// MCSpecs is used to identify the CODECO micro services which compose the application. Edit codecoapp_types.go to remove/update
 	MCSpecs []CodecoAppMSSpec `json:"codecoapp-msspec,omitempty"`
 
-	//+kubebuilder:validation:Enum=Gold;Silver;BestEffort
-
+	//+kubebuilder:validation:Enum=High;Good;Medium;Low; None
 	// SecurityClass is used to identify the CODECO application security class. Edit codecoapp_types.go to remove/update
-	SecurityClass    CocdcoSecurityClass   `json:"securityclass,omitempty"`
-	ComplianceClass  CodecoComplianceClass `json:"complianceclass,omitempty"`
-	AppEnergyLimit   string                `json:"appenergylimit,omitempty"`
-	FailureTolerance string                `json:"appfailuretolerance,omitempty"`
+	SecurityClass CocdcoSecurityClass `json:"securityClass,omitempty"`
+	//expected level of compliance, based on a scale
+	ComplianceClass CodecoComplianceClass `json:"complianceClass,omitempty"`
+	// Maximum desired level of energy expenditure for the overall k8s infrastructure associated with an application (percent)
+	AppEnergyLimit string `json:"appEnergyLimit,omitempty"`
+	//Desired tolerance to infrastructure failures, percentage
+	FailureTolerance CodecoFailureTolerance `json:"appFailureTolerance,omitempty"`
 }
 
 // CodecoAppStatusMetrics defines the observed metrics of CodecoApp

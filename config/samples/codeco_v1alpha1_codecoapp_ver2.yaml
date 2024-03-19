@@ -1,0 +1,35 @@
+apiVersion: codeco.he-codeco.eu/v1alpha1
+kind: CodecoApp
+metadata:
+  name: codecoappinstance2
+spec:
+  appEnergyLimit: "20" # Maximum desired level of energy expenditure for the overall k8s infrastructure associated with an application (percent)
+  appFailureTolerance: "" # Desired tolerance to infrastructure failures, High/Medium/Low
+  appName: "NewApp"
+  codecoapp-msspec:
+  - podspec:
+      containers:
+      - name: httpd
+        image: httpd
+        ports:
+        - containerPort: 80
+    requiredResources:
+      cpu: "50" # percentage
+      mem: "8" # GB
+      nwbandwidth: "1.2" #Mbs
+      nwlatency: "3" # Ms
+    serviceName: "service1"
+    serviceChannels:
+    - advancedChannelSettings:
+        bandwidth: "5"
+        frameSize: "100"
+        maxDelay: "1"
+        sendInterval: "10"
+      chanelName: ""
+      otherService:
+        appName: ""
+        port: 0
+        serviceName: "service2"
+  complianceClass: "High" #expected level of compliance, based on a scale - High, Medium, Low
+  qosClass: "Gold" # Preferred QoS level, Gold, Silver, BestEffort
+  securityClass: "Good" #Desired level of security for the application, based on a likert scale, 5 levels -HIGH-GOOD-MEDIUM-LOW-NONE
