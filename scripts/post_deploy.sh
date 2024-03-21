@@ -7,7 +7,7 @@ cd ..
 echo ".....................Installing SWM....................................."
 cd qos-scheduler
 make chart
-helm install qostest --namespace=codeco-swm-controllers --create-namespace tmp/helm
+helm install qostest --namespace=he-codeco-swm --create-namespace tmp/helm
 cd ..
 echo "......................................Finished installing SWM.................................."
 echo ".....................Installing MDM....................................."
