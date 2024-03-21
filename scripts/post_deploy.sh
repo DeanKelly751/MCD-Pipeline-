@@ -12,7 +12,7 @@ cd ..
 echo "......................................Finished installing SWM.................................."
 echo ".....................Installing MDM....................................."
 cd mdm-api
-export MDM_NAMESPACE=mdm
+export MDM_NAMESPACE=he-codeco-mdm
 export MDM_CONTEXT=kind-kind
 kubectl --context=$MDM_CONTEXT create namespace $MDM_NAMESPACE
 helm repo add bitnami https://charts.bitnami.com/bitnami
