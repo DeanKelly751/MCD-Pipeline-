@@ -38,12 +38,34 @@ echo "........................................Finished installing MDM...........
 # sudo kubectl get networkpaths -A
 # sudo kubectl --namespace mdm port-forward $POD_NAME 9092:$CONTAINER_PORT
 echo ".....................Installing PDLC....................................."
-cd pdlc-pp
-# chmod -R 777 .
-# sudo ./apply-controller.sh
-# cd crd\ data\ extraction/
-# sudo pip3 install -r requirements_e.txt
-# sudo python3 ca_crd_extractor.py
+
+# Prometheus installation
+
+cd kube-prometheus
+kubectl apply --server-side -f manifests/setup
+kubectl wait \
+	--for condition=Established \
+	--all CustomResourceDefinition \
+	--namespace=monitoring
+kubectl apply -f manifests/
+cd ..
+
+#Data generator
+cd synthetic-data-generator
+
+chmod -R 777 apply-controllers.sh
+./apply-controllers.sh
+
+cd ..
+
+#PDLC
+cd pdlc-integration
+
+git checkout no-gnn
+
+chmod -R 777 apply_yamls.sh
+./apply_yamls.sh
+
 cd ..
 echo "........................................Finished installing PDLC..............................................."
 echo ".....................Installing SWM....................................."
