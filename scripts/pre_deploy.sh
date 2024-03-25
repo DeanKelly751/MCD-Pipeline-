@@ -23,8 +23,10 @@ cd ..
 # Clone repositories if not already present
 clone_if_not_exists "https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/scheduling-and-workload-migration-swm/qos-scheduler.git" "qos-scheduler"
 clone_if_not_exists "https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/metadata-manager-mdm/mdm-api.git" "mdm-api"
-clone_if_not_exists "https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/privacy-preserving-decentralised-learning-and-context-awareness-pdlc/context-awareness/pdlc-pp.git" "pdlc-pp"
+clone_if_not_exists "https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/privacy-preserving-decentralised-learning-and-context-awareness-pdlc/pdlc-integration.git" "pdlc-integration"
 clone_if_not_exists "https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/network-management-and-adaptation-netma/secure-connectivity.git" "secure-connectivity"
 clone_if_not_exists "https://github.com/k8snetworkplumbingwg/multus-cni.git" "multus-cni"
+clone_if_not_exists "https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/experimentation-framework-and-demonstrations/data-generators-and-datasets/synthetic-data-generator.git" "synthetic-data-generator"
+clone_if_not_exists "https://github.com/prometheus-operator/kube-prometheus" "kube-prometheus"
 
 ##TODO(user): Add your dependencies here
