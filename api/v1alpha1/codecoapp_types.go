@@ -94,13 +94,13 @@ type CodecoAppMSSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Name is an used to identify the CODECO micro service. Edit codecoapp_types.go to remove/update
-	ServiceName string `json:"serviceName"`
+	BaseName string `json:"serviceName"`
 
 	// service channels
-	ServiceChannels []CodecoChannels `json:"serviceChannels"`
+	Channels []CodecoChannels `json:"serviceChannels"`
 
 	// A reference to the PodSpec of the microservice. Edit codecoapp_types.go to remove/update
-	PodSpec v1.PodSpec `json:"podspec,omitempty"`
+	Template v1.PodSpec `json:"podspec,omitempty"`
 
 	// RequiredResources is used to identify the CODECO micro service required resources. Edit codecoapp_types.go to remove/update
 	RequiredResources CodecoAppResource `json:"requiredResources,omitempty"`
@@ -110,8 +110,8 @@ type CodecoAppMSSpec struct {
 
 type ServiceId struct {
 	// +kubebuilder:validation:Pattern=^[a-z]+([-a-z0-9]+)$
-	ServiceName string `json:"serviceName,omitempty"`
-	AppName     string `json:"appName,omitempty"`
+	BaseName        string `json:"serviceName,omitempty"`
+	ApplicationName string `json:"appName,omitempty"`
 
 	// The port where the application listens for Channel data.
 	// This has to be the same as the containerPort on the relevant container.
@@ -154,11 +154,11 @@ type ChannelSettings struct {
 }
 
 type CodecoChannels struct {
-	ChannelName string `json:"chanelName,omitempty"`
+	BaseName string `json:"chanelName,omitempty"`
 
 	// OtherWorkload identifies the target workload of the connection
 	// via its application name and workload basename.
-	OtherService ServiceId `json:"otherService"`
+	OtherWorkload ServiceId `json:"otherService"`
 
 	// A communication service Class for this channel.
 	// Currently, two service classes are supported, 'BESTEFFORT' and 'ASSURED'.
@@ -184,7 +184,7 @@ type CodecoAppSpec struct {
 
 	//+kubebuilder:validation:MinItems=1
 	// MCSpecs is used to identify the CODECO micro services which compose the application. Edit codecoapp_types.go to remove/update
-	MCSpecs []CodecoAppMSSpec `json:"codecoapp-msspec,omitempty"`
+	Workloads []CodecoAppMSSpec `json:"codecoapp-msspec,omitempty"`
 
 	//+kubebuilder:validation:Enum=High;Good;Medium;Low; None
 	// SecurityClass is used to identify the CODECO application security class. Edit codecoapp_types.go to remove/update

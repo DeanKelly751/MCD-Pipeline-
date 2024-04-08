@@ -18,7 +18,10 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	dc "github.com/fluidtruck/deepcopy"
+	"github.com/tidwall/pretty"
 	codecov1alpha1 "gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm/api/v1alpha1"
 	swmv1alpha1 "gitlab.eclipse.org/rcarrollred/qos-scheduler/scheduler/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -119,17 +122,28 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	qos_scheduler_new_app.Spec = swmv1alpha1.ApplicationSpec{}
 	qos_scheduler_new_app.Spec.Workloads = []swmv1alpha1.ApplicationWorkloadSpec{}
 
-	workload := swmv1alpha1.ApplicationWorkloadSpec{Basename: "newswmapp-wrkload1"}
-	workload.Template.Spec = codecoAppCR.Spec.MCSpecs[0].PodSpec
-	//workload.Template.Spec.Containers = append(workload.Template.Spec.Containers, v1.Container{})
-	qos_scheduler_new_app.Spec.Workloads = append(qos_scheduler_new_app.Spec.Workloads, workload)
-
 	/// -------------------- UPDATE SWM Application --------------------------------------
 	fmt.Println(time.Now().Format(time.UnixDate), " ------------------- CREATING SWM APP ------------------------- ")
 
-	if uperr := r.Create(ctx, qos_scheduler_new_app); uperr != nil {
-		fmt.Printf("\n\nError Updating SWM: %v\n\n", uperr)
-		return ctrl.Result{}, nil
+	err := r.Get(ctx, client.ObjectKey{Namespace: "default", Name: "acm-swm-app"}, qos_scheduler_new_app)
+	if err != nil {
+		fmt.Println("Creating new SWM app")
+		if err := r.Create(ctx, qos_scheduler_new_app); err != nil {
+			fmt.Println("Error creating SWM")
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{}, err
+	}
+
+	// Map from Codeco Apllication Model to SWM Application Model
+	MapToSWMApplicationModel(codecoAppCR, qos_scheduler_new_app)
+
+	fmt.Println("Updating SWM app")
+	err = r.Update(ctx, qos_scheduler_new_app)
+
+	if err != nil {
+		fmt.Print("Error updating swm")
+		return ctrl.Result{}, err
 	}
 
 	// WAIT 8secs just to ensure UPDATE has completed
@@ -144,6 +158,10 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 		return ctrl.Result{}, err
 	}
+
+	fmt.Print("\n\n", qos_scheduler_new_app)
+	json_SWM, _ := json.Marshal(qos_scheduler_new_app)
+	fmt.Println("\n\nNew SWM app JSON:\n", string(pretty.Pretty(json_SWM)))
 
 	fmt.Println(time.Now().Format(time.UnixDate), "SWM App :", qos_scheduler_app2.Name)
 	fmt.Println(time.Now().Format(time.UnixDate), "SWM App Phase3 :", qos_scheduler_app2.Status.Phase)
@@ -172,7 +190,16 @@ func CreateNewSWMApplicationModel() {
 
 }
 
-func MapToSWMApplicationModel(codecoApp codecov1alpha1.CodecoApp, swmApp swmv1alpha1.Application) {
+func MapToSWMApplicationModel(codecoApp *codecov1alpha1.CodecoApp, swmApp *swmv1alpha1.Application) {
 	//Function to Map from Codeco Apllication Model to SWM Application Model
+
+	dc.DeepCopy(codecoApp.Spec, &swmApp.Spec)
+
+	for i := range codecoApp.Spec.Workloads {
+		dc.DeepCopy(codecoApp.Spec.Workloads[i].Template, &swmApp.Spec.Workloads[i].Template.Spec)
+		for j := range codecoApp.Spec.Workloads[i].Channels {
+			dc.DeepCopy(codecoApp.Spec.Workloads[i].Channels[j].AdvancedChannelSettings, &swmApp.Spec.Workloads[i].Channels[j])
+		}
+	}
 
 }
