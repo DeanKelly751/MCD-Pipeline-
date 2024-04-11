@@ -25,10 +25,10 @@ kubectl apply -f prometheus-operator/rbac
 kubectl apply -f prometheus-operator/deployment
 ```
 
-### Deploying prometheus server
-The prometheus server will receive metrics from prometheus agents, deploy it using:
+### Deploying thanos
+Thanos will receive metrics from prometheus agents, deploy it using:
 ```bash
-kubectl apply -f prometheus-server/
+kubectl apply -f thanos-receiver/
 ```
 
 ### Deploying prometheus agent

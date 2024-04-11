@@ -10,4 +10,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: prometheus-agent
-    namespace: monitoring-agent
+    namespace: he-codeco-acm

@@ -3,13 +3,13 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: mdm-api-monitor
-  namespace: mdm
+  namespace: he-codeco-mdm
   labels:
     prometheus: prometheus-agent
 spec:
   namespaceSelector:
     matchNames:
-      - mdm
+      - he-codeco-mdm
   selector:
     matchLabels:
       app.kubernetes.io/name: mdm-api

@@ -1,8 +1,9 @@
+---
 apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
 metadata:
   name: prometheus-agent
-  namespace: monitoring-agent
+  namespace: he-codeco-acm
 spec:
   containers:
   - args:
@@ -13,7 +14,7 @@ spec:
     name: prometheus
   replicas: 1
   remoteWrite: 
-  - url: 'http://prometheus-operated.monitoring.svc.cluster.local:9090/api/v1/write'
+   - url: 'http://thanos-receive-router.he-codeco-acm.svc.cluster.local:19291/api/v1/receive'
   externalLabels: {}
   image: quay.io/prometheus/prometheus:v2.47.0
   podMonitorNamespaceSelector: {}

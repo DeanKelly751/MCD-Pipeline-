@@ -2,7 +2,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: kube-state-metrics
+  name: node-exporter
   namespace: he-codeco-acm
   labels:
     prometheus: prometheus-agent
@@ -12,7 +12,7 @@ spec:
       - he-codeco-acm
   selector:
     matchLabels:
-      app.kubernetes.io/name: kube-state-metrics
+      app.kubernetes.io/name: node-exporter
   endpoints:
-    - port: http-metrics
+    - port: node-exporter
       path: /metrics

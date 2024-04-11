@@ -1,18 +1,22 @@
 ---
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
+apiVersion: v1
+kind: Service
 metadata:
-  name: <servicemonitor-name>
+  name: <service-name>
   namespace: <namespace>
   labels:
     prometheus: prometheus-agent
 spec:
   namespaceSelector:
     matchNames:
-      - <service-namespace> #Namespace where the app service is deployed
+      - <namespace>
   selector:
     matchLabels:
-      app: <app-name>
+      label1: <label1>
+      label2: <label2>
+      .
+      .
+      .
   endpoints:
-    - port: http-metrics #References the port defined in service.yaml
+    - port: <port name>
       path: /metrics
