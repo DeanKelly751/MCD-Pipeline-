@@ -5,7 +5,7 @@ metadata:
 spec:
   appEnergyLimit: "20" # Maximum desired level of energy expenditure for the overall k8s infrastructure associated with an application (percent)
   appFailureTolerance: "" # Desired tolerance to infrastructure failures, High/Medium/Low
-  appName: "NewApp"
+  appName: "acm-swm-app"
   codecoapp-msspec:
   - serviceName: "database"
     podspec:
@@ -39,7 +39,7 @@ spec:
         maxDelay: "1"
         sendInterval: "10"
       otherService:
-        appName: ""
+        appName: "acm-swm-app"
         port: 0
         serviceName: "front-end"
   - serviceName: "front-end"
@@ -62,7 +62,7 @@ spec:
         maxDelay: "1"
         sendInterval: "10"
       otherService:
-        appName: "NewApp"
+        appName: "acm-swm-app"
         port: 0
         serviceName: "database"
   complianceClass: "High" #expected level of compliance, based on a scale - High, Medium, Low

@@ -9,6 +9,7 @@ rules:
   resources:
   - applications
   - channels
+  - applicationgroups
   verbs:
   - create
   - delete
