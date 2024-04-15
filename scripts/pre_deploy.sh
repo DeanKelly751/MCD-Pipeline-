@@ -16,7 +16,7 @@ clone_if_not_exists() {
 }
 
 # Create Kubernetes cluster
-kind create cluster --config ./config/cluster/kind-config.yaml
+# kind create cluster --config ./config/cluster/kind-config.yaml
 
 cd ..
 
