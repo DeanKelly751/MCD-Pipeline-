@@ -26,11 +26,8 @@ spec:
           limits:
             memory: 4Gi
             cpu: "2"
-    requiredResources:
-      cpu: "50" # percentage
-      mem: "8" # GB
-      nwbandwidth: "1.2" #Mbs
-      nwlatency: "3" # Ms
+    nwbandwidth: "1.2" #Mbs
+    nwlatency: "3" # Ms
     serviceChannels:
     - chanelName: ""
       advancedChannelSettings:
@@ -49,11 +46,8 @@ spec:
         image: nginx:1.14.2
         ports:
         - containerPort: 80
-    requiredResources:
-      cpu: "50" # percentage
-      mem: "8" # GB
-      nwbandwidth: "1.2" #Mbs
-      nwlatency: "3" # Ms
+    nwbandwidth: "1.2" #Mbs
+    nwlatency: "3" # Ms
     serviceChannels:
     - chanelName: "fe-db-channel"
       advancedChannelSettings:
@@ -68,3 +62,39 @@ spec:
   complianceClass: "High" #expected level of compliance, based on a scale - High, Medium, Low
   qosClass: "Gold" # Preferred QoS level, Gold, Silver, BestEffort
   securityClass: "Good" #Desired level of security for the application, based on a likert scale, 5 levels -HIGH-GOOD-MEDIUM-LOW-NONE
+status:
+  status: "OK"
+  errormsg: ""
+  nodemetrics:
+  - node_name: "c1"
+    node_cpu: ""
+    node_memory: ""
+    node_failure: ""
+    node_energy: ""
+    node_security: ""
+  - node_name: "c2"
+    node_cpu: ""
+    node_memory: ""
+    node_failure: ""
+    node_energy: ""
+    node_security: ""
+  appmetrics:
+    numpods: 2
+    network_load: 2
+    app_cpu: ""
+    app_memory: ""
+    service_metrics:
+    - service_name: "front-end"
+      node_name: ""
+      service_cpu: ""
+      service_memory: ""
+      service_failure: ""
+      service_energy: ""
+      service_security: ""
+    - service_name: "database"
+      node_name: ""
+      service_cpu: ""
+      service_memory: ""
+      service_failure: ""
+      service_energy: ""
+      service_security: ""

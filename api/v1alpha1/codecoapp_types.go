@@ -70,24 +70,6 @@ const (
 	ServiceClassAssured    = "ASSURED"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
-// CodecoAppResource defines the resource consumption of CodecoApp
-type CodecoAppResource struct {
-	//+kubebuilder:validation:default=100
-	CpuUsagePct string `json:"cpu,omitempty"`
-
-	//+kubebuilder:validation:default=8
-	MemUsageGB string `json:"mem,omitempty"`
-
-	//+kubebuilder:validation:default=25
-	NWBandwidthMbs string `json:"nwbandwidth,omitempty"`
-
-	//+kubebuilder:validation:default=10
-	NWLatencyMs string `json:"nwlatency,omitempty"`
-}
-
 // CodecoAppMSSpec defines the desired state of CodecoApp micro service
 type CodecoAppMSSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
@@ -102,8 +84,11 @@ type CodecoAppMSSpec struct {
 	// A reference to the PodSpec of the microservice. Edit codecoapp_types.go to remove/update
 	Template v1.PodSpec `json:"podspec,omitempty"`
 
-	// RequiredResources is used to identify the CODECO micro service required resources. Edit codecoapp_types.go to remove/update
-	RequiredResources CodecoAppResource `json:"requiredResources,omitempty"`
+	//+kubebuilder:validation:default=25
+	NWBandwidthMbs string `json:"nwbandwidth,omitempty"`
+
+	//+kubebuilder:validation:default=10
+	NWLatencyMs string `json:"nwlatency,omitempty"`
 }
 
 // ServiceId is a combination of a service name and an application name.
@@ -197,11 +182,23 @@ type CodecoAppSpec struct {
 	FailureTolerance CodecoFailureTolerance `json:"appFailureTolerance,omitempty"`
 }
 
+type ServiceStatusMetrics struct {
+	ServiceName                 string `json:"service_name,omitempty"`
+	NodeName                    string `json:"node_name,omitempty"`
+	AvgServiceCpuUsage          string `json:"service_cpu,omitempty"`
+	AvgServiceMemoryUsage       string `json:"service_memory,omitempty"`
+	AvgServiceFailure           string `json:"service_failure,omitempty"`
+	AvgServiceEnergyExpenditure string `json:"service_energy,omitempty"`
+	AvgServiceSecurity          string `json:"service_security,omitempty"`
+}
+
 // CodecoAppStatusMetrics defines the observed metrics of CodecoApp
 type CodecoAppStatusMetrics struct {
-	Numpods        int    `json:"numpods,omitempty"`
-	AvgLoad        uint64 `json:"avgload,omitempty"`
-	NetworkAvgLoad uint64 `json:"networkavgload,omitempty"`
+	Numpods           int                    `json:"numpods,omitempty"`
+	AvgNetworkLoad    uint64                 `json:"network_load,omitempty"`
+	AvgAppCpuUsage    string                 `json:"app_cpu,omitempty"`
+	AvgAppMemoryUsage string                 `json:"app_memory,omitempty"`
+	ServiceMetrics    []ServiceStatusMetrics `json:"service_metrics,omitempty"`
 }
 
 // Observed and Aggregated metrics from Codeco App Nodes
@@ -226,7 +223,7 @@ type CodecoAppStatus struct {
 	// ErrorMsg describes the CODECO application error. Edit codecoapp_types.go to remove/update
 	ErrorMsg string `json:"errormsg,omitempty"`
 	//Observed and Aggregated metrics from Codeco App Nodes
-	NodeMetrics CodecoAppNodeStatusMetrics `json:"nodemetrics"`
+	NodeMetrics []CodecoAppNodeStatusMetrics `json:"nodemetrics"`
 
 	AppMetrics CodecoAppStatusMetrics `json:"appmetrics"`
 }
