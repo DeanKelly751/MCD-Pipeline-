@@ -22,6 +22,7 @@ import (
 	"fmt"
 	dc "github.com/fluidtruck/deepcopy"
 	// "github.com/tidwall/pretty"
+	"encoding/json"
 	codecov1alpha1 "gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm/api/v1alpha1"
 	swmv1alpha1 "gitlab.eclipse.org/rcarrollred/qos-scheduler/scheduler/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -155,7 +156,12 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// Map from Codeco Application Model to SWM Application Model
 	MapToSWMApplicationModel(codecoAppCR, qos_scheduler_new_app)
-
+	fmt.Println(time.Now().Format(time.UnixDate), " ------------------- SWM APP ------------------------- ")
+	jsonswm, error := json.MarshalIndent(qos_scheduler_new_app, "", "   ")
+	fmt.Println(string(jsonswm))
+	if err != nil {
+		fmt.Println(error)
+	}
 	err = r.Get(ctx, client.ObjectKey{Namespace: "default", Name: "acm-swm-app"}, qos_scheduler_new_app)
 	if err != nil {
 		fmt.Println("Creating new SWM app")
@@ -223,6 +229,7 @@ func MapToSWMApplicationModel(codecoApp *codecov1alpha1.CodecoApp, swmApp *swmv1
 
 	for i := range codecoApp.Spec.Workloads {
 		dc.DeepCopy(codecoApp.Spec.Workloads[i].Template, &swmApp.Spec.Workloads[i].Template.Spec)
+		dc.DeepCopy(codecoApp.Spec.Workloads[i].Channels, &swmApp.Spec.Workloads[i].Channels)
 		for j := range codecoApp.Spec.Workloads[i].Channels {
 			dc.DeepCopy(codecoApp.Spec.Workloads[i].Channels[j].AdvancedChannelSettings, &swmApp.Spec.Workloads[i].Channels[j])
 		}

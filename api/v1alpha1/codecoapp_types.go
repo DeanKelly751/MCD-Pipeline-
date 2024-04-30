@@ -79,6 +79,7 @@ type CodecoAppMSSpec struct {
 	BaseName string `json:"serviceName"`
 
 	// service channels
+	// +optional
 	Channels []CodecoChannels `json:"serviceChannels"`
 
 	// A reference to the PodSpec of the microservice. Edit codecoapp_types.go to remove/update
