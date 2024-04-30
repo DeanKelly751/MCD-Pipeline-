@@ -1,0 +1,63 @@
+apiVersion: codeco.he-codeco.eu/v1alpha1
+kind: CodecoApp
+metadata:
+  generation: 1
+  name: codecoappinstance3
+  namespace: he-codeco-acm
+  resourceVersion: "1456"
+  uid: 5c948d7e-43d6-425b-b0b2-76402b606e07
+spec:
+  appEnergyLimit: "20"
+  appFailureTolerance: ""
+  appName: acm-swm-app
+  codecoapp-msspec:
+  - nwbandwidth: "1.2"
+    nwlatency: "3"
+    podspec:
+      containers:
+      - image: quay.io/skupper/hello-world-backend:latest
+        name: skupper-backend
+        ports:
+        - containerPort: 8080
+          name: skupper-backend
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "2"
+            memory: 4Gi
+    serviceChannels:
+    - advancedChannelSettings:
+        bandwidth: "5"
+        frameSize: "100"
+        maxDelay: "1"
+        sendInterval: "10"
+      chanelName: frontend
+      otherService:
+        appName: acm-swm-app
+        port: 9090
+        serviceName: front-end
+    serviceName: backend
+  - nwbandwidth: "1.2"
+    nwlatency: "3"
+    podspec:
+      containers:
+      - image: quay.io/dekelly/frontend-app:v0.0.2
+        name: front-end
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+    serviceChannels:
+    - advancedChannelSettings:
+        bandwidth: "5"
+        frameSize: "100"
+        maxDelay: "1"
+        sendInterval: "10"
+      chanelName: backend
+      otherService:
+        appName: acm-swm-app
+        port: 8080
+        serviceName: backend
+    serviceName: front-end
+  complianceClass: High
+  qosClass: Gold
+  securityClass: Good
