@@ -38,6 +38,8 @@ Here is the topology.json changes you will need to make:     {
       ]
     }
 
+  This topology will need to be used in netma-controller-deployment.yaml and in the topology.json file which are located in the netma-controller repository of the synthetic-data-generator.
+
 ### Running on the cluster
 
 1. Build and push your image to the location specified by `IMG`:
