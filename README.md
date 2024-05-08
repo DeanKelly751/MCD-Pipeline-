@@ -23,7 +23,20 @@ Our post_deploy.sh script will then configure the cluster to suit the needs of n
 You’ll need a Kind installed on your machine. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.  
 **Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
 
-You will also need to make some changes PDLC topology. Follow the instructions [here](https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/privacy-preserving-decentralised-learning-and-context-awareness-pdlc/pdlc-integration#installation)
+You will also need to make some changes PDLC topology. Follow the instructions [here](https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/privacy-preserving-decentralised-learning-and-context-awareness-pdlc/pdlc-integration#installation).
+
+Here is the topology.json changes you will need to make:     {
+      "node_names": [
+        "c1",
+        "c2",
+        "kind-control-plane",
+      ],
+      "connections": [
+        [1, 1, 1],
+        [1, 1, 0],
+        [1, 0, 1]
+      ]
+    }
 
 ### Running on the cluster
 
