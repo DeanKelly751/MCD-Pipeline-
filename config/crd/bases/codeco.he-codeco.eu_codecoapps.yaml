@@ -53,6 +53,10 @@ spec:
                   description: CodecoAppMSSpec defines the desired state of CodecoApp
                     micro service
                   properties:
+                    nwbandwidth:
+                      type: string
+                    nwlatency:
+                      type: string
                     podspec:
                       description: A reference to the PodSpec of the microservice.
                         Edit codecoapp_types.go to remove/update
@@ -7608,20 +7612,6 @@ spec:
                       required:
                       - containers
                       type: object
-                    requiredResources:
-                      description: RequiredResources is used to identify the CODECO
-                        micro service required resources. Edit codecoapp_types.go
-                        to remove/update
-                      properties:
-                        cpu:
-                          type: string
-                        mem:
-                          type: string
-                        nwbandwidth:
-                          type: string
-                        nwlatency:
-                          type: string
-                      type: object
                     serviceChannels:
                       description: service channels
                       items:
@@ -7694,7 +7684,6 @@ spec:
                         Edit codecoapp_types.go to remove/update
                       type: string
                   required:
-                  - serviceChannels
                   - serviceName
                   type: object
                 minItems: 1
@@ -7724,39 +7713,62 @@ spec:
           status:
             description: CodecoAppStatus defines the observed state of CodecoApp
             properties:
-              appmetrics:
+              appMetrics:
                 description: CodecoAppStatusMetrics defines the observed metrics of
                   CodecoApp
                 properties:
-                  avgload:
+                  avgAppCpu:
+                    type: string
+                  avgAppMemory:
+                    type: string
+                  avgAppNetworkLoad:
                     format: int64
                     type: integer
-                  networkavgload:
-                    format: int64
+                  numPods:
                     type: integer
-                  numpods:
-                    type: integer
+                  serviceMetrics:
+                    items:
+                      properties:
+                        avgServiceCpu:
+                          type: string
+                        avgServiceEnergy:
+                          type: string
+                        avgServiceFailure:
+                          type: string
+                        avgServiceMemory:
+                          type: string
+                        avgServiceSecurity:
+                          type: string
+                        nodeName:
+                          type: string
+                        serviceName:
+                          type: string
+                      type: object
+                    type: array
                 type: object
-              errormsg:
+              errorMsg:
                 description: ErrorMsg describes the CODECO application error. Edit
                   codecoapp_types.go to remove/update
                 type: string
-              nodemetrics:
+              nodeMetrics:
                 description: Observed and Aggregated metrics from Codeco App Nodes
-                properties:
-                  node_cpu:
-                    type: string
-                  node_energy:
-                    type: string
-                  node_failure:
-                    type: string
-                  node_memory:
-                    type: string
-                  node_name:
-                    type: string
-                  node_security:
-                    type: string
-                type: object
+                items:
+                  description: Observed and Aggregated metrics from Codeco App Nodes
+                  properties:
+                    avgNodeCpu:
+                      type: string
+                    avgNodeEnergy:
+                      type: string
+                    avgNodeFailure:
+                      type: string
+                    avgNodeMemory:
+                      type: string
+                    avgNodeSecurity:
+                      type: string
+                    nodeName:
+                      type: string
+                  type: object
+                type: array
               status:
                 description: Status expresses the CODECO application status by the
                   CODECO framework. Edit codecoapp_types.go to remove/update
@@ -7766,8 +7778,8 @@ spec:
                 - Error
                 type: string
             required:
-            - appmetrics
-            - nodemetrics
+            - appMetrics
+            - nodeMetrics
             type: object
         type: object
     served: true

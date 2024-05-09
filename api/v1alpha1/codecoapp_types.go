@@ -184,32 +184,32 @@ type CodecoAppSpec struct {
 }
 
 type ServiceStatusMetrics struct {
-	ServiceName                 string `json:"service_name,omitempty"`
-	NodeName                    string `json:"node_name,omitempty"`
-	AvgServiceCpuUsage          string `json:"service_cpu,omitempty"`
-	AvgServiceMemoryUsage       string `json:"service_memory,omitempty"`
-	AvgServiceFailure           string `json:"service_failure,omitempty"`
-	AvgServiceEnergyExpenditure string `json:"service_energy,omitempty"`
-	AvgServiceSecurity          string `json:"service_security,omitempty"`
+	ServiceName                 string        `json:"serviceName,omitempty"`
+	NodeName                    string        `json:"nodeName,omitempty"`
+	AvgServiceCpuUsage          string		  `json:"avgServiceCpu,omitempty"`
+	AvgServiceMemoryUsage       string 		  `json:"avgServiceMemory,omitempty"`
+	AvgServiceFailure           string        `json:"avgServiceFailure,omitempty"`
+	AvgServiceEnergyExpenditure string        `json:"avgServiceEnergy,omitempty"`
+	AvgServiceSecurity          string        `json:"avgServiceSecurity,omitempty"`
 }
 
 // CodecoAppStatusMetrics defines the observed metrics of CodecoApp
 type CodecoAppStatusMetrics struct {
-	Numpods           int                    `json:"numpods,omitempty"`
-	AvgNetworkLoad    uint64                 `json:"network_load,omitempty"`
-	AvgAppCpuUsage    string                 `json:"app_cpu,omitempty"`
-	AvgAppMemoryUsage string                 `json:"app_memory,omitempty"`
-	ServiceMetrics    []ServiceStatusMetrics `json:"service_metrics,omitempty"`
+	Numpods           int                    `json:"numPods,omitempty"`
+	AvgNetworkLoad    uint64                 `json:"avgAppNetworkLoad,omitempty"`
+	AvgAppCpuUsage    string          		 `json:"avgAppCpu,omitempty"`
+	AvgAppMemoryUsage string          		 `json:"avgAppMemory,omitempty"`
+	ServiceMetrics    []ServiceStatusMetrics `json:"serviceMetrics,omitempty"`
 }
 
 // Observed and Aggregated metrics from Codeco App Nodes
 type CodecoAppNodeStatusMetrics struct {
-	NodeName                 string `json:"node_name,omitempty"`
-	AvgCpuUsage              string `json:"node_cpu,omitempty"`
-	AvgMemoryUsage           string `json:"node_memory,omitempty"`
-	AvgNodeFailureTelerance  string `json:"node_failure,omitempty"`
-	AvgNodeEnergyExpenditure string `json:"node_energy,omitempty"`
-	AvgNodeSecurity          string `json:"node_security,omitempty"`
+	NodeName                 string `json:"nodeName,omitempty"`
+	AvgCpuUsage              string `json:"avgNodeCpu,omitempty"`
+	AvgMemoryUsage           string `json:"avgNodeMemory,omitempty"`
+	AvgNodeFailureTolerance  string `json:"avgNodeFailure,omitempty"`
+	AvgNodeEnergyExpenditure string `json:"avgNodeEnergy,omitempty"`
+	AvgNodeSecurity          string `json:"avgNodeSecurity,omitempty"`
 }
 
 // CodecoAppStatus defines the observed state of CodecoApp
@@ -222,11 +222,11 @@ type CodecoAppStatus struct {
 	// Status expresses the CODECO application status by the CODECO framework. Edit codecoapp_types.go to remove/update
 	Status CodecoStatus `json:"status,omitempty"`
 	// ErrorMsg describes the CODECO application error. Edit codecoapp_types.go to remove/update
-	ErrorMsg string `json:"errormsg,omitempty"`
+	ErrorMsg string `json:"errorMsg,omitempty"`
 	//Observed and Aggregated metrics from Codeco App Nodes
-	NodeMetrics []CodecoAppNodeStatusMetrics `json:"nodemetrics"`
+	NodeMetrics []CodecoAppNodeStatusMetrics `json:"nodeMetrics"`
 
-	AppMetrics CodecoAppStatusMetrics `json:"appmetrics"`
+	AppMetrics CodecoAppStatusMetrics `json:"appMetrics"`
 }
 
 //+kubebuilder:object:root=true
