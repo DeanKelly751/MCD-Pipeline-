@@ -44,7 +44,10 @@ Here is the topology.json changes you will need to make:     {
 
 1. Build and push your image to the location specified by `IMG`:
 
-Please Note: Specifying an "IMG" is optional. IF you decide not to include this, it will build the IMG specified in the Makefile. However, if you wish to build and image in a specific repository you will have to specify <registry (e.g quay.io, docker.io)> / <account username> / <some-image-name> : v<version-you-decide (eg latest, 0.0.1)> 
+Please Note: Specifying an "IMG" is optional. IF you decide not to include this, it will build the IMG specified in the Makefile. However, if you wish to build and image in a specific repository you will have to specify "registry (e.g quay.io, docker.io) / account username / some-image-name : version-you-decide (eg latest, 0.0.1)>".
+
+Example IMG:
+IMG= "quay.io/johndoe/acm-image:v0.0.1"
 
 ```sh
 > make docker-build docker-push IMG=<some-registry>/codecoapp-operator:tag
