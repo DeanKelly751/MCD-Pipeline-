@@ -53,6 +53,8 @@ cd ..
 #Data generator
 cd synthetic-data-generator
 
+git checkout main-hotfixed
+
 kubectl apply --server-side -f manifests/setup
 kubectl wait \
 	--for condition=Established \
@@ -67,8 +69,6 @@ cd ..
 
 #PDLC
 cd pdlc-integration
-
-git checkout no-gnn
 
 chmod -R 777 apply_yamls.sh
 ./apply_yamls.sh
