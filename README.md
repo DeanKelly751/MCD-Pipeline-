@@ -164,6 +164,9 @@ If you need to customize the deployment process (for example, deploy your own co
 - `post_undeploy.sh` is executed after the CODECO operator was removes and is a good place for last minutes cleanups.  
 >**Note:** This script is executed after the namespace `codecoapp-operator-system` is removed
 
+## Prometheus Rules Aspect
+To add a prometheus rule you wish to deploy reference the 'acm/config/rules' file. You will add your rules.yaml (it may be a good idea to reference your component in this file name e.g acm-rules.yaml, swm-rules.yaml, etc) file to this directory, which our monitoring code will then read and pass to prometheus. Coupled with the prometheus-operator you should then be able to access these rules and see the metrics on the Grafana UI through port forwarding the pod.
+
 ## Contributing
 // TODO(user): Add detailed information on how you would like others to contribute to this project
 
