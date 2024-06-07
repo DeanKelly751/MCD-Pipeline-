@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prometheus-role
+rules:
+  - apiGroups: ["monitoring.coreos.com"]
+    resources:
+      - services
+      - endpoints
+      - pods
+      - nodes
+      - prometheusrules
+    verbs: ["get", "list", "watch", "create", "update"]

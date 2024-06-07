@@ -18,11 +18,15 @@ package controllers
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+	"strings"
 	// "encoding/json"
 	"fmt"
 	dc "github.com/fluidtruck/deepcopy"
 	// "github.com/tidwall/pretty"
 	"encoding/json"
+	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	codecov1alpha1 "gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm/api/v1alpha1"
 	swmv1alpha1 "gitlab.eclipse.org/rcarrollred/qos-scheduler/scheduler/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -31,6 +35,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/yaml"
 	"time"
 )
 
@@ -38,6 +43,73 @@ import (
 type CodecoAppReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
+}
+
+func readPrometheusRulesFromDir(dir string) ([]monitoringv1.PrometheusRule, error) {
+	var rules []monitoringv1.PrometheusRule
+
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range files {
+		if strings.HasSuffix(file.Name(), ".yml") || strings.HasSuffix(file.Name(), ".yaml") {
+			path := filepath.Join(dir, file.Name())
+			data, err := os.ReadFile(path)
+			if err != nil {
+				return nil, err
+			}
+
+			var rule monitoringv1.PrometheusRule
+			if err := yaml.Unmarshal(data, &rule); err != nil {
+				return nil, err
+			}
+
+			rules = append(rules, rule)
+		}
+	}
+
+	return rules, nil
+}
+
+func applyPrometheusRules(r *CodecoAppReconciler, rules []monitoringv1.PrometheusRule) error {
+	for _, rule := range rules {
+		existingRule := &monitoringv1.PrometheusRule{}
+
+		err := r.Get(context.TODO(), client.ObjectKey{Namespace: "monitoring", Name: "prometheus-example-rules"}, existingRule)
+		if err != nil {
+			fmt.Println("Creating new prometheus rule")
+			if err := r.Create(context.TODO(), &rule); err != nil {
+				fmt.Println("Error creating rule")
+				return err
+			}
+		} else {
+			// Update rules if already exists
+			fmt.Println("Already exists: Updating rule")
+			existingRule.Spec = rule.Spec
+			err = r.Update(context.TODO(), existingRule)
+
+			if err != nil {
+				fmt.Print("Error updating rule")
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func initializePrometheusRules(r *CodecoAppReconciler) error {
+	// Read the rules from the specified directory
+	rules, err := readPrometheusRulesFromDir("/prom_rules")
+	if err != nil {
+		return err
+	}
+
+	// Apply the rules to the cluster
+	return applyPrometheusRules(r, rules)
 }
 
 //+kubebuilder:rbac:groups=codeco.he-codeco.eu,resources=codecoapps,verbs=get;list;watch;create;update;patch;delete
@@ -57,6 +129,13 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	_ = log.FromContext(ctx)
 
 	fmt.Println(time.Now().Format(time.UnixDate), "---------------------- Starting Reconciliation Loop -----------------------")
+
+	// Initialize and apply Prometheus rules on startup
+	err := initializePrometheusRules(r)
+	if err != nil {
+		fmt.Print(err, "unable to initialize Prometheus rules")
+		os.Exit(1)
+	}
 
 	codecoAppCR := &codecov1alpha1.CodecoApp{}
 	qos_scheduler_app := &swmv1alpha1.Application{}
@@ -134,7 +213,7 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	qos_scheduler_new_application_group.Spec = swmv1alpha1.ApplicationGroupSpec{}
 
-	err := r.Get(ctx, client.ObjectKey{Namespace: "default", Name: "acm-applicationgroup"}, qos_scheduler_new_application_group)
+	err = r.Get(ctx, client.ObjectKey{Namespace: "default", Name: "acm-applicationgroup"}, qos_scheduler_new_application_group)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			fmt.Println("Creating new SWM application group")
