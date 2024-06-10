@@ -19,6 +19,12 @@ We will then use ACM to install the other 4 project components; SWM, MDM, PDLC &
 
 Our post_deploy.sh script will then configure the cluster to suit the needs of not only ACM, but of all CODECO components
 
+## Prerequisites
+- Golang v1.21<
+- Kind (or some other cluster creator)
+- Kubectl 
+- Docker
+
 ## Getting Started
 You’ll need a Kind installed on your machine. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.  
 **Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
