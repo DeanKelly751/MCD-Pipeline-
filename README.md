@@ -24,6 +24,8 @@ Our post_deploy.sh script will then configure the cluster to suit the needs of n
 - Kind (or some other cluster creator)
 - Kubectl 
 - Docker
+- Helm
+- Make
 
 ## Getting Started
 You’ll need a Kind installed on your machine. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.  
