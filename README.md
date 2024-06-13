@@ -27,7 +27,7 @@ Our post_deploy.sh script will then configure the cluster to suit the needs of n
 - Helm
 - Make
 
-## CLuster creation
+## Cluster creation
 We advise anyone who wishes to deploy CODECO use the kind-config.yaml file located in ACM/config/cluster directory. This config file has been created to configure the cluster for all CODECO components.
 
 To create a cluster cd into the ACM directory and with kind run:
