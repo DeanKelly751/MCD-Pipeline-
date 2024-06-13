@@ -27,6 +27,12 @@ Our post_deploy.sh script will then configure the cluster to suit the needs of n
 - Helm
 - Make
 
+## CLuster creation
+We advise anyone who wishes to deploy CODECO use the kind-config.yaml file located in ACM/config/cluster directory. This config file has been created to configure the cluster for all CODECO components.
+
+To create a cluster cd into the ACM directory and with kind run:
+> kind create cluster --config ./config/cluster/kind-config.yaml
+
 ## Getting Started
 You’ll need a Kind installed on your machine. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.  
 **Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
