@@ -138,24 +138,6 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	codecoAppCR := &codecov1alpha1.CodecoApp{}
-	qos_scheduler_app := &swmv1alpha1.Application{}
-	qos_scheduler_new_app := &swmv1alpha1.Application{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "acm-swm-app",
-			Namespace: "default",
-			Labels: map[string]string{
-				"application-group": "acm-applicationgroup",
-			},
-		},
-	}
-	qos_scheduler_new_application_group := &swmv1alpha1.ApplicationGroup{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "acm-applicationgroup",
-			Namespace: "default",
-		},
-	}
-	qos_scheduler_app_list := &swmv1alpha1.ApplicationList{}
-	qos_scheduler_app2 := &swmv1alpha1.Application{}
 
 	// GET Codeco Application
 	fmt.Println(time.Now().Format(time.UnixDate), "---------------------- GET ACM App -----------------------")
@@ -171,6 +153,25 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	fmt.Println(time.Now().Format(time.UnixDate), "CodecoApp App :", codecoAppCR.Spec.AppName)
 	fmt.Println(time.Now().Format(time.UnixDate), "CodecoApp QOS :", codecoAppCR.Spec.QosClass)
+
+	qos_scheduler_app := &swmv1alpha1.Application{}
+	qos_scheduler_new_app := &swmv1alpha1.Application{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "acm-swm-app",
+			Namespace: codecoAppCR.Namespace,
+			Labels: map[string]string{
+				"application-group": "acm-applicationgroup",
+			},
+		},
+	}
+	qos_scheduler_new_application_group := &swmv1alpha1.ApplicationGroup{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "acm-applicationgroup",
+			Namespace: codecoAppCR.Namespace,
+		},
+	}
+	qos_scheduler_app_list := &swmv1alpha1.ApplicationList{}
+	qos_scheduler_app2 := &swmv1alpha1.Application{}
 
 	fmt.Println(time.Now().Format(time.UnixDate), "---------------------- List SWM Apps -----------------------")
 
@@ -213,7 +214,7 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	qos_scheduler_new_application_group.Spec = swmv1alpha1.ApplicationGroupSpec{}
 
-	err = r.Get(ctx, client.ObjectKey{Namespace: "default", Name: "acm-applicationgroup"}, qos_scheduler_new_application_group)
+	err = r.Get(ctx, client.ObjectKey{Namespace: codecoAppCR.Namespace, Name: "acm-applicationgroup"}, qos_scheduler_new_application_group)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			fmt.Println("Creating new SWM application group")
@@ -241,7 +242,7 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	if err != nil {
 		fmt.Println(error)
 	}
-	err = r.Get(ctx, client.ObjectKey{Namespace: "default", Name: "acm-swm-app"}, qos_scheduler_new_app)
+	err = r.Get(ctx, client.ObjectKey{Namespace: codecoAppCR.Namespace, Name: "acm-swm-app"}, qos_scheduler_new_app)
 	if err != nil {
 		fmt.Println("Creating new SWM app")
 		if err := r.Create(ctx, qos_scheduler_new_app); err != nil {
@@ -263,7 +264,7 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	fmt.Println(time.Now().Format(time.UnixDate), "------ Waiting 8 seconds -------")
 	time.Sleep(8 * time.Second)
 
-	if err := r.Get(ctx, client.ObjectKey{Namespace: "default", Name: "acm-swm-app"}, qos_scheduler_app2); err != nil {
+	if err := r.Get(ctx, client.ObjectKey{Namespace: codecoAppCR.Namespace, Name: "acm-swm-app"}, qos_scheduler_app2); err != nil {
 		fmt.Printf("\n\nError Returning SWM CRD: %v\n\n", err)
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
