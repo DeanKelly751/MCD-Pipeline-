@@ -27,7 +27,7 @@ spec:
             memory: 4Gi
     serviceChannels:
     - advancedChannelSettings:
-        bandwidth: "5"
+        minBandwidth: "5"
         frameSize: "100"
         maxDelay: "1"
         sendInterval: "10"
@@ -48,7 +48,7 @@ spec:
           protocol: TCP
     serviceChannels:
     - advancedChannelSettings:
-        bandwidth: "5"
+        minBandwidth: "5"
         frameSize: "100"
         maxDelay: "1"
         sendInterval: "10"

@@ -116,7 +116,7 @@ type ChannelSettings struct {
 	// If that is not what you want, you need to request the framesize explicitly.
 	// +optional
 	// +kubebuilder:validation:Pattern:=^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-	MinBandwidth string `json:"bandwidth,omitempty"`
+	MinBandwidth string `json:"minBandwidth,omitempty"`
 
 	// The maximum tolerated latency (end to end) on this channel in seconds.
 	// "1" means "one second", "10e-3" means "10 milliseconds".
@@ -184,21 +184,19 @@ type CodecoAppSpec struct {
 }
 
 type ServiceStatusMetrics struct {
-	ServiceName                 string        `json:"serviceName,omitempty"`
-	NodeName                    string        `json:"nodeName,omitempty"`
-	AvgServiceCpuUsage          string		  `json:"avgServiceCpu,omitempty"`
-	AvgServiceMemoryUsage       string 		  `json:"avgServiceMemory,omitempty"`
-	AvgServiceFailure           string        `json:"avgServiceFailure,omitempty"`
-	AvgServiceEnergyExpenditure string        `json:"avgServiceEnergy,omitempty"`
-	AvgServiceSecurity          string        `json:"avgServiceSecurity,omitempty"`
+	ServiceName           string `json:"serviceName,omitempty"`
+	NodeName              string `json:"nodeName,omitempty"`
+	PodName               string `json:"podName,omitempty"`
+	ClusterName           string `json:"clusterName,omitempty"`
+	AvgServiceCpuUsage    string `json:"avgServiceCpu,omitempty"`
+	AvgServiceMemoryUsage string `json:"avgServiceMemory,omitempty"`
 }
 
 // CodecoAppStatusMetrics defines the observed metrics of CodecoApp
 type CodecoAppStatusMetrics struct {
 	Numpods           int                    `json:"numPods,omitempty"`
-	AvgNetworkLoad    uint64                 `json:"avgAppNetworkLoad,omitempty"`
-	AvgAppCpuUsage    string          		 `json:"avgAppCpu,omitempty"`
-	AvgAppMemoryUsage string          		 `json:"avgAppMemory,omitempty"`
+	AvgAppCpuUsage    string                 `json:"avgAppCpu,omitempty"`
+	AvgAppMemoryUsage string                 `json:"avgAppMemory,omitempty"`
 	ServiceMetrics    []ServiceStatusMetrics `json:"serviceMetrics,omitempty"`
 }
 
@@ -224,9 +222,9 @@ type CodecoAppStatus struct {
 	// ErrorMsg describes the CODECO application error. Edit codecoapp_types.go to remove/update
 	ErrorMsg string `json:"errorMsg,omitempty"`
 	//Observed and Aggregated metrics from Codeco App Nodes
-	NodeMetrics []CodecoAppNodeStatusMetrics `json:"nodeMetrics"`
+	NodeMetrics []CodecoAppNodeStatusMetrics `json:"nodeMetrics,omitempty"`
 
-	AppMetrics CodecoAppStatusMetrics `json:"appMetrics"`
+	AppMetrics CodecoAppStatusMetrics `json:"appMetrics,omitempty"`
 }
 
 //+kubebuilder:object:root=true

@@ -27,7 +27,7 @@ spec:
             memory: 4Gi
     serviceChannels:
     - advancedChannelSettings:
-        bandwidth: "5"
+        minBandwidth: "5"
         frameSize: "100"
         maxDelay: "1"
         sendInterval: "10"
@@ -48,7 +48,7 @@ spec:
           protocol: TCP
     serviceChannels:
     - advancedChannelSettings:
-        bandwidth: "5"
+        minBandwidth: "5"
         frameSize: "100"
         maxDelay: "1"
         sendInterval: "10"
@@ -65,22 +65,19 @@ status:
   appMetrics:
     avgAppCpu: "2"
     avgAppMemory: 8Gi
-    avgAppNetworkLoad: 2
     numPods: 2
     serviceMetrics:
     - avgServiceCpu: "100"
-      avgServiceEnergy: "2"
-      avgServiceFailure: val
       avgServiceMemory: 2Gi
-      avgServiceSecurity: val
+      podName: acm-swm-app-front-end
+      clusterName:
       nodeName: c1
       serviceName: front-end
     - avgServiceCpu: "100"
-      avgServiceEnergy: "2"
-      avgServiceFailure: val
       avgServiceMemory: 2Gi
-      avgServiceSecurity: val
       nodeName: c1
+      podName: acm-swm-app-backend
+      clusterName:
       serviceName: backend
   errorMsg: No errors
   nodeMetrics:
