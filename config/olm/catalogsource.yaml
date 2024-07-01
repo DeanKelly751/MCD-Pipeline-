@@ -1,0 +1,10 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: codeco-acm-catalog
+  namespace: he-codeco-acm
+spec:
+  sourceType: grpc
+  image: quay.io/dekelly/codecoapp-acm-catalog:v0.0.1
+  displayName: Codeco ACM Catalog
+  publisher: Dean Kelly

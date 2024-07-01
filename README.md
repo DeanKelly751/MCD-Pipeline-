@@ -13,13 +13,55 @@ application on the CODECO platforme. The CRD for the application deployment is
 *CodecoApp*.
 * _Cluster admin_ - TBD
 
+On deployment, a 3 node kind cluster will be configured and set up. 
+
+We will then use ACM to install the other 4 project components; SWM, MDM, PDLC & NetMA
+
+Our post_deploy.sh script will then configure the cluster to suit the needs of not only ACM, but of all CODECO components
+
+## Prerequisites
+- Golang v1.21<
+- Kind (or some other cluster creator)
+- Kubectl 
+- Docker
+- Helm
+- Make
+
+## Cluster creation
+We advise anyone who wishes to deploy CODECO use the kind-config.yaml file located in ACM/config/cluster directory. This config file has been created to configure the cluster for all CODECO components.
+
+To create a cluster cd into the ACM directory and with kind run:
+> kind create cluster --config ./config/cluster/kind-config.yaml
+
 ## Getting Started
-You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.  
+You’ll need a Kind installed on your machine. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.  
 **Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
+
+You will also need to make some changes PDLC topology. Follow the instructions [here](https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/privacy-preserving-decentralised-learning-and-context-awareness-pdlc/pdlc-integration#installation).
+
+Here is the topology.json changes you will need to make:     {
+      "node_names": [
+        "c1",
+        "c2",
+        "kind-control-plane",
+      ],
+      "connections": [
+        [1, 1, 1],
+        [1, 1, 0],
+        [1, 0, 1]
+      ]
+    }
+
+  This topology will need to be used in netma-controller-deployment.yaml and in the topology.json file which are located in the netma-controller repository of the synthetic-data-generator.
 
 ### Running on the cluster
 
 1. Build and push your image to the location specified by `IMG`:
+
+Please Note: Specifying an "IMG" is optional. IF you decide not to include this, it will build the IMG specified in the Makefile. However, if you wish to build and image in a specific repository you will have to specify "registry (e.g quay.io, docker.io) / account username / some-image-name : version-you-decide (eg latest, 0.0.1)>".
+
+Example IMG:
+IMG= "quay.io/johndoe/acm-image:v0.0.1"
 
 ```sh
 > make docker-build docker-push IMG=<some-registry>/codecoapp-operator:tag
@@ -31,7 +73,7 @@ You’ll need a Kubernetes cluster to run against. You can use [KIND](https://si
 Run the following step as a one time step (tested with Docker hub) - this is needed if the cluster can't access images on _localhost_
 
 ```sh
-> docker tag controller:latest <some-registry>/controller:tag
+> docker tag controller:latest <some-registry>/codecoapp-operator:tag
 > docker push <some-registry>/controller:tag
 ```
 
@@ -135,6 +177,9 @@ If you need to customize the deployment process (for example, deploy your own co
 - `pre_undeploy.sh` is executed before removing the CODECO operator and is the best place to uninstall additional compoenent that were installed in the `post_undeploy.sh` script.
 - `post_undeploy.sh` is executed after the CODECO operator was removes and is a good place for last minutes cleanups.  
 >**Note:** This script is executed after the namespace `codecoapp-operator-system` is removed
+
+## Prometheus Rules Aspect
+To add a prometheus rule you wish to deploy reference the 'acm/config/rules' file. You will add your rules.yaml (it may be a good idea to reference your component in this file name e.g acm-rules.yaml, swm-rules.yaml, etc) file to this directory, which our monitoring code will then read and pass to prometheus. Coupled with the prometheus-operator you should then be able to access these rules and see the metrics on the Grafana UI through port forwarding the pod.
 
 ## Contributing
 // TODO(user): Add detailed information on how you would like others to contribute to this project

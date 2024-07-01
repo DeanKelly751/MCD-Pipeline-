@@ -1,0 +1,11 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: my-acm-operator
+  namespace: he-codeco-acm
+spec:
+  channel: stable
+  name: my-acm-operator
+  source: codeco-acm-catalog
+  sourceNamespace: he-codeco-acm
+  installPlanApproval: Automatic

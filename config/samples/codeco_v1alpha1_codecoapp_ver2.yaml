@@ -1,0 +1,100 @@
+apiVersion: codeco.he-codeco.eu/v1alpha1
+kind: CodecoApp
+metadata:
+  name: codecoappinstance3
+spec:
+  appEnergyLimit: "20" # Maximum desired level of energy expenditure for the overall k8s infrastructure associated with an application (percent)
+  appFailureTolerance: "" # Desired tolerance to infrastructure failures, High/Medium/Low
+  appName: "acm-swm-app"
+  codecoapp-msspec:
+  - serviceName: "database"
+    podspec:
+      containers:
+      - name: postgres-db
+        image: postgres:13
+        ports:
+        - containerPort: 5432
+          name: "postgres"
+        env:
+        - name: POSTGRES_DB
+          value: vehicle_quotes
+        - name: POSTGRES_USER
+          value: vehicle_quotes
+        - name: POSTGRES_PASSWORD
+          value: password
+        resources:
+          limits:
+            memory: 4Gi
+            cpu: "2"
+    nwbandwidth: "1.2" #Mbs
+    nwlatency: "3" # Ms
+    serviceChannels:
+    - chanelName: ""
+      advancedChannelSettings:
+        bandwidth: "5"
+        frameSize: "100"
+        maxDelay: "1"
+        sendInterval: "10"
+      otherService:
+        appName: "acm-swm-app"
+        port: 0
+        serviceName: "front-end"
+  - serviceName: "front-end"
+    podspec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+    nwbandwidth: "1.2" #Mbs
+    nwlatency: "3" # Ms
+    serviceChannels:
+    - chanelName: "fe-db-channel"
+      advancedChannelSettings:
+        bandwidth: "5"
+        frameSize: "100"
+        maxDelay: "1"
+        sendInterval: "10"
+      otherService:
+        appName: "acm-swm-app"
+        port: 0
+        serviceName: "database"
+  complianceClass: "High" #expected level of compliance, based on a scale - High, Medium, Low
+  qosClass: "Gold" # Preferred QoS level, Gold, Silver, BestEffort
+  securityClass: "Good" #Desired level of security for the application, based on a likert scale, 5 levels -HIGH-GOOD-MEDIUM-LOW-NONE
+status:
+  status: "OK"
+  errormsg: ""
+  nodemetrics:
+  - node_name: "c1"
+    node_cpu: ""
+    node_memory: ""
+    node_failure: ""
+    node_energy: ""
+    node_security: ""
+  - node_name: "c2"
+    node_cpu: ""
+    node_memory: ""
+    node_failure: ""
+    node_energy: ""
+    node_security: ""
+  appmetrics:
+    numpods: 2
+    network_load: 2
+    app_cpu: ""
+    app_memory: ""
+    service_metrics:
+    - service_name: "front-end"
+      node_name: ""
+      service_cpu: ""
+      service_memory: ""
+      service_failure: ""
+      service_energy: ""
+      service_security: ""
+    - service_name: "database"
+      node_name: ""
+      service_cpu: ""
+      service_memory: ""
+      service_failure: ""
+      service_energy: ""
+      service_security: ""

@@ -22,17 +22,17 @@ import (
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
-
+	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
+	codecov1alpha1 "gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm/api/v1alpha1"
+	"gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm/controllers"
+	swmv1alpha1 "gitlab.eclipse.org/rcarrollred/qos-scheduler/scheduler/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	codecov1alpha1 "gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm/api/v1alpha1"
-	"gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm/controllers"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -43,8 +43,9 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-
 	utilruntime.Must(codecov1alpha1.AddToScheme(scheme))
+	utilruntime.Must(swmv1alpha1.AddToScheme(scheme))
+	monitoringv1.AddToScheme(scheme)
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -66,9 +67,9 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme:                 scheme,
-		MetricsBindAddress:     metricsAddr,
-		Port:                   9443,
+		Scheme: scheme,
+		//MetricsBindAddress:     metricsAddr,
+		//Port:                   9443,
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "00fb0915.he-codeco.eu",
@@ -96,6 +97,7 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "CodecoApp")
 		os.Exit(1)
 	}
+
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
@@ -112,4 +114,13 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+
+	// if err = (&ReconcileYourResource{
+	//     Client: mgr.GetClient(),
+	//     Scheme: mgr.GetScheme(),
+	// }).SetupWithManager(mgr); err != nil {
+	//     setupLog.Error(err, "unable to create controller", "controller", "YourResource")
+	//     os.Exit(1)
+	// }
+
 }

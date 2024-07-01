@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -28,12 +29,30 @@ const (
 	BestEffort CodecoQosClass = "BestEffort"
 )
 
+type CodecoFailureTolerance string
+
+const (
+	HighFailure CodecoFailureTolerance = "High"
+	MedFailure  CodecoFailureTolerance = "Medium"
+	LowFailure  CodecoFailureTolerance = "Low"
+)
+
+type CodecoComplianceClass string
+
+const (
+	HighComliance CodecoComplianceClass = "High"
+	MedCompliance CodecoComplianceClass = "Medium"
+	LowCompliance CodecoComplianceClass = "Low"
+)
+
 type CocdcoSecurityClass string
 
 const (
 	High   CocdcoSecurityClass = "High"
+	Good   CocdcoSecurityClass = "Good"
 	Medium CocdcoSecurityClass = "Medium"
-	Dev    CocdcoSecurityClass = "Dev"
+	Low    CocdcoSecurityClass = "Low"
+	None   CocdcoSecurityClass = "None"
 )
 
 type CodecoStatus string
@@ -44,16 +63,27 @@ const (
 	Error   CodecoStatus = "Error"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+type NetworkServiceClass string
 
-// CodecoAppResource defines the resource consumption of CodecoApp
-type CodecoAppResource struct {
-	//+kubebuilder:validation:default=100
-	CpuUsagePct string `json:"cpu,omitempty"`
+const (
+	ServiceClassBestEffort = "BESTEFFORT"
+	ServiceClassAssured    = "ASSURED"
+)
 
-	//+kubebuilder:validation:default=8
-	MemUsageGB string `json:"mem,omitempty"`
+// CodecoAppMSSpec defines the desired state of CodecoApp micro service
+type CodecoAppMSSpec struct {
+	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
+
+	// Name is an used to identify the CODECO micro service. Edit codecoapp_types.go to remove/update
+	BaseName string `json:"serviceName"`
+
+	// service channels
+	// +optional
+	Channels []CodecoChannels `json:"serviceChannels"`
+
+	// A reference to the PodSpec of the microservice. Edit codecoapp_types.go to remove/update
+	Template v1.PodSpec `json:"podspec,omitempty"`
 
 	//+kubebuilder:validation:default=25
 	NWBandwidthMbs string `json:"nwbandwidth,omitempty"`
@@ -62,19 +92,68 @@ type CodecoAppResource struct {
 	NWLatencyMs string `json:"nwlatency,omitempty"`
 }
 
-// CodecoAppMSSpec defines the desired state of CodecoApp micro service
-type CodecoAppMSSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+// ServiceId is a combination of a service name and an application name.
 
-	// Name is an used to identify the CODECO micro service. Edit codecoapp_types.go to remove/update
-	Name string `json:"name"`
+type ServiceId struct {
+	// +kubebuilder:validation:Pattern=^[a-z]+([-a-z0-9]+)$
+	BaseName        string `json:"serviceName,omitempty"`
+	ApplicationName string `json:"appName,omitempty"`
 
-	// A reference to the PodSpec of the microservice. Edit codecoapp_types.go to remove/update
-	PodSpecName string `json:"podspecname"`
+	// The port where the application listens for Channel data.
+	// This has to be the same as the containerPort on the relevant container.
+	Port int `json:"port,omitempty"`
+}
 
-	// RequiredResources is used to identify the CODECO micro service required resources. Edit codecoapp_types.go to remove/update
-	RequiredResources CodecoAppResource `json:"required-resources,omitempty"`
+type ChannelSettings struct {
+	// All NetworkChannel requirements can be specified like a Kubernetes
+	// resource.Quantity. This means you can specify a bandwidth of 10MBit/s by
+	// writing "10M".
+
+	// Bandwidth specifies the traffic requirements for the Channel.
+	// It is specified in bit/s, e.g. 5M means 5Mbit/s.
+	// If you specify only the bandwidth but leave framesize and sendinterval
+	// blank, the system will request a default framesize of 500 byte for you.
+	// If that is not what you want, you need to request the framesize explicitly.
+	// +optional
+	// +kubebuilder:validation:Pattern:=^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+	MinBandwidth string `json:"minBandwidth,omitempty"`
+
+	// The maximum tolerated latency (end to end) on this channel in seconds.
+	// "1" means "one second", "10e-3" means "10 milliseconds".
+	// +optional
+	// +kubebuilder:validation:Pattern:=^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+	MaxDelay string `json:"maxDelay,omitempty"`
+
+	// Framesize specifies the number of bytes that are sent in one go.
+	// As an example, specifying a Framesize of 1K and a SendInterval of 10e-3 (i.e. 10ms),
+	// the effective bandwidth is 100kByte/s or 800kbit/s.
+	// +optional
+	// +kubebuilder:validation:Pattern:=^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+	Framesize string `json:"frameSize,omitempty"`
+
+	// The SendInterval specifies the interval between two consecutive frames sent over this channel, in sedonds.
+	// "10e-6" means "10 microseconds".
+	// This value should not exceed 10e-3 aka 10ms. The code will cap it at 10ms if you specify a larger value.
+	// +optional
+	// +kubebuilder:validation:Pattern:=^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+	SendInterval string `json:"sendInterval,omitempty"`
+}
+
+type CodecoChannels struct {
+	BaseName string `json:"chanelName,omitempty"`
+
+	// OtherWorkload identifies the target workload of the connection
+	// via its application name and workload basename.
+	OtherWorkload ServiceId `json:"otherService"`
+
+	// A communication service Class for this channel.
+	// Currently, two service classes are supported, 'BESTEFFORT' and 'ASSURED'.
+	// Service classes are mapped to network infrastructure type by the QoS Scheduler.
+	// +optional
+	ServiceClass NetworkServiceClass `json:"serviceClass,omitempty"`
+
+	// +optional
+	AdvancedChannelSettings ChannelSettings `json:"advancedChannelSettings,omitempty"`
 }
 
 // CodecoAppSpec defines the desired state of CodecoApp
@@ -83,28 +162,52 @@ type CodecoAppSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Name is an used to identify the CODECO application. Edit codecoapp_types.go to remove/update
-	Name string `json:"name,omitempty"`
+	AppName string `json:"appName,omitempty"`
 
-	//+kubebuilder:validation:Enum=High;Medium;Dev
-
+	//+kubebuilder:validation:Enum=Gold;Silver;BestEffort
 	// QosClass is used to identify the CODECO application QoS. Edit codecoapp_types.go to remove/update
-	QosClass CodecoQosClass `json:"qosclass,omitempty"`
+	QosClass CodecoQosClass `json:"qosClass,omitempty"`
 
 	//+kubebuilder:validation:MinItems=1
 	// MCSpecs is used to identify the CODECO micro services which compose the application. Edit codecoapp_types.go to remove/update
-	MCSpecs []CodecoAppMSSpec `json:"codecoapp-msspec,omitempty"`
+	Workloads []CodecoAppMSSpec `json:"codecoapp-msspec,omitempty"`
 
-	//+kubebuilder:validation:Enum=Gold;Silver;BestEffort
-
+	//+kubebuilder:validation:Enum=High;Good;Medium;Low; None
 	// SecurityClass is used to identify the CODECO application security class. Edit codecoapp_types.go to remove/update
-	SecurityClass CocdcoSecurityClass `json:"securityclass,omitempty"`
+	SecurityClass CocdcoSecurityClass `json:"securityClass,omitempty"`
+	//expected level of compliance, based on a scale
+	ComplianceClass CodecoComplianceClass `json:"complianceClass,omitempty"`
+	// Maximum desired level of energy expenditure for the overall k8s infrastructure associated with an application (percent)
+	AppEnergyLimit string `json:"appEnergyLimit,omitempty"`
+	//Desired tolerance to infrastructure failures, percentage
+	FailureTolerance CodecoFailureTolerance `json:"appFailureTolerance,omitempty"`
+}
+
+type ServiceStatusMetrics struct {
+	ServiceName           string `json:"serviceName,omitempty"`
+	NodeName              string `json:"nodeName,omitempty"`
+	PodName               string `json:"podName,omitempty"`
+	ClusterName           string `json:"clusterName,omitempty"`
+	AvgServiceCpuUsage    string `json:"avgServiceCpu,omitempty"`
+	AvgServiceMemoryUsage string `json:"avgServiceMemory,omitempty"`
 }
 
 // CodecoAppStatusMetrics defines the observed metrics of CodecoApp
 type CodecoAppStatusMetrics struct {
-	Numpods        int    `json:"numpods,omitempty"`
-	AvgLoad        uint64 `json:"avgload,omitempty"`
-	NetworkAvgLoad uint64 `json:"networkavgload,omitempty"`
+	Numpods           int                    `json:"numPods,omitempty"`
+	AvgAppCpuUsage    string                 `json:"avgAppCpu,omitempty"`
+	AvgAppMemoryUsage string                 `json:"avgAppMemory,omitempty"`
+	ServiceMetrics    []ServiceStatusMetrics `json:"serviceMetrics,omitempty"`
+}
+
+// Observed and Aggregated metrics from Codeco App Nodes
+type CodecoAppNodeStatusMetrics struct {
+	NodeName                 string `json:"nodeName,omitempty"`
+	AvgCpuUsage              string `json:"avgNodeCpu,omitempty"`
+	AvgMemoryUsage           string `json:"avgNodeMemory,omitempty"`
+	AvgNodeFailureTolerance  string `json:"avgNodeFailure,omitempty"`
+	AvgNodeEnergyExpenditure string `json:"avgNodeEnergy,omitempty"`
+	AvgNodeSecurity          string `json:"avgNodeSecurity,omitempty"`
 }
 
 // CodecoAppStatus defines the observed state of CodecoApp
@@ -117,8 +220,11 @@ type CodecoAppStatus struct {
 	// Status expresses the CODECO application status by the CODECO framework. Edit codecoapp_types.go to remove/update
 	Status CodecoStatus `json:"status,omitempty"`
 	// ErrorMsg describes the CODECO application error. Edit codecoapp_types.go to remove/update
-	ErrorMsg string                 `json:"errormsg,omitempty"`
-	Metrics  CodecoAppStatusMetrics `json:"metrics"`
+	ErrorMsg string `json:"errorMsg,omitempty"`
+	//Observed and Aggregated metrics from Codeco App Nodes
+	NodeMetrics []CodecoAppNodeStatusMetrics `json:"nodeMetrics,omitempty"`
+
+	AppMetrics CodecoAppStatusMetrics `json:"appMetrics,omitempty"`
 }
 
 //+kubebuilder:object:root=true
