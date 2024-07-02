@@ -11,13 +11,14 @@ services:
   - docker:dind
 
 before_script:
+    - apk add --no-cache make
     - echo "Logging into Quay..."
     - docker login quay.io -u $QUAY_USER -p $QUAY_PASS
 
 
 build:
   stage: build
-  image: docker:stable-git
+  image: docker:stable
   script:
     - echo "Building image..."
     - make docker-build IMG="$IMG_NAME:$IMG_TAG"
@@ -25,7 +26,7 @@ build:
 
 push:   
   stage: push  
-  image: docker:stable-git 
+  image: docker:stable
   script:
     - echo "Pushing image to Quay.io..."
     - make docker-push IMG="$IMG_NAME:$IMG_TAG"
