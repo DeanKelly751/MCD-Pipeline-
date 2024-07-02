@@ -3,16 +3,21 @@ stages:
   - push
 
 variables: 
+  IMG_NAME: "quay.io/dekelly/codecoapp-acm"
+  IMG_TAG: "${CI_COMMIT_SHORT_SHA}"
   DOCKER_DRIVER: overlay2
 
 services:
   - docker:dind
 
 before_script:
-  - dnf install -y golang make git dnf-plugins-core
+  - dnf install -y wget make git dnf-plugins-core
   - dnf config-manager --add-repo=https://download.docker.com/linux/fedora/docker-ce.repo
   - dnf install -y docker-ce-cli
-  - go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0 # Adjust the version as needed
+  - wget https://go.dev/dl/go1.21.9.linux-amd64.tar.gz
+  - tar -C /usr/local -xzf go1.21.9.linux-amd64.tar.gz
+  - export PATH=$PATH:/usr/local/go/bin
+  - go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
   - export PATH=$PATH:$(go env GOPATH)/bin
   - echo "Logging into Quay..."
   - docker login quay.io -u $QUAY_USER -p $QUAY_PASS
@@ -21,15 +26,17 @@ build:
   stage: build
   image: fedora:latest
   script:
+    - export PATH=$PATH:/usr/local/go/bin
     - echo "Building image..."
-    - make docker-build IMG="quay.io/dekelly/codecoapp-acm:latest"
+    - make docker-build IMG="$IMG_NAME:$IMG_TAG"
     - echo "Build complete."
 
 push:
   stage: push
   image: fedora:latest
   script:
+    - export PATH=$PATH:/usr/local/go/bin
     - echo "Pushing image to Quay.io..."
-    - make docker-push IMG=""quay.io/dekelly/codecoapp-acm:latest"
+    - make docker-push IMG="$IMG_NAME:$IMG_TAG"
   only:
     - main
