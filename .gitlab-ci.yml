@@ -1,0 +1,27 @@
+stages:          # List of stages for jobs, and their order of execution
+  - build
+  - push
+
+variables: 
+    IMG_NAME: "quay.io/dekelly/codecoapp-acm"
+    IMG_TAG: "${CI_COMMIT_SHORT_SHA}"
+
+before_script:
+    - echo "Logging into Quay.io" 
+    - docker login quay.io -u ${QUAY_USER} -p ${QUAY_PASS}
+
+build-job:       # This job runs in the build stage, which runs first.
+  stage: build
+  script:
+    - echo "Building image..."
+    - make docker-build IMG="${IMG_NAME}:${IMG_TAG}"
+    - echo "Build complete."
+
+push-job:   # This job runs in the push stage.
+  stage: push   # It only starts when the job in the build stage completes successfully.
+  script:
+    - echo "Pushing image tyo Quay.io..."
+    - make docker-push ${IMAGE_NAME}:${IMAGE_TAG}
+
+  only:
+    - main
