@@ -7,6 +7,20 @@ metadata:
   resourceVersion: "1456"
   uid: 5c948d7e-43d6-425b-b0b2-76402b606e07
 spec:
+  #mdm
+  replicas: 1
+  selector:
+    matchLabels:
+      app: <your service app>
+  template:
+    metadata:
+      labels:
+        app: <your service app>
+      annotations:
+        prometheus.io/port: <port>
+        prometheus.io/scrape: "true"
+        prometheus.io/path: <metric path>
+#mdm-end
   appEnergyLimit: "20"
   appFailureTolerance: ""
   appName: acm-swm-app
