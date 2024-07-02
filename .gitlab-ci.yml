@@ -16,7 +16,7 @@ build-job:       # This job runs in the build stage, which runs first.
   image: fedora:latest
   script:
     - echo "Logging into Quay..."
-    - docker login quay.io -u $QUAY_USER -p $QUAY_PASS
+    - podman login quay.io -u $QUAY_USER -p $QUAY_PASS
     - echo "Building image..."
     - make docker-build IMG="$IMG_NAME:$IMG_TAG"
     - echo "Build complete."
