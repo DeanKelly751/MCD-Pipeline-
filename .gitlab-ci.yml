@@ -3,8 +3,6 @@ stages:
   - push
 
 variables: 
-  IMG_NAME: "quay.io/dekelly/codecoapp-acm"
-  IMG_TAG: "${CI_COMMIT_SHORT_SHA}"
   DOCKER_DRIVER: overlay2
 
 services:
@@ -24,7 +22,7 @@ build:
   image: fedora:latest
   script:
     - echo "Building image..."
-    - make docker-build IMG="$IMG_NAME:$IMG_TAG"
+    - make docker-build IMG="quay.io/dekelly/codecoapp-acm:latest"
     - echo "Build complete."
 
 push:
@@ -32,6 +30,6 @@ push:
   image: fedora:latest
   script:
     - echo "Pushing image to Quay.io..."
-    - make docker-push IMG="$IMG_NAME:$IMG_TAG"
+    - make docker-push IMG=""quay.io/dekelly/codecoapp-acm:latest"
   only:
     - main
