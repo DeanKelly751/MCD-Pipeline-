@@ -5,6 +5,10 @@ stages:          # List of stages for jobs, and their order of execution
 variables: 
     IMG_NAME: "quay.io/dekelly/codecoapp-acm"
     IMG_TAG: "${CI_COMMIT_SHORT_SHA}"
+    DOCKER_DRIVER: overlay2
+
+services:
+  - docker:dind
 
 before_script:
     - echo "Logging into Quay.io" 
