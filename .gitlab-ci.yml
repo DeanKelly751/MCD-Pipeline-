@@ -11,7 +11,7 @@ services:
   - docker:dind
 
 before_script:
-    - dnf install make golang:1.21 
+    - dnf install golang
     - echo "Logging into Quay..."
     - docker login quay.io -u $QUAY_USER -p $QUAY_PASS
 
