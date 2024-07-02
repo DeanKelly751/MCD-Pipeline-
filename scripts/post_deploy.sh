@@ -28,6 +28,22 @@ helm --kube-context=$MDM_CONTEXT install mdm-neo4j -n $MDM_NAMESPACE neo4j/neo4j
 kubectl --context=$MDM_CONTEXT -n $MDM_NAMESPACE exec -i mdm-kafka-0 -- /opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server mdm-kafka-0:9093 --create --topic json-events --config cleanup.policy=compact
 helm --kube-context=$MDM_CONTEXT -n $MDM_NAMESPACE install mdm-controller ./controller/src/helm -f ./controller/src/helm/values.yaml
 helm --kube-context=$MDM_CONTEXT -n $MDM_NAMESPACE install mdm-api ./mdm-api/src/helm -f ./mdm-api/src/helm/values.yaml
+# MDM update
+cd ..
+cd mdm-connectors
+sed -i "s/<namespace>/$MDM_NAMESPACE/g" ./connectors/k8s/src/main/helm/values.yaml
+sed -i "s/<clustername>/$MDM_CONTEXT/g" ./connectors/k8s/src/main/helm/values.yaml
+sed -i "s/<namespace>/$MDM_NAMESPACE/g" ./connectors/kubescape/src/main/helm/values.yaml
+sed -i "s/<clustername>/$MDM_CONTEXT/g" ./connectors/kubescape/src/main/helm/values.yaml
+sed -i "s/<namespace>/$MDM_NAMESPACE/g" ./connectors/prometheus/src/main/helm/values.yaml
+sed -i "s/<clustername>/$MDM_CONTEXT/g" ./connectors/prometheus/src/main/helm/values.yaml
+# Prometheus config set the Prometheus url to $PROMETHEUS_URL
+# Prometheus config set the Prometheus port to $PROMETHEUS_PORT
+sed -i "s|http://prometheus-service.monitoring.svc.cluster.local|$PROMETHEUS_URL|g" ./connectors/prometheus/src/main/helm/values.yaml
+sed -i "s/9090/$PROMETHEUS_PORT/g" ./connectors/prometheus/src/main/helm/values.yaml
+helm --kube-context=$MDM_CONTEXT -n $MDM_NAMESPACE install k8s-connector ./connectors/k8s/src/main/helm -f ./connectors/k8s/src/main/helm/values.yaml 
+helm --kube-context=$MDM_CONTEXT -n $MDM_NAMESPACE install kubescape-connector ./connectors/kubescape/src/main/helm -f ./connectors/kubescape/src/main/helm/values.yaml 
+helm --kube-context=$MDM_CONTEXT -n $MDM_NAMESPACE install freshness-connector ./connectors/prometheus/src/main/helm -f ./connectors/prometheus/src/main/helm/values.yaml
 cd ..
 echo "........................................Finished installing MDM..............................................."
 # export POD_NAME=$(sudo kubectl get pods --namespace mdm -l "app.kubernetes.io/name=mdm-api,app.kubernetes.io/instance=mdm-api" -o jsonpath="{.items[0].metadata.name}")
