@@ -11,10 +11,11 @@ services:
   - docker:dind
 
 before_script:
-    - dnf install golang -y
-    - echo "Logging into Quay..."
-    - docker login quay.io -u $QUAY_USER -p $QUAY_PASS
-
+  - dnf install -y golang make git dnf-plugins-core
+  - dnf config-manager --add-repo=https://download.docker.com/linux/fedora/docker-ce.repo
+  - dnf install -y docker-ce-cli
+  - echo "Logging into Quay..."
+  - docker login quay.io -u $QUAY_USER -p $QUAY_PASS
 
 build:
   stage: build
@@ -30,6 +31,5 @@ push:
   script:
     - echo "Pushing image to Quay.io..."
     - make docker-push IMG="$IMG_NAME:$IMG_TAG"
-
   only:
     - main
