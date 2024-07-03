@@ -1,0 +1,18 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: node-exporter
+  namespace: he-codeco-acm
+  labels:
+    prometheus: prometheus-agent
+spec:
+  namespaceSelector:
+    matchNames:
+      - he-codeco-acm
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: node-exporter
+  endpoints:
+    - port: node-exporter
+      path: /metrics

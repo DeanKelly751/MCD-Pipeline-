@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: <service-name>
+  namespace: <namespace>
+  labels:
+    prometheus: prometheus-agent
+spec:
+  namespaceSelector:
+    matchNames:
+      - <namespace>
+  selector:
+    matchLabels:
+      label1: <label1>
+      label2: <label2>
+      .
+      .
+      .
+  endpoints:
+    - port: <port name>
+      path: /metrics

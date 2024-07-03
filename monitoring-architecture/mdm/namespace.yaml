@@ -1,0 +1,7 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: he-codeco-mdm
+  labels:
+    monitoring: prometheus
