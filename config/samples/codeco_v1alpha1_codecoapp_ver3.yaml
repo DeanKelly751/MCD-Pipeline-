@@ -7,21 +7,6 @@ metadata:
   resourceVersion: "1456"
   uid: 5c948d7e-43d6-425b-b0b2-76402b606e07
 spec:
-  #mdm
-  replicas: 1
-  selector:
-    matchLabels:
-      app: acm-swm-app
-  template:
-    metadata:
-      labels:
-        application-group: acm-applicationgroup
-        app: acm-swm-app
-      annotations:
-        prometheus.io/port: 9090
-        prometheus.io/scrape: "true"
-        prometheus.io/path: "http://localhost:9090/metrics."
-#mdm-end
   appEnergyLimit: "20"
   appFailureTolerance: ""
   appName: acm-swm-app
@@ -29,6 +14,21 @@ spec:
   - nwbandwidth: "1.2"
     nwlatency: "3"
     podspec:
+        #mdm
+      replicas: 1
+      selector:
+        matchLabels:
+          app: acm-swm-app
+      template:
+        metadata:
+          labels:
+            application-group: acm-applicationgroup
+            app: acm-swm-app
+          annotations:
+            prometheus.io/port: 9090
+            prometheus.io/scrape: "true"
+            prometheus.io/path: "http://localhost:9090/metrics."
+      # mdm-end
       containers:
       - image: quay.io/skupper/hello-world-backend:latest
         name: skupper-backend
