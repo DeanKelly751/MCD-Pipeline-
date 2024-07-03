@@ -17,9 +17,9 @@ spec:
       labels:
         app: <your service app>
       annotations:
-        prometheus.io/port: <port>
+        prometheus.io/port: 9090
         prometheus.io/scrape: "true"
-        prometheus.io/path: <metric path>
+        prometheus.io/path: "http://localhost:9090/metrics."
 #mdm-end
   appEnergyLimit: "20"
   appFailureTolerance: ""
