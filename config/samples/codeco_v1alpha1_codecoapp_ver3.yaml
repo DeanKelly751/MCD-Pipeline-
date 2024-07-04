@@ -14,6 +14,19 @@ spec:
   - nwbandwidth: "1.2"
     nwlatency: "3"
     podspec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: acm-swm-app
+      template:
+        metadata:
+          labels:
+            application-group: acm-applicationgroup
+            app: acm-swm-app
+          annotations:
+            prometheus.io/port: 9090
+            prometheus.io/scrape: "true"
+            prometheus.io/path: "http://prometheus-service.monitoring.svc.cluster.local"
       containers:
       - image: quay.io/skupper/hello-world-backend:latest
         name: skupper-backend
