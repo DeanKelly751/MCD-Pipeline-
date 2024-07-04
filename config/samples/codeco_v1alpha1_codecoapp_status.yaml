@@ -31,7 +31,7 @@ spec:
         frameSize: "100"
         maxDelay: "1"
         sendInterval: "10"
-      chanelName: frontend
+      channelName: frontend
       otherService:
         appName: acm-swm-app
         port: 9090
@@ -52,7 +52,7 @@ spec:
         frameSize: "100"
         maxDelay: "1"
         sendInterval: "10"
-      chanelName: backend
+      channelName: backend
       otherService:
         appName: acm-swm-app
         port: 8080
@@ -85,12 +85,10 @@ status:
     avgNodeEnergy: "2"
     avgNodeFailure: val
     avgNodeMemory: 10Gi
-    avgNodeSecurity: val
     nodeName: c1
   - avgNodeCpu: "2"
     avgNodeEnergy: "2"
     avgNodeFailure: val
     avgNodeMemory: 10Gi
-    avgNodeSecurity: val
     nodeName: c2
   status: OK

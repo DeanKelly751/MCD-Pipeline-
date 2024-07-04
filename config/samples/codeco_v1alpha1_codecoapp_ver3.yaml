@@ -44,7 +44,7 @@ spec:
         frameSize: "100"
         maxDelay: "1"
         sendInterval: "10"
-      chanelName: frontend
+      channelName: frontend
       otherService:
         appName: acm-swm-app
         port: 9090
@@ -65,7 +65,7 @@ spec:
         frameSize: "100"
         maxDelay: "1"
         sendInterval: "10"
-      chanelName: backend
+      channelName: backend
       otherService:
         appName: acm-swm-app
         port: 8080

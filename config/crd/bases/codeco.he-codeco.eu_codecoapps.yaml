@@ -8183,7 +8183,7 @@ spec:
                                 pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                                 type: string
                             type: object
-                          chanelName:
+                          channelName:
                             type: string
                           otherService:
                             description: OtherWorkload identifies the target workload
@@ -8289,8 +8289,6 @@ spec:
                     avgNodeFailure:
                       type: string
                     avgNodeMemory:
-                      type: string
-                    avgNodeSecurity:
                       type: string
                     nodeName:
                       type: string

@@ -3,20 +3,23 @@ kind: PrometheusRule
 metadata:
   creationTimestamp: null
   labels:
-    prometheus: example
+    prometheus: codecoapp-status-metrics
     # role: record-rules
   name: prometheus-example-rules
   namespace: monitoring
 spec:
   groups:
-  - name: example
+  - name: codecoapp-status-metrics
     rules:
-    - record: code:prometheus_http_requests_total:sum #metric name
-      expr: "sum by (code) (prometheus_http_requests_total)" #metric value
-    - record: sum_container_cpu_utilization
-      expr: "sum(rate(container_cpu_usage_seconds_total[5m]))"
-      # Average CPU usage over the past 5 minutes for each instance (node)
-    - record: avgNodeCpu
-      expr: avg(node_cpu_seconds_total) by (instance)
-    - record: avgNodeMemory
-      expr: avg(node_memory_MemAvailable_bytes) by (instance)
+      # Average CPU utilization for each instance (node)
+    - record: instance:node_cpu:rate1m #metric name
+      expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[1m])) * 100) #metric value
+      # Average node memory
+    - record: instance:node_memory:avg1m
+      expr: 100 * (1 - ((avg_over_time(node_memory_MemFree_bytes[1m]) + avg_over_time(node_memory_Cached_bytes[1m]) + avg_over_time(node_memory_Buffers_bytes[1m])) / avg_over_time(node_memory_MemTotal_bytes[1m])))
+      # Average node energy
+    - record: instance:node_energy:irate1m
+      expr: avg by (instance) (irate(kepler_node_platform_joules_total{mode="dynamic"}[1m]))
+      # Average node failure
+    - record: instance:node_status:avg1m
+      expr: sum(avg_over_time(kube_node_status_condition{condition="Ready", status!="true"}[1m])) by (node)

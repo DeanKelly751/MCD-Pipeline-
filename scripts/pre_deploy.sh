@@ -29,5 +29,6 @@ clone_if_not_exists "https://gitlab.eclipse.org/eclipse-research-labs/codeco-pro
 clone_if_not_exists "https://github.com/k8snetworkplumbingwg/multus-cni.git" "multus-cni"
 clone_if_not_exists "https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/experimentation-framework-and-demonstrations/data-generators-and-datasets/synthetic-data-generator.git" "synthetic-data-generator"
 clone_if_not_exists "https://github.com/prometheus-operator/kube-prometheus" "kube-prometheus"
+clone_if_not_exists "https://github.com/sustainable-computing-io/kepler" "kepler"
 
 ##TODO(user): Add your dependencies here

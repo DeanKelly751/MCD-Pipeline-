@@ -98,3 +98,10 @@ make chart
 helm install qostest --namespace=he-codeco-swm --create-namespace tmp/helm
 cd ..
 echo "......................................Finished installing SWM.................................."
+
+echo ".....................Installing Kepler....................................."
+cd kepler
+make build-manifest OPTS="PROMETHEUS_DEPLOY"
+kubectl create -f _output/generated-manifest/deployment.yaml
+cd ..
+echo "......................................Finished installing Kepler.................................."
