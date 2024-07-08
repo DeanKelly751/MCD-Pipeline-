@@ -13,13 +13,31 @@ spec:
     rules:
       # Average CPU utilization for each instance (node)
     - record: instance:node_cpu:rate1m #metric name
-      expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[1m])) * 100) #metric value
+      expr: avg by (instance) (1 - rate(node_cpu_seconds_total{mode="idle"}[1m])) #metric value
       # Average node memory
     - record: instance:node_memory:avg1m
-      expr: 100 * (1 - ((avg_over_time(node_memory_MemFree_bytes[1m]) + avg_over_time(node_memory_Cached_bytes[1m]) + avg_over_time(node_memory_Buffers_bytes[1m])) / avg_over_time(node_memory_MemTotal_bytes[1m])))
+      expr: avg_over_time(node_memory_MemTotal_bytes[1m]) - (avg_over_time(node_memory_MemFree_bytes[1m]) + avg_over_time(node_memory_Cached_bytes[1m]) + avg_over_time(node_memory_Buffers_bytes[1m]))
       # Average node energy
     - record: instance:node_energy:irate1m
       expr: avg by (instance) (irate(kepler_node_platform_joules_total{mode="dynamic"}[1m]))
       # Average node failure
     - record: instance:node_status:avg1m
       expr: sum(avg_over_time(kube_node_status_condition{condition="Ready", status!="true"}[1m])) by (node)
+      # Node info
+    - record: instance:node_info:current
+      expr: kube_node_info
+      # Pod info
+    - record: pod:pod_info:current
+      expr: kube_pod_info
+      # Average CPU utilization for each pod
+    - record: pod:container_cpu:rate1m
+      expr: avg by (pod) (rate(container_cpu_usage_seconds_total[1m]))
+      # Average memory usage for each pod 
+    - record: pod:container_memory:avg1m
+      expr: avg by (pod) (avg_over_time(container_memory_usage_bytes[1m]))
+      # Average CPU utlization for each application
+    - record: app:container_cpu:rate1m
+      expr: avg(rate(container_cpu_usage_seconds_total[1m]))
+      # Average memory usage for each application 
+    - record: app:container_memory:avg1m
+      expr: sum(avg_over_time(container_memory_usage_bytes[1m]))

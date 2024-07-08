@@ -128,15 +128,15 @@ func queryPrometheus(v1api v1.API, query string) model.Value {
 	if len(warnings) > 0 {
 		fmt.Printf("Warnings: %v\n", warnings)
 	}
-	fmt.Printf("Query:\n%v\n", query)
-	fmt.Printf("Result:\n%v\n", result)
-	fmt.Printf("Result Type:%v\n", result.Type())
+	// fmt.Printf("Query:\n%v\n", query)
+	// fmt.Printf("Result:\n%v\n", result)
+	// fmt.Printf("Result Type:%v\n", result.Type())
 
 	return result
 }
 
 func getPodInfo(acmApp *codecov1alpha1.CodecoApp, v1api v1.API) {
-	query := "kube_pod_info{created_by_name='acm-swm-app'}"
+	query := "pod:pod_info:current{created_by_name='acm-swm-app'}"
 	result := queryPrometheus(v1api, query)
 
 	if result.Type() == model.ValVector {
@@ -172,8 +172,8 @@ func getServiceMetricsFromPrometheus(acmApp *codecov1alpha1.CodecoApp, v1api v1.
 	getPodInfo(acmApp, v1api)
 
 	queries := map[string]string{
-		"AvgCpuUsage":    `avg by (pod) (rate(container_cpu_usage_seconds_total{pod="%s"}[1m]))`,
-		"AvgMemoryUsage": `avg by (pod) (avg_over_time(container_memory_usage_bytes{pod="%s"}[1m]))`,
+		"AvgCpuUsage":    `pod:container_cpu:rate1m{pod="%s"}`,
+		"AvgMemoryUsage": `pod:container_memory:avg1m{pod="%s"}`,
 	}
 
 	for i, service := range acmApp.Spec.Workloads {
@@ -209,9 +209,9 @@ func getAppMetricsFromPrometheus(acmApp *codecov1alpha1.CodecoApp, v1api v1.API)
 	fmt.Println(time.Now().Format(time.UnixDate), "---------------------- Get app level metrics -----------------------")
 
 	queries := map[string]string{
-		"AvgCpuUsage":    `avg by (pod) (rate(container_cpu_usage_seconds_total{pod=~"acm-swm-app-.*"}[1m]))`,
-		"AvgMemoryUsage": `avg by (pod) (avg_over_time(container_memory_usage_bytes{pod=~"acm-swm-app-.*"}[1m]))`,
-		"Numpods":        `count(kube_pod_info{created_by_name="acm-swm-app"})`,
+		"AvgCpuUsage":    `app:container_cpu:rate1m{pod=~"acm-swm-app-.*"}`,
+		"AvgMemoryUsage": `app:container_memory:avg1m{pod=~"acm-swm-app-.*"}`,
+		"Numpods":        `count(pod:pod_info:current{created_by_name="acm-swm-app"})`,
 	}
 
 	for metric, query := range queries {
@@ -241,7 +241,7 @@ func getAppMetricsFromPrometheus(acmApp *codecov1alpha1.CodecoApp, v1api v1.API)
 
 func getNodeInfo(acmApp *codecov1alpha1.CodecoApp, v1api v1.API) {
 
-	query := "kube_node_info"
+	query := "instance:node_info:current"
 	result := queryPrometheus(v1api, query)
 
 	if result.Type() == model.ValVector {
