@@ -27,6 +27,9 @@ import (
 	// "github.com/tidwall/pretty"
 	"encoding/json"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
+	"github.com/prometheus/client_golang/api"
+	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
+	"github.com/prometheus/common/model"
 	codecov1alpha1 "gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm/api/v1alpha1"
 	swmv1alpha1 "gitlab.eclipse.org/rcarrollred/qos-scheduler/scheduler/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -112,6 +115,212 @@ func initializePrometheusRules(r *CodecoAppReconciler) error {
 	return applyPrometheusRules(r, rules)
 }
 
+// Function to query Prometheus with a given query
+func queryPrometheus(v1api v1.API, query string) model.Value {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	result, warnings, err := v1api.Query(ctx, query, time.Now())
+	if err != nil {
+		fmt.Printf("Error querying Prometheus: %v\n", err)
+		return nil
+	}
+	if len(warnings) > 0 {
+		fmt.Printf("Warnings: %v\n", warnings)
+	}
+	// fmt.Printf("Query:\n%v\n", query)
+	// fmt.Printf("Result:\n%v\n", result)
+	// fmt.Printf("Result Type:%v\n", result.Type())
+
+	return result
+}
+
+func getPodInfo(acmApp *codecov1alpha1.CodecoApp, v1api v1.API) {
+	query := "pod:pod_info:current{created_by_name='acm-swm-app'}"
+	result := queryPrometheus(v1api, query)
+
+	if result.Type() == model.ValVector {
+		vector := result.(model.Vector)
+
+		for i, obj := range vector {
+			// Extract metadata labels
+			labels := obj.Metric
+			podName := labels["pod"]
+			nodeName := labels["node"]
+
+			// Print metadata labels
+			fmt.Printf("Pod: %s, Node: %s\n", podName, nodeName)
+
+			acmApp.Status.AppMetrics.ServiceMetrics[i].PodName = string(podName)
+			acmApp.Status.AppMetrics.ServiceMetrics[i].NodeName = string(nodeName)
+			acmApp.Status.AppMetrics.ServiceMetrics[i].ClusterName = "kind" // Statically fixed for now, OCM in future
+		}
+	} else {
+		fmt.Print("Invalid result type")
+	}
+}
+
+func getServiceMetricsFromPrometheus(acmApp *codecov1alpha1.CodecoApp, v1api v1.API) {
+
+	fmt.Println(time.Now().Format(time.UnixDate), "---------------------- Get service level metrics -----------------------")
+
+	// Ensure ServiceMetrics is properly sized
+	if len(acmApp.Status.AppMetrics.ServiceMetrics) < len(acmApp.Spec.Workloads) {
+		acmApp.Status.AppMetrics.ServiceMetrics = make([]codecov1alpha1.ServiceStatusMetrics, len(acmApp.Spec.Workloads))
+	}
+
+	getPodInfo(acmApp, v1api)
+
+	queries := map[string]string{
+		"AvgCpuUsage":    `pod:container_cpu:rate1m{pod="%s"}`,
+		"AvgMemoryUsage": `pod:container_memory:avg1m{pod="%s"}`,
+	}
+
+	for i, service := range acmApp.Spec.Workloads {
+
+		acmApp.Status.AppMetrics.ServiceMetrics[i].ServiceName = service.BaseName
+
+		for metric, query := range queries {
+
+			query := fmt.Sprintf(query, acmApp.Status.AppMetrics.ServiceMetrics[i].PodName)
+			result := queryPrometheus(v1api, query)
+
+			if result.Type() == model.ValVector {
+				vector := result.(model.Vector)
+
+				for _, obj := range vector {
+					stringValue := fmt.Sprintf("%f", obj.Value)
+					switch metric {
+					case "AvgCpuUsage":
+						acmApp.Status.AppMetrics.ServiceMetrics[i].AvgServiceCpuUsage = stringValue
+					case "AvgMemoryUsage":
+						acmApp.Status.AppMetrics.ServiceMetrics[i].AvgServiceMemoryUsage = stringValue
+					}
+				}
+			} else {
+				fmt.Print("Invalid result type")
+			}
+		}
+	}
+}
+
+func getAppMetricsFromPrometheus(acmApp *codecov1alpha1.CodecoApp, v1api v1.API) {
+
+	fmt.Println(time.Now().Format(time.UnixDate), "---------------------- Get app level metrics -----------------------")
+
+	queries := map[string]string{
+		"AvgCpuUsage":    `app:container_cpu:rate1m{pod=~"acm-swm-app-.*"}`,
+		"AvgMemoryUsage": `app:container_memory:avg1m{pod=~"acm-swm-app-.*"}`,
+		"Numpods":        `count(pod:pod_info:current{created_by_name="acm-swm-app"})`,
+	}
+
+	for metric, query := range queries {
+		result := queryPrometheus(v1api, query)
+
+		if result.Type() == model.ValVector {
+			vector := result.(model.Vector)
+
+			for _, obj := range vector {
+				stringValue := fmt.Sprintf("%f", obj.Value)
+				switch metric {
+				case "AvgCpuUsage":
+					acmApp.Status.AppMetrics.AvgAppCpuUsage = stringValue
+				case "AvgMemoryUsage":
+					acmApp.Status.AppMetrics.AvgAppMemoryUsage = stringValue
+				case "Numpods":
+					acmApp.Status.AppMetrics.Numpods = int(obj.Value)
+				}
+			}
+		} else {
+			fmt.Print("Invalid result type")
+		}
+
+	}
+	getServiceMetricsFromPrometheus(acmApp, v1api)
+}
+
+func getNodeInfo(acmApp *codecov1alpha1.CodecoApp, v1api v1.API) {
+
+	query := "instance:node_info:current"
+	result := queryPrometheus(v1api, query)
+
+	if result.Type() == model.ValVector {
+		vector := result.(model.Vector)
+		acmApp.Status.NodeMetrics = make([]codecov1alpha1.CodecoAppNodeStatusMetrics, len(vector))
+		for i, obj := range vector {
+			// Extract metadata labels
+			nodeName := obj.Metric["node"]
+			// Print metadata labels
+			fmt.Printf("Node: %s\n", nodeName)
+			acmApp.Status.NodeMetrics[i].NodeName = string(nodeName)
+		}
+	} else {
+		fmt.Print("Invalid result type")
+	}
+
+}
+
+func getNodeMetricsFromPrometheus(acmApp *codecov1alpha1.CodecoApp, v1api v1.API) {
+
+	fmt.Println(time.Now().Format(time.UnixDate), "---------------------- Get node level metrics -----------------------")
+
+	getNodeInfo(acmApp, v1api)
+
+	queries := map[string]string{
+		"AvgCpuUsage":              "instance:node_cpu:rate1m",
+		"AvgMemoryUsage":           "instance:node_memory:avg1m",
+		"AvgNodeEnergyExpenditure": "instance:node_energy:irate1m",
+		"AvgNodeFailureTolerance":  "instance:node_status:avg1m",
+	}
+
+	for metric, query := range queries {
+		result := queryPrometheus(v1api, query)
+
+		if result.Type() == model.ValVector {
+			vector := result.(model.Vector)
+
+			// Create a map for quick lookup of metric values for each node
+			lookup := make(map[string]string)
+			for _, obj := range vector {
+				lookup[string(obj.Metric["instance"])] = fmt.Sprintf("%f", obj.Value)
+			}
+			for i := range acmApp.Status.NodeMetrics {
+				if val, found := lookup[acmApp.Status.NodeMetrics[i].NodeName]; found {
+					switch metric {
+					case "AvgCpuUsage":
+						acmApp.Status.NodeMetrics[i].AvgCpuUsage = val
+					case "AvgMemoryUsage":
+						acmApp.Status.NodeMetrics[i].AvgMemoryUsage = val
+					case "AvgNodeEnergyExpenditure":
+						acmApp.Status.NodeMetrics[i].AvgNodeEnergyExpenditure = val
+					case "AvgNodeFailureTolerance":
+						acmApp.Status.NodeMetrics[i].AvgNodeFailureTolerance = val
+					}
+				}
+			}
+		} else {
+			fmt.Print("Invalid result type")
+		}
+	}
+}
+
+func getMetricsFromPrometheus(acmApp *codecov1alpha1.CodecoApp) {
+
+	client, err := api.NewClient(api.Config{
+		Address: "http://prometheus-k8s.monitoring.svc.cluster.local:9090",
+	})
+	if err != nil {
+		fmt.Printf("Error creating client: %v\n", err)
+		return
+	}
+
+	v1api := v1.NewAPI(client)
+
+	getNodeMetricsFromPrometheus(acmApp, v1api)
+	getAppMetricsFromPrometheus(acmApp, v1api)
+
+}
+
 //+kubebuilder:rbac:groups=codeco.he-codeco.eu,resources=codecoapps,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=codeco.he-codeco.eu,resources=codecoapps/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=codeco.he-codeco.eu,resources=codecoapps/finalizers,verbs=update
@@ -133,7 +342,7 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	// Initialize and apply Prometheus rules on startup
 	err := initializePrometheusRules(r)
 	if err != nil {
-		fmt.Print(err, "unable to initialize Prometheus rules")
+		fmt.Print(err, "Unable to initialize Prometheus rules")
 		os.Exit(1)
 	}
 
@@ -288,6 +497,23 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	//}
 
 	//err := r.Status().Update(ctx, codecoAppCR)
+
+	fmt.Println(time.Now().Format(time.UnixDate), "---------------------- Update ACM App status metrics -----------------------")
+
+	getMetricsFromPrometheus(codecoAppCR)
+	err = r.Status().Update(ctx, codecoAppCR)
+	if err != nil {
+		fmt.Print("Error updating codecoAppCR")
+		return ctrl.Result{}, err
+	}
+
+	fmt.Println("CODECO App status metrics -----------------------")
+
+	jsonacm, err := json.MarshalIndent(codecoAppCR, "", "   ")
+	fmt.Println(string(jsonacm))
+	if err != nil {
+		fmt.Println(err)
+	}
 	return ctrl.Result{RequeueAfter: time.Minute}, nil
 }
 
@@ -302,7 +528,7 @@ func CreateNewSWMApplicationModel() {
 
 }
 
-// Function to Map from Codeco Apllication Model to SWM Application Model
+// Function to Map from Codeco Application Model to SWM Application Model
 func MapToSWMApplicationModel(codecoApp *codecov1alpha1.CodecoApp, swmApp *swmv1alpha1.Application) {
 
 	dc.DeepCopy(codecoApp.Spec, &swmApp.Spec)

@@ -140,7 +140,7 @@ type ChannelSettings struct {
 }
 
 type CodecoChannels struct {
-	BaseName string `json:"chanelName,omitempty"`
+	BaseName string `json:"channelName,omitempty"`
 
 	// OtherWorkload identifies the target workload of the connection
 	// via its application name and workload basename.
@@ -207,7 +207,6 @@ type CodecoAppNodeStatusMetrics struct {
 	AvgMemoryUsage           string `json:"avgNodeMemory,omitempty"`
 	AvgNodeFailureTolerance  string `json:"avgNodeFailure,omitempty"`
 	AvgNodeEnergyExpenditure string `json:"avgNodeEnergy,omitempty"`
-	AvgNodeSecurity          string `json:"avgNodeSecurity,omitempty"`
 }
 
 // CodecoAppStatus defines the observed state of CodecoApp
