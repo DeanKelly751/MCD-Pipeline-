@@ -55,7 +55,7 @@ test:
     - chmod +x ./kubectl
     - mv ./kubectl /usr/local/bin/kubectl
     - echo "Creating Kind cluster..."
-    - kind create cluster --config ./config/cluster/kind-config.yaml
+    - kind create cluster --config ./acm/config/cluster/kind-config.yaml
     - echo "Deploying operator..."
     - kubectl apply -f codeco_v1alpha_codecoapp_ver3.yaml
     - echo "Waiting for pods to be running..."
