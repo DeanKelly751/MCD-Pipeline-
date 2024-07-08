@@ -1,6 +1,7 @@
 stages:
   - build
   - push
+  - test
 
 variables: 
   IMG_NAME: "quay.io/dekelly/codecoapp-acm"
@@ -40,3 +41,40 @@ push:
     - make docker-push IMG="$IMG_NAME:$IMG_TAG"
   only:
     - main
+
+test:
+  stage: test
+  image: fedora:latest
+  script:
+    - export PATH=$PATH:/usr/local/go/bin
+    - echo "Installing Kind and kubectl..."
+    - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
+    - chmod +x ./kind
+    - mv ./kind /usr/local/bin/kind
+    - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl
+    - mv ./kubectl /usr/local/bin/kubectl
+    - echo "Creating Kind cluster..."
+    - kind create cluster
+    - echo "Deploying operator..."
+    - kubectl apply -f your-operator-manifest.yaml
+    - echo "Waiting for pods to be running..."
+    - timeout=1200
+    - interval=10
+    - end=$((SECONDS+timeout))
+    - while [ $SECONDS -lt $end ]; do
+        kubectl get po -A | grep -q 'Running' && break;
+        sleep $interval;
+      done
+    - echo "Checking pod statuses..."
+    - failed_pods=$(kubectl get po -A --field-selector=status.phase=Failed | wc -l)
+    - if [ "$failed_pods" -gt 1 ]; then
+        echo "More than 1 pod has failed. Failing the test stage.";
+        kubectl get po -A --field-selector=status.phase=Failed -o custom-columns=NAME:.metadata.name,NAMESPACE:.metadata.namespace | tail -n +2 | while read -r pod namespace; do
+          echo "Logs for pod $pod in namespace $namespace:";
+          kubectl logs -n $namespace $pod;
+        done;
+        exit 1;
+      fi
+  dependencies:
+    - push
