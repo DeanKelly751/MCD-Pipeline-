@@ -59,7 +59,7 @@ test:
     - echo "Deploying operator..."
     - kubectl apply -f codeco_v1alpha_codecoapp_ver3.yaml
     - echo "Waiting for pods to be running..."
-    - timeout=1200
+    - timeout=180
     - interval=10
     - end=$((SECONDS+timeout))
     - while [ $SECONDS -lt $end ]; do
