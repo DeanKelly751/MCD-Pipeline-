@@ -39,6 +39,7 @@ push:
     - export PATH=$PATH:/usr/local/go/bin
     - echo "Pushing image to Quay.io..."
     - make docker-push IMG="$IMG_NAME:$IMG_TAG"
+    - ls
   only:
     - main
 
@@ -76,5 +77,5 @@ push:
 #         done;
 #         exit 1;
 #       fi
-#   dependencies:
-#     - push
+  dependencies:
+    - push
