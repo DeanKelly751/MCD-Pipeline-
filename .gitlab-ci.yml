@@ -39,4 +39,10 @@ push:
     - echo "Pushing image to Quay.io..."
     - make docker-push IMG="$IMG_NAME:$IMG_TAG"
   only:
-    - main
+    - rht-integration
+
+test:
+  stage: push
+  image: fedora:latest
+  script:
+    - ls
