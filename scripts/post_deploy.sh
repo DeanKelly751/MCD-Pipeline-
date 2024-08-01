@@ -68,27 +68,25 @@ cd ..
 
 #Data generator
 cd synthetic-data-generator
-
-git checkout main-hotfixed
-
-kubectl apply --server-side -f manifests/setup
-kubectl wait \
-	--for condition=Established \
-	--all CustomResourceDefinition \
-	--namespace=monitoring
-kubectl apply -f manifests/
-
+# git checkout main-hotfixed   # remove
+sed -i 's/node1,node2,node3/c1,c2,kind-control-plane/' netma-controller/netma-controller-deployment.yaml
+sed -i 's/node1,node2,node3/c1,c2,kind-control-plane/' acm-controller/acm-controller-deployment.yaml
 chmod -R 777 apply-controllers.sh
 ./apply-controllers.sh
-
+# dummy CRs
+chmod -R 777 ./apply-dummy.sh
+./apply-dummy.sh
 cd ..
-
 #PDLC
 cd pdlc-integration
-
+sed -i 's/sonem-worker/c1/' data_preprocessing/pdlc-dp-deployment.yaml
+sed -i 's/sonem-worker/c1/' context_awareness/pdlc-ca-deployment.yaml
+sed -i 's/sonem-worker/c1/' gnn_model/gnn_controller.yaml
+sed -i 's/sonem-worker/c1/' gnn_model/gnn_inference.yaml
+sed -i 's/sonem-worker/c1/' rl_model/rl-model-deployment.yaml
+sed -i 's/sonem/kind/' data_preprocessing/pdlc-dp-deployment.yaml
 chmod -R 777 apply_yamls.sh
 ./apply_yamls.sh
-
 cd ..
 echo "........................................Finished installing PDLC..............................................."
 echo ".....................Installing SWM....................................."
