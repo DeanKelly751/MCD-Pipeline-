@@ -8,9 +8,10 @@ echo "........................................Installing NetMA..................
 cd secure-connectivity
 kubectl taint nodes kind-control-plane node-role.kubernetes.io/control-plane:NoSchedule-
 # kubectl taint nodes --all node-role.kubernetes.io/control-plane- node-role.kubernetes.io/master-
-kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick.yml
-cat ../multus-cni/deployments/multus-daemonset-thick.yml | kubectl apply -f -
-kubectl create -f ./deployments/l2sm-deployment.yaml
+kubectl create namespace he-codeco-netma
+kubectl get nodes
+kubectl label nodes [kind-control-plane] dedicated=control-plane
+kubectl create -f ./deployments/l2sm-deployment.yaml -n=he-codeco-netma
 cd ..
 echo "........................................Finished installing NetMA..............................................."
 echo ".....................Installing MDM....................................."
