@@ -67,16 +67,16 @@ kubectl apply -f manifests/
 cd ..
 
 #Data generator
-cd synthetic-data-generator
-# git checkout main-hotfixed   # remove
-sed -i 's/node1,node2,node3/c1,c2,kind-control-plane/' netma-controller/netma-controller-deployment.yaml
-sed -i 's/node1,node2,node3/c1,c2,kind-control-plane/' acm-controller/acm-controller-deployment.yaml
-chmod -R 777 apply-controllers.sh
-./apply-controllers.sh
-# dummy CRs
-chmod -R 777 ./apply-dummy.sh
-./apply-dummy.sh
-cd ..
+# cd synthetic-data-generator
+# # git checkout main-hotfixed   # remove
+# sed -i 's/node1,node2,node3/c1,c2,kind-control-plane/' netma-controller/netma-controller-deployment.yaml
+# sed -i 's/node1,node2,node3/c1,c2,kind-control-plane/' acm-controller/acm-controller-deployment.yaml
+# chmod -R 777 apply-controllers.sh
+# ./apply-controllers.sh
+# # dummy CRs
+# chmod -R 777 ./apply-dummy.sh
+# ./apply-dummy.sh
+# cd ..
 #PDLC
 cd pdlc-integration
 sed -i 's/sonem-worker/c1/' data_preprocessing/pdlc-dp-deployment.yaml
