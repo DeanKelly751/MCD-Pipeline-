@@ -6,6 +6,7 @@ echo "Executing post deployment tasks..."
 cd ..
 echo "........................................Installing NetMA..............................................."
 cd secure-connectivity
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.3/cert-manager.yaml
 kubectl taint nodes kind-control-plane node-role.kubernetes.io/control-plane:NoSchedule-
 # kubectl taint nodes --all node-role.kubernetes.io/control-plane- node-role.kubernetes.io/master-
 kubectl create namespace he-codeco-netma
