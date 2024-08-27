@@ -14,6 +14,7 @@ kubectl taint nodes kind-control-plane node-role.kubernetes.io/control-plane:NoS
 kubectl create namespace he-codeco-netma
 kubectl get nodes
 kubectl label nodes kind-control-plane dedicated=control-plane --overwrite
+sleep 60
 kubectl create -f ./deployments/l2sm-deployment.yaml -n=he-codeco-netma
 cd ..
 echo "........................................Finished installing NetMA..............................................."
