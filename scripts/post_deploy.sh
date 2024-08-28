@@ -17,6 +17,12 @@ kubectl label nodes kind-control-plane dedicated=control-plane --overwrite
 sleep 60
 kubectl create -f ./deployments/l2sm-deployment.yaml -n=he-codeco-netma
 cd ..
+## kubectl apply -f network-exposure/kuberfiles/01_netma-topology-crd.yaml
+## chmod 755 network-exposure/ejecutar_mon.sh
+## This should be executed with sudo privileges
+## ./network-exposure/ejecutar_mon.sh
+## The next command is to check that the CR has been pushed correctly 
+## kubectl get netma-topology netma-sample -o yaml -n he-codeco-netma
 echo "........................................Finished installing NetMA..............................................."
 echo ".....................Installing MDM....................................."
 cd mdm-api
