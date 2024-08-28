@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 
@@ -33,6 +34,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -110,6 +112,24 @@ func main() {
 	}
 
 	setupLog.Info("starting manager")
+
+	err = mgr.Add(manager.RunnableFunc(func(context.Context) error {
+		reconcilerObject := &controllers.CodecoAppReconciler{
+			Client: mgr.GetClient(),
+			Scheme: mgr.GetScheme(),
+		}
+		// Initialize and apply Prometheus rules on startup
+		if err := controllers.InitializePrometheusRules(reconcilerObject); err != nil {
+			setupLog.Error(err, "Failed to initialize Prometheus rules")
+		} else {
+			setupLog.Info("Prometheus rules initialized successfully")
+		}
+		return nil
+	}))
+	if err != nil {
+		setupLog.Error(err, "unable add a runnable to the manager")
+	}
+
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)

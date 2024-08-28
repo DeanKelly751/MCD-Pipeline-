@@ -53,6 +53,7 @@ func readPrometheusRulesFromDir(dir string) ([]monitoringv1.PrometheusRule, erro
 
 	files, err := os.ReadDir(dir)
 	if err != nil {
+		fmt.Println("Error reading directory:", err)
 		return nil, err
 	}
 
@@ -82,9 +83,14 @@ func applyPrometheusRules(r *CodecoAppReconciler, rules []monitoringv1.Prometheu
 
 		err := r.Get(context.TODO(), client.ObjectKey{Namespace: "monitoring", Name: "prometheus-example-rules"}, existingRule)
 		if err != nil {
-			fmt.Println("Creating new prometheus rule")
-			if err := r.Create(context.TODO(), &rule); err != nil {
-				fmt.Println("Error creating rule")
+			if errors.IsNotFound(err) {
+				fmt.Println("Creating new prometheus rule")
+				if err := r.Create(context.TODO(), &rule); err != nil {
+					fmt.Println("Error creating rule")
+					return err
+				}
+			} else {
+				fmt.Println("Error fetching existing rule")
 				return err
 			}
 		} else {
@@ -104,7 +110,7 @@ func applyPrometheusRules(r *CodecoAppReconciler, rules []monitoringv1.Prometheu
 	return nil
 }
 
-func initializePrometheusRules(r *CodecoAppReconciler) error {
+func InitializePrometheusRules(r *CodecoAppReconciler) error {
 	// Read the rules from the specified directory
 	rules, err := readPrometheusRulesFromDir("/prom_rules")
 	if err != nil {
@@ -153,7 +159,7 @@ func getPodInfo(acmApp *codecov1alpha1.CodecoApp, v1api v1.API) {
 
 			acmApp.Status.AppMetrics.ServiceMetrics[i].PodName = string(podName)
 			acmApp.Status.AppMetrics.ServiceMetrics[i].NodeName = string(nodeName)
-			acmApp.Status.AppMetrics.ServiceMetrics[i].ClusterName = "kind" // Statically fixed for now, OCM in future
+			acmApp.Status.AppMetrics.ServiceMetrics[i].ClusterName = "codeco-cluster-1" // Statically fixed for now, OCM in future
 		}
 	} else {
 		fmt.Print("Invalid result type")
@@ -339,12 +345,6 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	fmt.Println(time.Now().Format(time.UnixDate), "---------------------- Starting Reconciliation Loop -----------------------")
 
-	// Initialize and apply Prometheus rules on startup
-	err := initializePrometheusRules(r)
-	if err != nil {
-		fmt.Print(err, "Unable to initialize Prometheus rules")
-		os.Exit(1)
-	}
 
 	codecoAppCR := &codecov1alpha1.CodecoApp{}
 
@@ -423,7 +423,7 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	qos_scheduler_new_application_group.Spec = swmv1alpha1.ApplicationGroupSpec{}
 
-	err = r.Get(ctx, client.ObjectKey{Namespace: codecoAppCR.Namespace, Name: "acm-applicationgroup"}, qos_scheduler_new_application_group)
+	err := r.Get(ctx, client.ObjectKey{Namespace: codecoAppCR.Namespace, Name: "acm-applicationgroup"}, qos_scheduler_new_application_group)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			fmt.Println("Creating new SWM application group")
