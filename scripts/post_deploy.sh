@@ -3,17 +3,20 @@
 ## components and to perform any other post-deployment tasks.
 echo "Executing post deployment tasks..."
 ##TODO(user): Add your post deployment tasks here
+echo "........................................Installing Primary CNI: Flannel..............................................."
+kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml 
+sleep 20
 cd ..
 echo "........................................Installing NetMA..............................................."
 cd secure-connectivity
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.3/cert-manager.yaml
 kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick.yml
-cat ../multus-cni/deployments/multus-daemonset-thick.yml | kubectl apply -f -
+
 kubectl taint nodes kind-control-plane node-role.kubernetes.io/control-plane:NoSchedule-
 # kubectl taint nodes --all node-role.kubernetes.io/control-plane- node-role.kubernetes.io/master-
 kubectl create namespace he-codeco-netma
 kubectl get nodes
-kubectl label nodes kind-control-plane dedicated=control-plane --overwrite
+
 sleep 60
 kubectl create -f ./deployments/l2sm-deployment.yaml -n=he-codeco-netma
 cd ..
