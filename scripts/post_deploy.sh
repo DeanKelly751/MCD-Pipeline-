@@ -31,6 +31,8 @@ echo ".....................Installing MDM....................................."
 cd mdm-api
 export MDM_NAMESPACE=he-codeco-mdm
 export MDM_CONTEXT=kind-kind
+export PROMETHEUS_URL="http://prometheus-service.monitoring.svc.cluster.local"
+export PROMETHEUS_PORT="9090"
 kubectl --context=$MDM_CONTEXT create namespace $MDM_NAMESPACE
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add neo4j https://helm.neo4j.com/neo4j
