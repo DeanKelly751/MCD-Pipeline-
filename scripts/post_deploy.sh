@@ -3,6 +3,17 @@
 ## components and to perform any other post-deployment tasks.
 echo "Executing post deployment tasks..."
 ##TODO(user): Add your post deployment tasks here
+
+echo "........................................Prometheus Installing..............................................."
+cd kube-prometheus
+kubectl apply --server-side -f manifests/setup
+kubectl wait \
+	--for condition=Established \
+	--all CustomResourceDefinition \
+	--namespace=monitoring
+kubectl apply -f manifests/
+cd ..
+echo "........................................Prometheus Installed..............................................."
 echo "........................................Installing Primary CNI: Flannel..............................................."
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml 
 sleep 20
@@ -31,7 +42,7 @@ echo ".....................Installing MDM....................................."
 cd mdm-api
 export MDM_NAMESPACE=he-codeco-mdm
 export MDM_CONTEXT=kind-kind
-export PROMETHEUS_URL="http://prometheus-service.monitoring.svc.cluster.local"
+export PROMETHEUS_URL="http://prometheus-k8s.monitoring.svc.cluster.local"
 export PROMETHEUS_PORT="9090"
 kubectl --context=$MDM_CONTEXT create namespace $MDM_NAMESPACE
 helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -70,17 +81,6 @@ echo "........................................Finished installing MDM...........
 # sudo kubectl get networkpaths -A
 # sudo kubectl --namespace mdm port-forward $POD_NAME 9092:$CONTAINER_PORT
 echo ".....................Installing PDLC....................................."
-
-# Prometheus installation
-
-cd kube-prometheus
-kubectl apply --server-side -f manifests/setup
-kubectl wait \
-	--for condition=Established \
-	--all CustomResourceDefinition \
-	--namespace=monitoring
-kubectl apply -f manifests/
-cd ..
 
 #Data generator
 # cd synthetic-data-generator
