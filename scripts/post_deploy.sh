@@ -5,6 +5,7 @@ echo "Executing post deployment tasks..."
 ##TODO(user): Add your post deployment tasks here
 
 echo "........................................Prometheus Installing..............................................."
+cd ..
 cd kube-prometheus
 kubectl apply --server-side -f manifests/setup
 kubectl wait \
@@ -17,7 +18,6 @@ echo "........................................Prometheus Installed..............
 echo "........................................Installing Primary CNI: Flannel..............................................."
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml 
 sleep 20
-cd ..
 echo "........................................Installing NetMA..............................................."
 cd secure-connectivity
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.3/cert-manager.yaml
