@@ -8250,25 +8250,41 @@ spec:
                   CodecoApp
                 properties:
                   avgAppCpu:
+                    description: Aggregation of the CPU usage of all the services
+                      in the app (in vCPU units)
                     type: string
                   avgAppMemory:
+                    description: Aggregation of the memory usage of all the services
+                      in the app
                     type: string
                   numPods:
+                    description: The number of the pods instantiated for the application
                     type: integer
                   serviceMetrics:
+                    description: ServiceStatusMetrics defines the observed metrics
+                      of CODECO micro services
                     items:
+                      description: ServiceStatusMetrics defines the observed metrics
+                        of CODECO micro services
                       properties:
                         avgServiceCpu:
+                          description: Average CPU usage per micro service pod
                           type: string
                         avgServiceMemory:
+                          description: Average memory usage per micro service pod
                           type: string
                         clusterName:
+                          description: Cluster name (unique, assigned by K8s)
                           type: string
                         nodeName:
+                          description: Node name (unique, assigned by K8s)
                           type: string
                         podName:
+                          description: Pod name (unique, assigned by K8s)
                           type: string
                         serviceName:
+                          description: Service name, user assigned in the app model,
+                            non unique (can have multiple instances of the same service)
                           type: string
                       type: object
                     type: array
@@ -8283,14 +8299,22 @@ spec:
                   description: Observed and Aggregated metrics from Codeco App Nodes
                   properties:
                     avgNodeCpu:
+                      description: Avg CPU consumption of the application on this
+                        node (aggregation of service CPU over the node)
                       type: string
                     avgNodeEnergy:
+                      description: Avg energy consumption of the node
                       type: string
                     avgNodeFailure:
+                      description: Node failures averaged over a specific time window
+                        (Exponential moving average)
                       type: string
                     avgNodeMemory:
+                      description: Avg memory consumption of the application on this
+                        node (aggregation of service memory over the node)
                       type: string
                     nodeName:
+                      description: Node name (unique, assigned by K8s)
                       type: string
                   type: object
                 type: array

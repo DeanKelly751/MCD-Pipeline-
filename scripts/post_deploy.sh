@@ -3,20 +3,47 @@
 ## components and to perform any other post-deployment tasks.
 echo "Executing post deployment tasks..."
 ##TODO(user): Add your post deployment tasks here
+
+echo "........................................Prometheus Installing..............................................."
 cd ..
+cd kube-prometheus
+kubectl apply --server-side -f manifests/setup
+kubectl wait \
+	--for condition=Established \
+	--all CustomResourceDefinition \
+	--namespace=monitoring
+kubectl apply -f manifests/
+cd ..
+echo "........................................Prometheus Installed..............................................."
+echo "........................................Installing Primary CNI: Flannel..............................................."
+kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml 
+sleep 20
 echo "........................................Installing NetMA..............................................."
 cd secure-connectivity
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.3/cert-manager.yaml
+kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick.yml
+
 kubectl taint nodes kind-control-plane node-role.kubernetes.io/control-plane:NoSchedule-
 # kubectl taint nodes --all node-role.kubernetes.io/control-plane- node-role.kubernetes.io/master-
-kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick.yml
-cat ../multus-cni/deployments/multus-daemonset-thick.yml | kubectl apply -f -
-kubectl create -f ./deployments/l2sm-deployment.yaml
+kubectl create namespace he-codeco-netma
+kubectl get nodes
+
+sleep 60
+kubectl create -f ./deployments/l2sm-deployment.yaml -n=he-codeco-netma
 cd ..
+kubectl apply -f network-exposure/kuberfiles/01_netma-topology-crd.yaml
+chmod 755 network-exposure/ejecutar_mon.sh
+## This should be executed with sudo privileges
+./network-exposure/ejecutar_mon.sh
+## The next command is to check that the CR has been pushed correctly 
+## kubectl get netma-topology netma-sample -o yaml -n he-codeco-netma
 echo "........................................Finished installing NetMA..............................................."
 echo ".....................Installing MDM....................................."
 cd mdm-api
 export MDM_NAMESPACE=he-codeco-mdm
 export MDM_CONTEXT=kind-kind
+export PROMETHEUS_URL="http://prometheus-k8s.monitoring.svc.cluster.local"
+export PROMETHEUS_PORT="9090"
 kubectl --context=$MDM_CONTEXT create namespace $MDM_NAMESPACE
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add neo4j https://helm.neo4j.com/neo4j
@@ -55,40 +82,27 @@ echo "........................................Finished installing MDM...........
 # sudo kubectl --namespace mdm port-forward $POD_NAME 9092:$CONTAINER_PORT
 echo ".....................Installing PDLC....................................."
 
-# Prometheus installation
-
-cd kube-prometheus
-kubectl apply --server-side -f manifests/setup
-kubectl wait \
-	--for condition=Established \
-	--all CustomResourceDefinition \
-	--namespace=monitoring
-kubectl apply -f manifests/
-cd ..
-
 #Data generator
-cd synthetic-data-generator
-
-git checkout main-hotfixed
-
-kubectl apply --server-side -f manifests/setup
-kubectl wait \
-	--for condition=Established \
-	--all CustomResourceDefinition \
-	--namespace=monitoring
-kubectl apply -f manifests/
-
-chmod -R 777 apply-controllers.sh
-./apply-controllers.sh
-
-cd ..
-
+# cd synthetic-data-generator
+# # git checkout main-hotfixed   # remove
+# sed -i 's/node1,node2,node3/c1,c2,kind-control-plane/' netma-controller/netma-controller-deployment.yaml
+# sed -i 's/node1,node2,node3/c1,c2,kind-control-plane/' acm-controller/acm-controller-deployment.yaml
+# chmod -R 777 apply-controllers.sh
+# ./apply-controllers.sh
+# # dummy CRs
+# chmod -R 777 ./apply-dummy.sh
+# ./apply-dummy.sh
+# cd ..
 #PDLC
 cd pdlc-integration
-
+sed -i 's/sonem-worker/c1/' data_preprocessing/pdlc-dp-deployment.yaml
+sed -i 's/sonem-worker/c1/' context_awareness/pdlc-ca-deployment.yaml
+sed -i 's/sonem-worker/c1/' gnn_model/gnn_controller.yaml
+sed -i 's/sonem-worker/c1/' gnn_model/gnn_inference.yaml
+sed -i 's/sonem-worker/c1/' rl_model/rl-model-deployment.yaml
+sed -i 's/sonem/kind/' data_preprocessing/pdlc-dp-deployment.yaml
 chmod -R 777 apply_yamls.sh
 ./apply_yamls.sh
-
 cd ..
 echo "........................................Finished installing PDLC..............................................."
 echo ".....................Installing SWM....................................."
