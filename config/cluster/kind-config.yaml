@@ -38,3 +38,7 @@ nodes:
   kubeadmConfigPatches:
   - |
     kind: JoinConfiguration
+    nodeRegistration:
+      name: "C2"
+      kubeletExtraArgs:
+        node-labels: "mac-address=da69.022b.c8fc,siemens.com.qosscheduler.c2=true"
