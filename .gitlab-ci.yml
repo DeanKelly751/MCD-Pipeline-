@@ -1,15 +1,24 @@
 stages:
   - build
+  - build-cluster
+  - test-build
+  - test-logs
+  - clean-up
   - push
-  - test
 
 variables: 
   IMG_NAME: "quay.io/dekelly/codecoapp-acm"
   IMG_TAG: "${CI_COMMIT_SHORT_SHA}"
+  IMG: "$IMG_NAME:$IMG_TAG"
   DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""  # Disable Docker TLS
+
+  # KUSTOMIZE_VERSION: 5.0.3 # Define the desired kustomize version
+  # KUBECONFIG: ~/.kube/config
 
 services:
-  - docker:dind
+    - name: docker:dind
+      command: ["--privileged"] 
 
 before_script:
   - dnf install -y wget make git dnf-plugins-core
@@ -21,61 +30,143 @@ before_script:
   - go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
   - export PATH=$PATH:$(go env GOPATH)/bin
   - echo "Logging into Quay..."
-  - docker login quay.io -u $QUAY_USER -p $QUAY_PASS
+  - echo "$QUAY_PASS" | docker login quay.io -u "$QUAY_USER" --password-stdin
+  - echo "Logging into Docker"
+  - docker login -u $DOCK_USER -p $DOCK_PASS
+
+  # - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+  # - mv ./kustomize /usr/local/bin/kustomize  # Move it to a location in PATH
+  # - chmod +x ./scripts/pre_deploy.sh ./scripts/post_deploy.sh
+
 
 build:
   stage: build
+  tags:
+    - acm2-runner
   image: fedora:latest
+  services:
+    - name: docker:dind
+      command: ["--privileged"]  # Enable privileged mode
   script:
-    - export PATH=$PATH:/usr/local/go/bin
-    - echo "Building image..."
-    - make docker-build IMG="$IMG_NAME:$IMG_TAG"
+    - docker info  # Check Docker connection
+    - controller-gen object paths=./api/...  # Generate controller object files
+    - docker build -t ${IMG} .  # Build Docker image
     - echo "Build complete."
 
-push:
-  stage: push
+build-cluster:
+  stage: build-cluster
+  tags:
+    - acm2-runner
   image: fedora:latest
+  services:
+    - name: docker:dind
+      command: ["--privileged"]  # Enable privileged mode
   script:
     - export PATH=$PATH:/usr/local/go/bin
-    - echo "Pushing image to Quay.io..."
-    - make docker-push IMG="$IMG_NAME:$IMG_TAG"
-    - ls
-  only:
-    - main
+    - echo "Installing Kind and kubectl..."
+    - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
+    - chmod +x ./kind
+    - mv ./kind /usr/local/bin/kind
+    - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
+    - chmod +x ./kubectl
+    - mv ./kubectl /usr/local/bin/kubectl
+    - echo "Creating Kind cluster..."
+    - kind create cluster --config ./config/cluster/kind-config.yaml
+    - echo "Test cluster created."
+
+test-build:
+  stage: test-build
+  tags:
+    - acm2-runner
+  image: fedora:latest
+  services:
+    - name: docker:dind
+      command: ["--privileged"]  # Enable privileged mode
+  script:
+    - echo "Running tests..."
+    - ./scripts/pre_deploy.sh  # Run pre-deployment script
+    # - cd config/manager && kustomize edit set image controller=$IMG  # Set the controller image in the Kustomize file
+    # - kustomize build config/default | kubectl apply -f -  # Build and deploy using kubectl
+    # - ./scripts/post_deploy.sh 
+
+    # - kubectl create -f codecosampleapp
+    # - sleep 60
+
+    # - kubectl get po - - if status = FAILED, get name of pod status FAILED, kubectl describe pod POD_NAME, loop through all status fails
+
+test-logs:
+  stage: test-logs
+  tags:
+    - acm2-runner
+  image: fedora:latest
+  services:
+    - name: docker:dind
+      command: ["--privileged"]
+  script:
+    - sleep 30
+    - kubectl get po -A
+
+clean-up: 
+    stage: clean-up
+    tags:
+      - acm2-runner
+    image: fedora:latest
+    services:
+      - name: docker:dind
+        command: ["--privileged"]  # Enable privileged mode
+    script:
+      - echo "Deleting cluster ..."
+      - kind delete cluster
+
+    
+
+# Further stages like test and push can be uncommented and configured as needed.
 
 # test:
 #   stage: test
-#   image: fedora:latest
-#   script:
-#     - export PATH=$PATH:/usr/local/go/bin
-#     - echo "Installing Kind and kubectl..."
-#     - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
-#     - chmod +x ./kind
-#     - mv ./kind /usr/local/bin/kind
-#     - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
+#   tags:
+#     - acm-runner
+#   image: golang:1.21   # Or use an image with kubectl/kind pre-installed
+#   services:
+#     - docker:dind
+#   before_script:
+#     # Install kubectl
+#     - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 #     - chmod +x ./kubectl
 #     - mv ./kubectl /usr/local/bin/kubectl
-#     - echo "Creating Kind cluster..."
-#     - kind create cluster --config ./acm/config/cluster/kind-config.yaml
+#     # Install Kind
+#     - curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
+#     - chmod +x ./kind
+#     - mv ./kind /usr/local/bin/kind
+#     # Create a Kubernetes cluster with Kind
+#     - kind create cluster --config $KIND_CONFIG
+#     # Set kubeconfig for kubectl
+#     - export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
+#   script:
+#     # Build the operator's container image (or use pre-built)
 #     - echo "Deploying operator..."
-#     - kubectl apply -f codeco_v1alpha_codecoapp_ver3.yaml
-#     - echo "Waiting for pods to be running..."
-#     - timeout=180
-#     - interval=10
-#     - end=$((SECONDS+timeout))
-#     - while [ $SECONDS -lt $end ]; do
-#         kubectl get po -A | grep -q 'Running' && break;
-#         sleep $interval;
-#       done
-#     - echo "Checking pod statuses..."
-#     - failed_pods=$(kubectl get po -A --field-selector=status.phase=Failed | wc -l)
-#     - if [ "$failed_pods" -gt 1 ]; then
-#         echo "More than 1 pod has failed. Failing the test stage.";
-#         kubectl get po -A --field-selector=status.phase=Failed -o custom-columns=NAME:.metadata.name,NAMESPACE:.metadata.namespace | tail -n +2 | while read -r pod namespace; do
-#           echo "Logs for pod $pod in namespace $namespace:";
-#           kubectl logs -n $namespace $pod;
-#         done;
-#         exit 1;
-#       fi
-  dependencies:
-    - push
+#     - make docker-build IMG="pipeline-build:v0.0.1"
+#     # Wait for the operator deployment to be ready
+#     - make deploy IMG="pipeline-build:v0.0.1"
+#     # Check if the operator pod is running successfully
+#     - sleep 120
+#     - kubectl get pods
+
+push:
+   stage: push
+   tags:
+     - acm2-runner
+   image: fedora:latest
+   services:
+     - name: docker:dind
+       command: ["--privileged"]
+   variables:
+     DOCKER_TLS_CERTDIR: ""
+   script:
+     - export PATH=$PATH:/usr/local/go/bin
+     - echo "Pushing image named $IMG to Quay.io..."
+     - docker info  # Check if the Docker daemon is running
+     - docker push "${IMG}"
+     - echo "Push complete"
+   only:
+     - rht-integration
