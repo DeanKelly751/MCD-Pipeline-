@@ -1,5 +1,33 @@
 #!/bin/bash
-
+# Unset variables to prevent overlapping issues
+unset jsonConfigPath
+unset podInfo
+unset nodeIPs
+unset entry
+unset nodeName
+unset nodeIP
+unset nodesArray
+unset linksArray
+unset linkPairs
+unset srcNode
+unset dstNode
+unset key1
+unset key2
+unset configFilePath
+unset pods
+unset podName
+unset pod
+unset output_file
+unset nodes
+unset ip_counter
+unset helm_chart_path
+unset non_deployments_file
+unset deployment_file
+unset deployment_count
+unset doc
+unset in_deployment
+unset file_name
+cd ../secure-connectivity
 # Filename for the JSON config
 jsonConfigPath="./configs/switchConfig.json"
 
@@ -40,10 +68,14 @@ for srcNode in "${!nodeIPs[@]}"
 do
   for dstNode in "${!nodeIPs[@]}"
   do
-    if [[ "$srcNode" != "$dstNode" && -z "${linkPairs["$srcNode|$dstNode"]}" && -z "${linkPairs["$dstNode|$srcNode"]}" ]]; then
+    key1="$srcNode|$dstNode"
+    key2="$dstNode|$srcNode"
+
+    if [[ "$srcNode" != "$dstNode" && -z "${linkPairs[$key1]}" && -z "${linkPairs[$key2]}" ]]; then
       linksArray+=("{\"endpointA\": \"$srcNode\", \"endpointB\": \"$dstNode\"}")
-      linkPairs["$srcNode|$dstNode"]=1
+      linkPairs["$key1"]=1
     fi
+
   done
 done
 
@@ -59,7 +91,6 @@ echo "{
 
 echo "Network topology configuration has been generated at $jsonConfigPath."
 
-#!/bin/bash
 
 # Unset variables to prevent overlapping issues
 unset configFilePath
@@ -105,7 +136,6 @@ done
 
 echo "Configuration deployment completed."
 
-#!/bin/bash
 
 # Define the output file path
 output_file="./LPM/chart/values.yaml"
@@ -142,7 +172,6 @@ cat >> "$output_file" << EOF
   namespace: he-codeco-netma
 EOF
 
-#!/bin/bash
 
 # Define file paths
 helm_chart_path="./LPM/chart/"
