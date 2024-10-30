@@ -73,6 +73,7 @@ const (
 	ServiceClassAssured    = "ASSURED"
 )
 
+// CodecoAppMSSpec defines the desired state of CodecoApp micro service
 type CodecoAppMSSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
