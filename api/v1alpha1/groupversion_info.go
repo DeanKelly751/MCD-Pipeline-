@@ -17,6 +17,10 @@
 // Contributors:
 //     [name] - [contribution]
 
+
+// Package v1alpha1 contains API Schema definitions for the codeco v1alpha1 API group
+// +kubebuilder:object:generate=true
+// +groupName=codeco.he-codeco.eu
 package v1alpha1
 
 import (
