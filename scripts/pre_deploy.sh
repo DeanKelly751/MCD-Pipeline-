@@ -1,22 +1,3 @@
-# Copyright (c) 2024 Red Hat, Inc
-# 
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-# 
-#     http://www.apache.org/licenses/LICENSE-2.0
-# 
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# 
-# SPDX-License-Identifier: Apache-2.0
-# 
-# Contributors:
-#     [name] - [contribution]
-
 #!/bin/bash
 
 ## This script is executed before the CODECO operator deployment starts. It is used to install dependencies or
@@ -46,6 +27,7 @@ clone_if_not_exists "https://gitlab.eclipse.org/eclipse-research-labs/codeco-pro
 clone_if_not_exists "https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/privacy-preserving-decentralised-learning-and-context-awareness-pdlc/pdlc-integration.git" "pdlc-integration"
 clone_if_not_exists "https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/network-management-and-adaptation-netma/secure-connectivity.git" "secure-connectivity"
 clone_if_not_exists "https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/network-management-and-adaptation-netma/network-exposure.git" "network-exposure"
+clone_if_not_exists "https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/network-management-and-adaptation-netma/network-state-management.git" "network-state-management"
 
 clone_if_not_exists "https://github.com/k8snetworkplumbingwg/multus-cni.git" "multus-cni"
 # clone_if_not_exists "https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/experimentation-framework-and-demonstrations/data-generators-and-datasets/synthetic-data-generator.git" "synthetic-data-generator"

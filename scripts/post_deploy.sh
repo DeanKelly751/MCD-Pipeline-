@@ -35,25 +35,57 @@ kubectl apply -f manifests/
 cd ..
 echo "........................................Prometheus Installed..............................................."
 echo "........................................Installing Primary CNI: Flannel..............................................."
+
+# clone and build plugins that kind needs in order to use our custom cni
+git clone https://github.com/containernetworking/plugins.git 
+sed -i "s/go 1.23/go 1.23.0/g" ./plugins/go.mod # to avoid error after recent update
+cd plugins && ./build_linux.sh
+cd ..
+
+# copy necessary plugins into all nodes
+docker cp ./plugins/bin/. kind-control-plane:/opt/cni/bin
+docker cp ./plugins/bin/. kind-worker:/opt/cni/bin
+docker cp ./plugins/bin/. kind-worker2:/opt/cni/bin
+
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml 
 sleep 20
 echo "........................................Installing NetMA..............................................."
 cd secure-connectivity
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.3/cert-manager.yaml
 kubectl apply -f https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick.yml
+# Just in case the previous Prometheus instalation does not include the coreos monitoring CRDs.
+# helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+# helm repo update
+# helm install prometheus-operator prometheus-community/kube-prometheus-stack -n he-codeco-netma
 
 kubectl taint nodes kind-control-plane node-role.kubernetes.io/control-plane:NoSchedule-
 # kubectl taint nodes --all node-role.kubernetes.io/control-plane- node-role.kubernetes.io/master-
-kubectl create namespace he-codeco-netma
-kubectl get nodes
+# kubectl create namespace he-codeco-netma
+# kubectl get nodes
 
-sleep 60
+kubectl wait --for=condition=Ready pod --all -A --timeout=20m # wait until everything is running before we continue
 kubectl create -f ./deployments/l2sm-deployment.yaml -n=he-codeco-netma
+
+# Fix by Alejandro de Cock Buning for proper l2sm function
+kubectl wait --for=condition=Ready pod --all -A --timeout=20m
+chmod +x /acm/scripts/after_netma_deployment.sh
+/acm/scripts/after_netma_deployment.sh
+#
 cd ..
-kubectl apply -f network-exposure/kuberfiles/01_netma-topology-crd.yaml
-chmod 755 network-exposure/ejecutar_mon.sh
-## This should be executed with sudo privileges
-./network-exposure/ejecutar_mon.sh
+
+
+cd network-exposure/
+kubectl apply -f kuberfiles/00_namespace.yaml
+kubectl apply -f kuberfiles/01_netma-topology-crd.yaml
+cd ..
+chmod 755 network-exposure/npp-script.sh
+sed -i -e 's/\r$//' ./network-exposure/npp-script.sh
+./network-exposure/npp-script.sh
+kubectl apply -f network-state-management/netma-nsm-npp/daemonset.yaml
+kubectl apply -f network-exposure/kuberfiles/02_nemesys-deployment.yaml
+
+kubectl wait --for=condition=Ready pod --all -n he-codeco-netma --timeout=20m
+
 ## The next command is to check that the CR has been pushed correctly 
 ## kubectl get netma-topology netma-sample -o yaml -n he-codeco-netma
 echo "........................................Finished installing NetMA..............................................."
@@ -113,13 +145,16 @@ echo ".....................Installing PDLC....................................."
 # ./apply-dummy.sh
 # cd ..
 #PDLC
+
 cd pdlc-integration
 sed -i 's/sonem-worker/c1/' data_preprocessing/pdlc-dp-deployment.yaml
+sed -i 's/test-namespace/he-codeco-acm/' data_preprocessing/pdlc-dp-deployment.yaml
 sed -i 's/sonem-worker/c1/' context_awareness/pdlc-ca-deployment.yaml
 sed -i 's/sonem-worker/c1/' gnn_model/gnn_controller.yaml
 sed -i 's/sonem-worker/c1/' gnn_model/gnn_inference.yaml
 sed -i 's/sonem-worker/c1/' rl_model/rl-model-deployment.yaml
 sed -i 's/sonem/kind/' data_preprocessing/pdlc-dp-deployment.yaml
+sed -i 's/"http://mdm-controller-service.he-codeco-mdm.svc.cluster.local:5080"/"http://mdm-api.he-codeco-mdm.svc.cluster.local:8090"/' data_preprocessing/pdlc-dp-deployment.yaml
 chmod -R 777 apply_yamls.sh
 ./apply_yamls.sh
 cd ..
