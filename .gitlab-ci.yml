@@ -41,8 +41,6 @@ before_script:
 
 build:
   stage: build
-  tags:
-    - icom-runner
   image: fedora:latest
   services:
     - name: docker:dind
@@ -55,8 +53,6 @@ build:
 
 build-cluster:
   stage: build-cluster
-  tags:
-    - icom-runner
   image: fedora:latest
   services:
     - name: docker:dind
@@ -76,8 +72,6 @@ build-cluster:
 
 test-build:
   stage: test-build
-  tags:
-    - icom-runner
   image: fedora:latest
   services:
     - name: docker:dind
@@ -96,8 +90,6 @@ test-build:
 
 test-logs:
   stage: test-logs
-  tags:
-    - icom-runner
   image: fedora:latest
   services:
     - name: docker:dind
@@ -108,8 +100,6 @@ test-logs:
 
 clean-up: 
     stage: clean-up
-    tags:
-      - icom-runner
     image: fedora:latest
     services:
       - name: docker:dind
@@ -154,8 +144,6 @@ clean-up:
 
 push:
    stage: push
-   tags:
-     - icom-runner
    image: fedora:latest
    services:
      - name: docker:dind
