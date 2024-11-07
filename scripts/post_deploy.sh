@@ -81,9 +81,8 @@ cd ..
 
 cd network-state-management/netma-nsm-npp/k8s-netperf
 kubectl apply -f k8s-netperf.yaml
-cd ..
+cd ../../..
 
-kubectl apply -f network-state-management/netma-nsm-npp/daemonset.yaml
 kubectl apply -f network-exposure/kuberfiles/02_nemesys-deployment.yaml
 
 kubectl wait --for=condition=Ready pod --all -n he-codeco-netma --timeout=20m
