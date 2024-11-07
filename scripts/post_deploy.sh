@@ -79,7 +79,7 @@ kubectl apply -f kuberfiles/00_namespace.yaml
 kubectl apply -f kuberfiles/01_netma-topology-crd.yaml
 cd ..
 
-cd network-state-management/netma-nsm-npp/k8s-netperf
+cd network-state-management/netma-nsm-mon/k8s-netperf
 kubectl apply -f k8s-netperf.yaml
 cd ../../..
 
