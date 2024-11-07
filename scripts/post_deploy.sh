@@ -65,13 +65,13 @@ kubectl taint nodes kind-control-plane node-role.kubernetes.io/control-plane:NoS
 
 kubectl wait --for=condition=Ready pod --all -A --timeout=20m # wait until everything is running before we continue
 kubectl create -f ./deployments/l2sm-deployment.yaml -n=he-codeco-netma
+cd ..
 
 # Fix by Alejandro de Cock Buning for proper l2sm function
 kubectl wait --for=condition=Ready pod --all -A --timeout=20m
-chmod +x /acm/scripts/after_netma_deployment.sh
-/acm/scripts/after_netma_deployment.sh
-#
-cd ..
+chmod +x acm/scripts/after_netma_deployment.sh
+./acm/scripts/after_netma_deployment.sh
+
 
 
 cd network-exposure/
