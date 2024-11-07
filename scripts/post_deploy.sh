@@ -92,6 +92,7 @@ kubectl wait --for=condition=Ready pod --all -n he-codeco-netma --timeout=20m
 echo "........................................Finished installing NetMA..............................................."
 echo ".....................Installing MDM....................................."
 cd mdm-api
+export STORAGECLASSNAME=standard
 export MDM_NAMESPACE=he-codeco-mdm
 export MDM_CONTEXT=kind-kind
 export PROMETHEUS_URL="http://prometheus-k8s.monitoring.svc.cluster.local"
@@ -99,8 +100,8 @@ export PROMETHEUS_PORT="9090"
 kubectl --context=$MDM_CONTEXT create namespace $MDM_NAMESPACE
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add neo4j https://helm.neo4j.com/neo4j
-sed -i "s/<storageclassName>/standard/g" "./deployment/zookeeper-helm.yaml"
-sed -i "s/<storageclassName>/standard/g" "./deployment/neo4j-helm.yaml"
+sed -i "s/<storageclassName>/$STORAGECLASSNAME/g" "./deployment/zookeeper-helm.yaml"
+sed -i "s/<storageclassName>/$STORAGECLASSNAME/g" "./deployment/neo4j-helm.yaml"
 helm --kube-context=$MDM_CONTEXT install mdm-zookeeper -n $MDM_NAMESPACE  bitnami/zookeeper  -f ./deployment/zookeeper-helm.yaml
 helm --kube-context=$MDM_CONTEXT install mdm-kafka -n $MDM_NAMESPACE bitnami/kafka --version 21.1.1 -f ./deployment/kafka-helm.yaml
 helm --kube-context=$MDM_CONTEXT install mdm-neo4j -n $MDM_NAMESPACE neo4j/neo4j-standalone -f ./deployment/neo4j-helm.yaml
