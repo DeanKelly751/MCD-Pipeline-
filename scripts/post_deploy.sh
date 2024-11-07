@@ -78,9 +78,11 @@ cd network-exposure/
 kubectl apply -f kuberfiles/00_namespace.yaml
 kubectl apply -f kuberfiles/01_netma-topology-crd.yaml
 cd ..
-chmod 755 network-exposure/npp-script.sh
-sed -i -e 's/\r$//' ./network-exposure/npp-script.sh
-./network-exposure/npp-script.sh
+
+cd network-state-management/netma-nsm-npp/k8s-netperf
+kubectl apply -f k8s-netperf.yaml
+cd ..
+
 kubectl apply -f network-state-management/netma-nsm-npp/daemonset.yaml
 kubectl apply -f network-exposure/kuberfiles/02_nemesys-deployment.yaml
 
