@@ -158,3 +158,82 @@ push:
      - echo "Push complete"
    only:
      - rht-integration
+
+integration_build:
+  stage: integration_build
+  image: docker:26.1.2
+  services:
+    - docker:26.1.2-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/integration
+    IMAGE_TAG: 2.0.1
+  only:
+    - integration
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - echo "Building docker image with CODECO requirements"
+    - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/gitlab-profile.git
+    - docker build -t $CI_REGISTRY_IMAGE/integration:2.0.1 -f gitlab-profile/Dockerfile-integration .
+    - docker push $CI_REGISTRY_IMAGE/integration:2.0.1 # pushing to intermediate private repository
+
+integration:
+  stage: integration
+  image: docker:26.1.2
+  services:
+    - docker:26.1.2-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/integration
+    IMAGE_TAG: 2.0.1
+  only:
+    - integration
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker rm integ --force
+    - docker rmi $CI_REGISTRY_IMAGE/integration:2.0.1
+  script:
+    - |
+      docker run -t -v /var/run/docker.sock:/var/run/docker.sock -e DOCKERHUB_USER=$DOCKERHUB_USER -e DOCKERHUB_PASS=$DOCKERHUB_PASS --network host --name integ --rm $CI_REGISTRY_IMAGE/integration:2.0.1 bash -c -i "
+    
+      git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git 
+
+      kind delete cluster
+      kind create cluster --config ./acm/config/cluster/kind-config.yaml
+
+      cd acm
+      echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
+      make docker-build docker-push IMG=$DOCKERHUB_USER/codecoapp-operator:2.0.0
+      make deploy IMG=$DOCKERHUB_USER/codecoapp-operator:2.0.0
+
+      kubectl apply -f ./config/samples/codeco_v1alpha1_codecoapp_ver3.yaml
+
+      # Wait for 20 minutes, if Codeco Application Pods are not running, then the test is Failed!
+      # Note that the kubectl wait command will continue the script execution earlier than the timeout if the condition is satisfied
+      if kubectl wait --for=condition=Ready pod --all -n he-codeco-acm --timeout=20m; then 
+          echo "Application pods are in Running state"
+          kubectl get pods -A; 
+          exit 0; # success
+      else
+          kubectl get pods -A; 
+          exit 1; # error
+      fi
+
+      # Verify that all CODECO pods are in the Running state, or else, fail the test
+      if kubectl wait --for=condition=Ready pod --all --all-namespaces --timeout=20m; then 
+          echo "Application pods are in Running state"
+          kubectl get pods -A; 
+          exit 0; # success
+      else
+          kubectl get pods -A; 
+          exit 1; # error
+      fi
+
+      # [In-progress] Other integration tests: Verify correct input and output for every codeco component
+
+      "
+
+
+
+
