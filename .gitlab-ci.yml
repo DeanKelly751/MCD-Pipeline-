@@ -5,6 +5,9 @@ stages:
   - test-logs
   - clean-up
   - push
+  - integration_build
+  - integration
+
 
 variables: 
   IMG_NAME: "quay.io/dekelly/codecoapp-acm"
@@ -169,7 +172,7 @@ integration_build:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/integration
     IMAGE_TAG: 2.0.1
   only:
-    - integration
+    - icom-integration-testing
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
@@ -188,7 +191,7 @@ integration:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/integration
     IMAGE_TAG: 2.0.1
   only:
-    - integration
+    - icom-integration-testing
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker rm integ --force
