@@ -53,119 +53,119 @@ build:
     - docker build -t ${IMG} .  # Build Docker image
     - echo "Build complete."
 
-build-cluster:
-  stage: build-cluster
-  tags:
-    - acm-runner
-  image: fedora:latest
-  services:
-    - name: docker:dind
-      command: ["--privileged"]  # Enable privileged mode
-  script:
-    - export PATH=$PATH:/usr/local/go/bin
-    - echo "Installing Kind and kubectl..."
-    - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
-    - chmod +x ./kind
-    - mv ./kind /usr/local/bin/kind
-    - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
-    - chmod +x ./kubectl
-    - mv ./kubectl /usr/local/bin/kubectl
-    - echo "Creating Kind cluster..."
-    - kind create cluster --config ./config/cluster/kind-config.yaml
-    - echo "Test cluster created."
+# build-cluster:
+#   stage: build-cluster
+#   tags:
+#     - acm-runner
+#   image: fedora:latest
+#   services:
+#     - name: docker:dind
+#       command: ["--privileged"]  # Enable privileged mode
+#   script:
+#     - export PATH=$PATH:/usr/local/go/bin
+#     - echo "Installing Kind and kubectl..."
+#     - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
+#     - chmod +x ./kind
+#     - mv ./kind /usr/local/bin/kind
+#     - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
+#     - chmod +x ./kubectl
+#     - mv ./kubectl /usr/local/bin/kubectl
+#     - echo "Creating Kind cluster..."
+#     - kind create cluster --config ./config/cluster/kind-config.yaml
+#     - echo "Test cluster created."
 
-test-build:
-  stage: test-build
-  tags:
-    - saas-linux-medium-amd64
-  image: fedora:latest
-  services:
-    - name: docker:dind
-      command: ["--privileged"]  # Enable privileged mode
-  script:
-    - echo "Cloning repos..."
-    - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git
-    - cd acm
-    - echo "Running tests..."
-    - make deploy IMG ="$IMG"  # Run pre-deployment script
-    # - cd config/manager && kustomize edit set image controller=$IMG  # Set the controller image in the Kustomize file
-    # - kustomize build config/default | kubectl apply -f -  # Build and deploy using kubectl
-    # - ./scripts/post_deploy.sh 
+# test-build:
+#   stage: test-build
+#   tags:
+#     - saas-linux-medium-amd64
+#   image: fedora:latest
+#   services:
+#     - name: docker:dind
+#       command: ["--privileged"]  # Enable privileged mode
+#   script:
+#     - echo "Cloning repos..."
+#     - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git
+#     - cd acm
+#     - echo "Running tests..."
+#     - make deploy IMG ="$IMG"  # Run pre-deployment script
+#     # - cd config/manager && kustomize edit set image controller=$IMG  # Set the controller image in the Kustomize file
+#     # - kustomize build config/default | kubectl apply -f -  # Build and deploy using kubectl
+#     # - ./scripts/post_deploy.sh 
 
-    # - kubectl create -f codecosampleapp
-    # - sleep 60
+#     # - kubectl create -f codecosampleapp
+#     # - sleep 60
 
-    # - kubectl get po - - if status = FAILED, get name of pod status FAILED, kubectl describe pod POD_NAME, loop through all status fails
+#     # - kubectl get po - - if status = FAILED, get name of pod status FAILED, kubectl describe pod POD_NAME, loop through all status fails
 
-test-logs:
-  stage: test-logs
-  tags:
-    - saas-linux-small-amd64
-  image: fedora:latest
-  services:
-    - name: docker:dind
-      command: ["--privileged"]
-  script:
-    - sleep 30
-    - kubectl get po -A
+# test-logs:
+#   stage: test-logs
+#   tags:
+#     - saas-linux-small-amd64
+#   image: fedora:latest
+#   services:
+#     - name: docker:dind
+#       command: ["--privileged"]
+#   script:
+#     - sleep 30
+#     - kubectl get po -A
 
-clean-up: 
-    stage: clean-up
-    image: fedora:latest
-    services:
-      - name: docker:dind
-        command: ["--privileged"]  # Enable privileged mode
-    script:
-      - echo "Deleting cluster ..."
-      - kind delete cluster
+# clean-up: 
+#     stage: clean-up
+#     image: fedora:latest
+#     services:
+#       - name: docker:dind
+#         command: ["--privileged"]  # Enable privileged mode
+#     script:
+#       - echo "Deleting cluster ..."
+#       - kind delete cluster
 
     
 
-# Further stages like test and push can be uncommented and configured as needed.
+# # Further stages like test and push can be uncommented and configured as needed.
 
-# test:
-#   stage: test
-#   tags:
-#     - acm-runner
-#   image: golang:1.21   # Or use an image with kubectl/kind pre-installed
-#   services:
-#     - docker:dind
-#   before_script:
-#     # Install kubectl
-#     - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-#     - chmod +x ./kubectl
-#     - mv ./kubectl /usr/local/bin/kubectl
-#     # Install Kind
-#     - curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
-#     - chmod +x ./kind
-#     - mv ./kind /usr/local/bin/kind
-#     # Create a Kubernetes cluster with Kind
-#     - kind create cluster --config $KIND_CONFIG
-#     # Set kubeconfig for kubectl
-#     - export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
-#   script:
-#     # Build the operator's container image (or use pre-built)
-#     - echo "Deploying operator..."
-#     - make docker-build IMG="pipeline-build:v0.0.1"
-#     # Wait for the operator deployment to be ready
-#     - make deploy IMG="pipeline-build:v0.0.1"
-#     # Check if the operator pod is running successfully
-#     - sleep 120
-#     - kubectl get pods
+# # test:
+# #   stage: test
+# #   tags:
+# #     - acm-runner
+# #   image: golang:1.21   # Or use an image with kubectl/kind pre-installed
+# #   services:
+# #     - docker:dind
+# #   before_script:
+# #     # Install kubectl
+# #     - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+# #     - chmod +x ./kubectl
+# #     - mv ./kubectl /usr/local/bin/kubectl
+# #     # Install Kind
+# #     - curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
+# #     - chmod +x ./kind
+# #     - mv ./kind /usr/local/bin/kind
+# #     # Create a Kubernetes cluster with Kind
+# #     - kind create cluster --config $KIND_CONFIG
+# #     # Set kubeconfig for kubectl
+# #     - export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
+# #   script:
+# #     # Build the operator's container image (or use pre-built)
+# #     - echo "Deploying operator..."
+# #     - make docker-build IMG="pipeline-build:v0.0.1"
+# #     # Wait for the operator deployment to be ready
+# #     - make deploy IMG="pipeline-build:v0.0.1"
+# #     # Check if the operator pod is running successfully
+# #     - sleep 120
+# #     - kubectl get pods
 
-push:
-   stage: push
-   image: fedora:latest
-   services:
-     - name: docker:dind
-       command: ["--privileged"]
-   variables:
-     DOCKER_TLS_CERTDIR: ""
-   script:
-     - export PATH=$PATH:/usr/local/go/bin
-     - echo "Pushing image named $IMG to Quay.io..."
-     - docker info  # Check if the Docker daemon is running
-     - docker push "${IMG}"
-     - echo "Push complete"
-   only:
-     - rht-integration
+# push:
+#    stage: push
+#    image: fedora:latest
+#    services:
+#      - name: docker:dind
+#        command: ["--privileged"]
+#    variables:
+#      DOCKER_TLS_CERTDIR: ""
+#    script:
+#      - export PATH=$PATH:/usr/local/go/bin
+#      - echo "Pushing image named $IMG to Quay.io..."
+#      - docker info  # Check if the Docker daemon is running
+#      - docker push "${IMG}"
+#      - echo "Push complete"
+#    only:
+#      - rht-integration
