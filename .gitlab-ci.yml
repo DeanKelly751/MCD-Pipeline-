@@ -56,7 +56,7 @@ build:
 build-cluster:
   stage: build-cluster
   tags:
-    - saas-linux-medium-amd64
+    - acm-runner
   image: fedora:latest
   services:
     - name: docker:dind
