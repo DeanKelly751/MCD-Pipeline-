@@ -41,8 +41,8 @@ before_script:
 
 build:
   stage: build
-  tags:
-     - acm-runner
+  # tags:
+  #    - acm-runner
   image: fedora:latest
   services:
     - name: docker:dind
