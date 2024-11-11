@@ -41,8 +41,8 @@ before_script:
 
 build:
   stage: build
-  # tags:
-  #   - saas-linux-medium-amd64
+  tags:
+     - acm2-runner
   image: fedora:latest
   services:
     - name: docker:dind
