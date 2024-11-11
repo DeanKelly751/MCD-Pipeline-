@@ -41,6 +41,8 @@ before_script:
 
 build:
   stage: build
+  tags:
+    - saas-linux-medium-amd64
   image: fedora:latest
   services:
     - name: docker:dind
@@ -53,6 +55,8 @@ build:
 
 build-cluster:
   stage: build-cluster
+  tags:
+    - saas-linux-medium-amd64
   image: fedora:latest
   services:
     - name: docker:dind
@@ -72,13 +76,18 @@ build-cluster:
 
 test-build:
   stage: test-build
+  tags:
+    - saas-linux-medium-amd64
   image: fedora:latest
   services:
     - name: docker:dind
       command: ["--privileged"]  # Enable privileged mode
   script:
+    - echo "Cloning repos..."
+    - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git
+    - cd acm
     - echo "Running tests..."
-    - ./scripts/pre_deploy.sh  # Run pre-deployment script
+    - make deploy IMG ="$IMG"  # Run pre-deployment script
     # - cd config/manager && kustomize edit set image controller=$IMG  # Set the controller image in the Kustomize file
     # - kustomize build config/default | kubectl apply -f -  # Build and deploy using kubectl
     # - ./scripts/post_deploy.sh 
@@ -90,6 +99,8 @@ test-build:
 
 test-logs:
   stage: test-logs
+  tags:
+    - saas-linux-small-amd64
   image: fedora:latest
   services:
     - name: docker:dind
