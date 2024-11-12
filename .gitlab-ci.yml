@@ -47,9 +47,9 @@ build:
   tags:
     - rhat-runner
   image: fedora:latest
-  services:
-    - name: docker:dind
-      command: ["--privileged"]  # Enable privileged mode
+  # services:
+  #   - name: docker:dind
+  #     command: ["--privileged"]  # Enable privileged mode
   script:
     - docker info  # Check Docker connection
     - controller-gen object paths=./api/...  # Generate controller object files
