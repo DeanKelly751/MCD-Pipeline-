@@ -59,7 +59,7 @@ before_script:
 build-cluster:
    stage: build-cluster
    tags:
-     - acm-runner
+     - rhat-runner
    image: fedora:latest
    services:
      - name: docker:dind
