@@ -73,6 +73,8 @@ build-cluster:
      - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
      - chmod +x ./kubectl
      - mv ./kubectl /usr/local/bin/kubectl
+     - echo "Removing previous clusters if present..."
+     - kind delete cluster --name kind
      - echo "Creating Kind cluster..."
      - kind create cluster --config ./config/cluster/kind-config.yaml
      - echo "Test cluster created."
