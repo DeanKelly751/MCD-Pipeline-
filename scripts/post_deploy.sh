@@ -47,6 +47,16 @@ docker cp ./plugins/bin/. kind-control-plane:/opt/cni/bin
 docker cp ./plugins/bin/. kind-worker:/opt/cni/bin
 docker cp ./plugins/bin/. kind-worker2:/opt/cni/bin
 
+# fix by Alex UC3M
+docker exec -it kind-control-plane modprobe br_netfilter
+docker exec -it kind-worker modprobe br_netfilter
+docker exec -it kind-control-plane modprobe br_netfilter
+
+docker exec -it kind-control-plane sysctl -p /etc/sysctl.conf
+docker exec -it kind-worker sysctl -p /etc/sysctl.conf
+docker exec -it kind-worker2 sysctl -p /etc/sysctl.conf
+
+
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml 
 sleep 20
 echo "........................................Installing NetMA..............................................."
