@@ -6,23 +6,20 @@ stages:
   - clean-up
   - push
 
-variables: 
+variables:
   IMG_NAME: "quay.io/dekelly/codecoapp-acm"
   IMG_TAG: "${CI_COMMIT_SHORT_SHA}"
   IMG: "$IMG_NAME:$IMG_TAG"
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""  # Disable Docker TLS
 
-  # KUSTOMIZE_VERSION: 5.0.3 # Define the desired kustomize version
-  # KUBECONFIG: ~/.kube/config
-
 services:
-    - name: docker:dind
-      command: ["--privileged"] 
+  # No longer need the docker:dind service
+  # Remove this section entirely, and bind the Docker socket directly in the runner config
 
 before_script:
-  - dnf install -y wget make git dnf-plugins-core
-  - dnf config-manager --add-repo=https://download.docker.com/linux/fedora/docker-ce.repo
+  - dnf install -y dnf-plugins-core
+  - dnf config-manager --add-repo=https://download.docker.com/linux/fedora/docker-ce.repo  # Add Docker repo
   - dnf install -y docker-ce-cli
   - wget https://go.dev/dl/go1.21.9.linux-amd64.tar.gz
   - tar -C /usr/local -xzf go1.21.9.linux-amd64.tar.gz
@@ -33,21 +30,14 @@ before_script:
   - echo "$QUAY_PASS" | docker login quay.io -u "$QUAY_USER" --password-stdin
   - echo "Logging into Docker"
   - docker login -u $DOCK_USER -p $DOCK_PASS
-  - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git
-
-  # - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
-  # - mv ./kustomize /usr/local/bin/kustomize  # Move it to a location in PATH
-  # - chmod +x ./scripts/pre_deploy.sh ./scripts/post_deploy.sh
-
 
 build:
   stage: build
   tags:
-    - rhat-runner
+    - rht-runner
   image: fedora:latest
   services:
-    - name: docker:dind
-      command: ["--privileged"]  # Enable privileged mode
+    # No services section needed anymore, Docker socket will be bound in the runner config
   script:
     - cd acm
     - docker info  # Check Docker connection
