@@ -34,7 +34,7 @@ before_script:
 build:
   stage: build
   tags:
-    - rht-runner
+    - rhat-runner
   image: fedora:latest
   services:
     # No services section needed anymore, Docker socket will be bound in the runner config
