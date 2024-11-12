@@ -6,38 +6,49 @@ stages:
   - clean-up
   - push
 
-variables:
+variables: 
   IMG_NAME: "quay.io/dekelly/codecoapp-acm"
   IMG_TAG: "${CI_COMMIT_SHORT_SHA}"
   IMG: "$IMG_NAME:$IMG_TAG"
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: ""  # Disable Docker TLS
 
+  # KUSTOMIZE_VERSION: 5.0.3 # Define the desired kustomize version
+  # KUBECONFIG: ~/.kube/config
+
 services:
-  # No longer need the docker:dind service
-  # Remove this section entirely, and bind the Docker socket directly in the runner config
+    - name: docker:dind
+      command: ["--privileged"]
 
 before_script:
-  - dnf install -y dnf-plugins-core
-  - dnf config-manager --add-repo=https://download.docker.com/linux/fedora/docker-ce.repo  # Add Docker repo
+  # Install required dependencies
+  - dnf install -y wget make git dnf-plugins-core
+  # Add Docker repository
+  - curl -fsSL https://download.docker.com/linux/fedora/docker-ce.repo -o /etc/yum.repos.d/docker-ce.repo
+  # Install Docker CLI
   - dnf install -y docker-ce-cli
+  # Install Go (required for controller-gen)
   - wget https://go.dev/dl/go1.21.9.linux-amd64.tar.gz
   - tar -C /usr/local -xzf go1.21.9.linux-amd64.tar.gz
   - export PATH=$PATH:/usr/local/go/bin
   - go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
   - export PATH=$PATH:$(go env GOPATH)/bin
+  # Log into Docker and Quay
   - echo "Logging into Quay..."
   - echo "$QUAY_PASS" | docker login quay.io -u "$QUAY_USER" --password-stdin
   - echo "Logging into Docker"
   - docker login -u $DOCK_USER -p $DOCK_PASS
+  # Clone the repository
+  - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git
 
 build:
   stage: build
   tags:
-    - rhat-runner
+    - rht-runner
   image: fedora:latest
   services:
-    # No services section needed anymore, Docker socket will be bound in the runner config
+    - name: docker:dind
+      command: ["--privileged"]  # Enable privileged mode
   script:
     - cd acm
     - docker info  # Check Docker connection
