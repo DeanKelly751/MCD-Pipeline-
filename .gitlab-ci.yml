@@ -51,8 +51,6 @@ build:
     - name: docker:dind
       command: ["--privileged"]  # Enable privileged mode
   script:
-    - sudo systemctl start docker
-    - sudo systemctl status docker
     - docker info  # Check Docker connection
     - controller-gen object paths=./api/...  # Generate controller object files
     - docker build -t ${IMG} .  # Build Docker image
