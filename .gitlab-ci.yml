@@ -42,40 +42,40 @@ before_script:
   # Clone the repository
   # - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git
 
-build:
-  stage: build
-  tags:
-    - rhat-runner
-  image: fedora:latest
-  # services:
-  #   - name: docker:dind
-  #     command: ["--privileged"]  # Enable privileged mode
-  script:
-    - docker info  # Check Docker connection
-    - controller-gen object paths=./api/...  # Generate controller object files
-    - docker build -t ${IMG} .  # Build Docker image
-    - echo "Build complete."
-
-# build-cluster:
-#   stage: build-cluster
+# build:
+#   stage: build
 #   tags:
-#     - acm-runner
+#     - rhat-runner
 #   image: fedora:latest
-#   services:
-#     - name: docker:dind
-#       command: ["--privileged"]  # Enable privileged mode
+#   # services:
+#   #   - name: docker:dind
+#   #     command: ["--privileged"]  # Enable privileged mode
 #   script:
-#     - export PATH=$PATH:/usr/local/go/bin
-#     - echo "Installing Kind and kubectl..."
-#     - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
-#     - chmod +x ./kind
-#     - mv ./kind /usr/local/bin/kind
-#     - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
-#     - chmod +x ./kubectl
-#     - mv ./kubectl /usr/local/bin/kubectl
-#     - echo "Creating Kind cluster..."
-#     - kind create cluster --config ./config/cluster/kind-config.yaml
-#     - echo "Test cluster created."
+#     - docker info  # Check Docker connection
+#     - controller-gen object paths=./api/...  # Generate controller object files
+#     - docker build -t ${IMG} .  # Build Docker image
+#     - echo "Build complete."
+
+build-cluster:
+   stage: build-cluster
+   tags:
+     - acm-runner
+   image: fedora:latest
+   services:
+     - name: docker:dind
+       command: ["--privileged"]  # Enable privileged mode
+   script:
+     - export PATH=$PATH:/usr/local/go/bin
+     - echo "Installing Kind and kubectl..."
+     - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
+     - chmod +x ./kind
+     - mv ./kind /usr/local/bin/kind
+     - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
+     - chmod +x ./kubectl
+     - mv ./kubectl /usr/local/bin/kubectl
+     - echo "Creating Kind cluster..."
+     - kind create cluster --config ./config/cluster/kind-config.yaml
+     - echo "Test cluster created."
 
 # test-build:
 #   stage: test-build
