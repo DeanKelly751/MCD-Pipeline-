@@ -56,51 +56,43 @@ before_script:
 #     - docker build -t ${IMG} .  # Build Docker image
 #     - echo "Build complete."
 
-build-cluster:
-   stage: build-cluster
+# build-cluster:
+#    stage: build-cluster
+#    tags:
+#      - rhat-runner
+#    image: fedora:latest
+#    services:
+#      - name: docker:dind
+#        command: ["--privileged"]  # Enable privileged mode
+#    script:
+#      - export PATH=$PATH:/usr/local/go/bin
+#      - echo "Installing Kind and kubectl..."
+#      - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
+#      - chmod +x ./kind
+#      - mv ./kind /usr/local/bin/kind
+#      - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
+#      - chmod +x ./kubectl
+#      - mv ./kubectl /usr/local/bin/kubectl
+#      - echo "Removing previous clusters if present..."
+#      - kind delete cluster --name kind
+#      - echo "Creating Kind cluster..."
+#      - kind create cluster --config ./config/cluster/kind-config.yaml
+#      - echo "Test cluster created."
+
+#  FROM HERE UP PASSED
+
+test-build:
+   stage: test-build
    tags:
-     - rhat-runner
+     - saas-linux-medium-amd64
    image: fedora:latest
    services:
      - name: docker:dind
        command: ["--privileged"]  # Enable privileged mode
    script:
-     - export PATH=$PATH:/usr/local/go/bin
-     - echo "Installing Kind and kubectl..."
-     - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
-     - chmod +x ./kind
-     - mv ./kind /usr/local/bin/kind
-     - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
-     - chmod +x ./kubectl
-     - mv ./kubectl /usr/local/bin/kubectl
-     - echo "Removing previous clusters if present..."
-     - kind delete cluster --name kind
-     - echo "Creating Kind cluster..."
-     - kind create cluster --config ./config/cluster/kind-config.yaml
-     - echo "Test cluster created."
-
-# test-build:
-#   stage: test-build
-#   tags:
-#     - saas-linux-medium-amd64
-#   image: fedora:latest
-#   services:
-#     - name: docker:dind
-#       command: ["--privileged"]  # Enable privileged mode
-#   script:
-#     - echo "Cloning repos..."
-#     - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git
-#     - cd acm
-#     - echo "Running tests..."
-#     - make deploy IMG ="$IMG"  # Run pre-deployment script
-#     # - cd config/manager && kustomize edit set image controller=$IMG  # Set the controller image in the Kustomize file
-#     # - kustomize build config/default | kubectl apply -f -  # Build and deploy using kubectl
-#     # - ./scripts/post_deploy.sh 
-
-#     # - kubectl create -f codecosampleapp
-#     # - sleep 60
-
-#     # - kubectl get po - - if status = FAILED, get name of pod status FAILED, kubectl describe pod POD_NAME, loop through all status fails
+     - echo "Running tests..."
+     - ls
+     
 
 # test-logs:
 #   stage: test-logs
