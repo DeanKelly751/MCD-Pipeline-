@@ -74,7 +74,6 @@ build-cluster:
      - chmod +x ./kubectl
      - mv ./kubectl /usr/local/bin/kubectl
      - echo "Creating Kind cluster..."
-     - kubectl get clusters
      - kind create cluster --config ./config/cluster/kind-config.yaml
      - echo "Test cluster created."
 
