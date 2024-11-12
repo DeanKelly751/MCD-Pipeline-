@@ -37,7 +37,7 @@ before_script:
   - echo "Logging into Quay..."
   - echo "$QUAY_PASS"
   - echo $QUAY_USER
-  - docker login quay.io -u "$QUAY_USER" --password-stdin
+  - docker login quay.io -u "$QUAY_USER" --password-stdin "$QUAY_PASS"
   - echo "Logging into Docker"
   # - docker login -u $DOCK_USER -p $DOCK_PASS
   # Clone the repository
