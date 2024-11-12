@@ -84,7 +84,7 @@ before_script:
 test-build:
    stage: test-build
    tags:
-     - saas-linux-medium-amd64
+     - rhat-runner
    image: fedora:latest
    services:
      - name: docker:dind
