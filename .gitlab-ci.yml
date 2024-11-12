@@ -91,7 +91,7 @@ test-build:
        command: ["--privileged"]  # Enable privileged mode
    script:
      - echo "Running tests..."
-     - ls
+     - make deploy IMG="$IMG"
      
 
 # test-logs:
