@@ -33,13 +33,15 @@ before_script:
   - export PATH=$PATH:/usr/local/go/bin
   - go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
   - export PATH=$PATH:$(go env GOPATH)/bin
-  # Log into Docker and Quay
+  # Log into Quay
   - echo "Logging into Quay..."
-  - echo "$QUAY_PASS" | docker login quay.io -u "$QUAY_USER" --password-stdin
+  - echo "$QUAY_PASS"
+  - echo $QUAY_USER
+  - docker login quay.io -u "$QUAY_USER" --password-stdin
   - echo "Logging into Docker"
-  - docker login -u $DOCK_USER -p $DOCK_PASS
+  # - docker login -u $DOCK_USER -p $DOCK_PASS
   # Clone the repository
-  - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git
+  # - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git
 
 build:
   stage: build
