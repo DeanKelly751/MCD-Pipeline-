@@ -1,6 +1,6 @@
 stages:
   - build
-  - build-cluster
+  - build-deployment
   - test-build
   - test-logs
   - clean-up
@@ -74,7 +74,7 @@ before_script:
 #     - docker build -t ${IMG} .  # Build Docker image
 #     - echo "Build complete."
 
-build-cluster:
+build-deployment:
     stage: build-cluster
     tags:
         - rhat-runner
@@ -96,6 +96,8 @@ build-cluster:
       - echo "Creating Kind cluster..."
       - kind create cluster --config ./config/cluster/kind-config.yaml
       - echo "Test cluster created."
+      - echo "Deploying CODECO to pods ..."
+      - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
     artifacts:
      paths:
       - $HOME/.kube/config 
@@ -103,20 +105,20 @@ build-cluster:
 
 #  FROM HERE UP PASSED
 
-test-build:
-   stage: test-build
-   tags:
-     - rhat-runner
-   image: fedora:latest
-   services:
-     - name: docker:dind
-       command: ["--privileged"]  # Enable privileged mode
-   dependencies:
-     - build-cluster
-   script:
-     - echo "Running tests..."
-     - export KUBECONFIG=$HOME/.kube/config
-     - kubectl config get-contexts
+# test-build:
+#    stage: test-build
+#    tags:
+#      - rhat-runner
+#    image: fedora:latest
+#    services:
+#      - name: docker:dind
+#        command: ["--privileged"]  # Enable privileged mode
+#    dependencies:
+#      - build-cluster
+#    script:
+#      - echo "Running tests..."
+#      - export KUBECONFIG=$HOME/.kube/config
+#      - kubectl config get-contexts
     #  - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
      
 
