@@ -96,6 +96,8 @@ build-deployment:
       - echo "Creating Kind cluster..."
       - kind create cluster --config ./config/cluster/kind-config.yaml
       - echo "Test cluster created."
+      - kubectl config get-contexts  # Check available contexts, should show 'kind-kind'
+      - kubectl config current-context 
       - echo "Deploying CODECO to pods ..."
       - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
     artifacts:
