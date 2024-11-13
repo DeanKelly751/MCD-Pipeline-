@@ -109,6 +109,7 @@ test-build:
        command: ["--privileged"]  # Enable privileged mode
    script:
      - echo "Running tests..."
+     - kubectl config use-context kind-kind
      - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
      
 
