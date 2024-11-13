@@ -94,7 +94,7 @@ build-deployment:
       - echo "Removing previous clusters if present..."
       - kind delete cluster --name kind
       - echo "Creating Kind cluster..."
-      - kind create cluster --config ./config/cluster/kind-config.yaml --api-server-address 0.0.0.0 --api-server-port 6443
+      - kind create cluster --config ./config/cluster/kind-config.yaml 
       - echo "Test cluster created."
       - kubectl config get-contexts  # Check available contexts, should show 'kind-kind'
       - kubectl config use-context kind-kind  # Ensure we are using the correct context
