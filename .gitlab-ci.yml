@@ -35,7 +35,7 @@ before_script:
   - export PATH=$PATH:/usr/local/go/bin
   - go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
   - export PATH=$PATH:$(go env GOPATH)/bin
-    - dnf install -y curl wget git make
+  - dnf install -y curl wget git make
 
   # Install kubectl
   - echo "Installing kubectl ${KUBECTL_VERSION}..."
