@@ -112,7 +112,7 @@ test-build:
      - name: docker:dind
        command: ["--privileged"]  # Enable privileged mode
    dependencies:
-     - "build-cluster"
+     - build-cluster
    script:
      - echo "Running tests..."
      - export KUBECONFIG=$HOME/.kube/config
