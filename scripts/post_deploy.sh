@@ -166,7 +166,8 @@ sed -i 's/sonem-worker/c1/' gnn_model/gnn_controller.yaml
 sed -i 's/sonem-worker/c1/' gnn_model/gnn_inference.yaml
 sed -i 's/sonem-worker/c1/' rl_model/rl-model-deployment.yaml
 sed -i 's/sonem/kind/' data_preprocessing/pdlc-dp-deployment.yaml
-sed -i 's/"http://mdm-controller-service.he-codeco-mdm.svc.cluster.local:5080"/"http://mdm-api.he-codeco-mdm.svc.cluster.local:8090"/' data_preprocessing/pdlc-dp-deployment.yaml
+#sed -i 's/"http://mdm-controller-service.he-codeco-mdm.svc.cluster.local:5080"/"http://mdm-api.he-codeco-mdm.svc.cluster.local:8090"/' data_preprocessing/pdlc-dp-deployment.yaml
+sed -i 's|"http://mdm-controller-service.he-codeco-mdm.svc.cluster.local:5080"|"http://mdm-api.he-codeco-mdm.svc.cluster.local:8090"|' data_preprocessing/pdlc-dp-deployment.yaml
 chmod -R 777 apply_yamls.sh
 ./apply_yamls.sh
 cd ..
