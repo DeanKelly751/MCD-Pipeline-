@@ -110,6 +110,7 @@ test-build:
    script:
      - echo "Running tests..."
      - export KUBECONFIG=$HOME/.kube/config
+     - kubectl context get-context
      - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
      
 
