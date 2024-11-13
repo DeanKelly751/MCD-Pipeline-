@@ -75,7 +75,7 @@ before_script:
 #     - echo "Build complete."
 
 build-deployment:
-    stage: build-cluster
+    stage: build-deployment
     tags:
         - rhat-runner
     image: fedora:latest
