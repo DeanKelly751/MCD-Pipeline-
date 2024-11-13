@@ -38,8 +38,8 @@ before_script:
   - dnf install -y curl wget git make
 
   # Install kubectl
-  - echo "Installing kubectl ${KUBECTL_VERSION}..."
-  - curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl
+  - echo "Installing kubectl..."
+  - curl -LO https://dl.k8s.io/release/1.24/bin/linux/amd64/kubectl
   - chmod +x kubectl
   - mv kubectl /usr/local/bin/
   - kubectl version --client  # Verify kubectl installation
