@@ -5,6 +5,9 @@ stages:
   - test-logs
   - clean-up
   - push
+  - integration_build
+  - integration
+
 
 variables: 
   IMG_NAME: "quay.io/dekelly/codecoapp-acm"
