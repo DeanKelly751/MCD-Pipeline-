@@ -107,10 +107,9 @@ build-deployment:
      paths:
       - $HOME/.kube/config 
 
-
 #  FROM HERE UP PASSED
 
- test-build:
+test-build:
     stage: test-build
     tags:
       - rhat-runner
