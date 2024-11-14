@@ -17,62 +17,48 @@ variables:
   # KUBECONFIG: ~/.kube/config
 
 services:
-    - name: docker:dind
-      command: ["--privileged"]
+  - name: docker:dind
+    command: ["--privileged"]
 
 before_script:
   # Install required dependencies
-  - dnf install -y wget make git dnf-plugins-core
+  - sudo dnf install -y wget make git dnf-plugins-core
 
   # Add Docker repository
   - curl -fsSL https://download.docker.com/linux/fedora/docker-ce.repo -o /etc/yum.repos.d/docker-ce.repo
   # Install Docker CLI
-  - dnf install -y docker-ce-cli
+  - sudo dnf install -y docker-ce-cli
 
   # Install Go (required for controller-gen)
   - wget https://go.dev/dl/go1.21.9.linux-amd64.tar.gz
-  - tar -C /usr/local -xzf go1.21.9.linux-amd64.tar.gz
+  - sudo tar -C /usr/local -xzf go1.21.9.linux-amd64.tar.gz
   - export PATH=$PATH:/usr/local/go/bin
-  - go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
+  - sudo go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
   - export PATH=$PATH:$(go env GOPATH)/bin
-  - dnf install -y curl wget git make
+  - sudo dnf install -y curl wget git make
 
   # Install kubectl
   - echo "Installing kubectl..."
   - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-  - chmod +x kubectl
-  - mv kubectl /usr/local/bin/
-  - kubectl version --client  # Verify kubectl installation
+  - sudo chmod +x kubectl
+  - sudo mv kubectl /usr/local/bin/
+  - sudo kubectl version --client  # Verify kubectl installation
 
   # Install helm
   - echo "Installing helm ..."
   - export VERIFY_CHECKSUM=false
   - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-  - chmod 700 get_helm.sh
-  - ./get_helm.sh
+  - sudo chmod 700 get_helm.sh
+  - sudo ./get_helm.sh
   # - mv linux-amd64/helm /usr/local/bin/helm
   - helm version  # Verify helm installation
 
   # Log into Quay
   - echo "Logging into Quay..."
-  - echo "$QUAY_PASS" | docker login quay.io -u "$QUAY_USER" --password-stdin
+  - echo "$QUAY_PASS" | sudo docker login quay.io -u "$QUAY_USER" --password-stdin
   # - docker login -u $DOCK_USER -p $DOCK_PASS
   # Clone the repository
   # - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git
-
-# build:
-#   stage: build
-#   tags:
-#     - rhat-runner
-#   image: fedora:latest
-#   # services:
-#   #   - name: docker:dind
-#   #     command: ["--privileged"]  # Enable privileged mode
-#   script:
-#     - docker info  # Check Docker connection
-#     - controller-gen object paths=./api/...  # Generate controller object files
-#     - docker build -t ${IMG} .  # Build Docker image
-#     - echo "Build complete."
 
 build-deployment:
     stage: build-deployment
@@ -86,28 +72,26 @@ build-deployment:
       - export PATH=$PATH:/usr/local/go/bin
       - echo "Installing Kind and kubectl..."
       - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
-      - chmod +x ./kind
-      - mv ./kind /usr/local/bin/kind
+      - sudo chmod +x ./kind
+      - sudo mv ./kind /usr/local/bin/kind
       - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
-      - chmod +x ./kubectl
-      - mv ./kubectl /usr/local/bin/kubectl
+      - sudo chmod +x ./kubectl
+      - sudo mv ./kubectl /usr/local/bin/kubectl
       - echo "Removing previous clusters if present..."
-      - kind delete cluster --name kind
+      - sudo kind delete cluster --name kind
       - echo "Creating Kind cluster..."
-      - kind create cluster --config ./config/cluster/kind-config.yaml 
+      - sudo kind create cluster --config ./config/cluster/kind-config.yaml 
       - echo "Test cluster created."
-      - kubectl config get-contexts  # Check available contexts, should show 'kind-kind'
-      - kubectl config use-context kind-kind  # Ensure we are using the correct context 
+      - sudo kubectl config get-contexts  # Check available contexts, should show 'kind-kind'
+      - sudo kubectl config use-context kind-kind  # Ensure we are using the correct context 
       # - cat $HOME/.kube/config 
       - export KUBECONFIG=$HOME/.kube/config
-      # - kubectl get pods -A --context kind-kind
+      # - sudo kubectl get pods -A --context kind-kind
       # - echo "Deploying CODECO to pods ..."
-      # - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
+      # - sudo make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
     artifacts:
      paths:
       - $HOME/.kube/config 
-
-#  FROM HERE UP PASSED
 
 test-build:
     stage: test-build
@@ -124,7 +108,6 @@ test-build:
       - echo KUBECONFIG=$HOME/.kube/config
       - sudo kubectl config get-contexts
       - sudo make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
-     
 
 # test-logs:
 #   stage: test-logs
