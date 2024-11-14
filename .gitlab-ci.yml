@@ -22,40 +22,40 @@ services:
 
 before_script:
   # Install required dependencies
-  - sudo dnf install -y wget make git dnf-plugins-core
+  - dnf install -y wget make git dnf-plugins-core
 
   # Add Docker repository
   - curl -fsSL https://download.docker.com/linux/fedora/docker-ce.repo -o /etc/yum.repos.d/docker-ce.repo
   # Install Docker CLI
-  - sudo dnf install -y docker-ce-cli
+  - dnf install -y docker-ce-cli
 
   # Install Go (required for controller-gen)
   - wget https://go.dev/dl/go1.21.9.linux-amd64.tar.gz
-  - sudo tar -C /usr/local -xzf go1.21.9.linux-amd64.tar.gz
+  - tar -C /usr/local -xzf go1.21.9.linux-amd64.tar.gz
   - export PATH=$PATH:/usr/local/go/bin
   - go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
   - export PATH=$PATH:$(go env GOPATH)/bin
-  - sudo dnf install -y curl wget git make
+  - dnf install -y curl wget git make
 
   # Install kubectl
   - echo "Installing kubectl..."
   - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-  - sudo chmod +x kubectl
-  - sudo mv kubectl /usr/local/bin/
-  - sudo kubectl version --client  # Verify kubectl installation
+  - chmod +x kubectl
+  - mv kubectl /usr/local/bin/
+  - kubectl version --client  # Verify kubectl installation
 
   # Install helm
   - echo "Installing helm ..."
   - export VERIFY_CHECKSUM=false
   - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-  - sudo chmod 700 get_helm.sh
+  - chmod 700 get_helm.sh
   - ./get_helm.sh
   # - mv linux-amd64/helm /usr/local/bin/helm
   - helm version  # Verify helm installation
 
   # Log into Quay
   - echo "Logging into Quay..."
-  - echo "$QUAY_PASS" | sudo docker login quay.io -u "$QUAY_USER" --password-stdin
+  - echo "$QUAY_PASS" | docker login quay.io -u "$QUAY_USER" --password-stdin
   # - docker login -u $DOCK_USER -p $DOCK_PASS
   # Clone the repository
   # - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git
@@ -72,23 +72,23 @@ build-deployment:
       - export PATH=$PATH:/usr/local/go/bin
       - echo "Installing Kind and kubectl..."
       - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
-      - sudo chmod +x ./kind
-      - sudo mv ./kind /usr/local/bin/kind
+      - chmod +x ./kind
+      - mv ./kind /usr/local/bin/kind
       - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
-      - sudo chmod +x ./kubectl
-      - sudo mv ./kubectl /usr/local/bin/kubectl
+      - chmod +x ./kubectl
+      - mv ./kubectl /usr/local/bin/kubectl
       - echo "Removing previous clusters if present..."
-      - sudo kind delete cluster --name kind
+      - kind delete cluster --name kind
       - echo "Creating Kind cluster..."
-      - sudo kind create cluster --config ./config/cluster/kind-config.yaml 
+      - kind create cluster --config ./config/cluster/kind-config.yaml 
       - echo "Test cluster created."
-      - sudo kubectl config get-contexts  # Check available contexts, should show 'kind-kind'
-      - sudo kubectl config use-context kind-kind  # Ensure we are using the correct context 
+      - kubectl config get-contexts  # Check available contexts, should show 'kind-kind'
+      - kubectl config use-context kind-kind  # Ensure we are using the correct context 
       # - cat $HOME/.kube/config 
       - export KUBECONFIG=$HOME/.kube/config
-      # - sudo kubectl get pods -A --context kind-kind
+      # - kubectl get pods -A --context kind-kind
       # - echo "Deploying CODECO to pods ..."
-      # - sudo make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
+      # - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
     artifacts:
      paths:
       - $HOME/.kube/config 
@@ -106,8 +106,8 @@ test-build:
     script:
       - echo "Running tests..."
       - echo KUBECONFIG=$HOME/.kube/config
-      - sudo kubectl config get-contexts
-      - sudo make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
+      - kubectl config get-contexts
+      - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
 
 # test-logs:
 #   stage: test-logs
