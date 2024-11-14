@@ -100,6 +100,8 @@ build-deployment:
       - kubectl config use-context kind-kind  # Ensure we are using the correct context
         # Confirm if kubectl can reach the cluster 
       - cat $HOME/.kube/config 
+      - echo "Testing Kubernetes connection"
+      - curl -k https://127.0.0.1:37305 || echo "Failed to connect to the Kubernetes API server"
       - kubectl get pods -A --context kind-kind
       - echo "Deploying CODECO to pods ..."
       - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
