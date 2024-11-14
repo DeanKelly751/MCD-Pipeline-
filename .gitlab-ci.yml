@@ -100,7 +100,7 @@ build-deployment:
       - kubectl config use-context kind-kind  # Ensure we are using the correct context 
       # - cat $HOME/.kube/config 
       - export KUBECONFIG=$HOME/.kube/config
-      - kubectl get pods -A --context kind-kind
+      # - kubectl get pods -A --context kind-kind
       # - echo "Deploying CODECO to pods ..."
       # - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
     artifacts:
