@@ -1,6 +1,6 @@
 stages:
   - build
-  - build-cluster
+  - build-deployment
   - test-build
   - test-logs
   - clean-up
@@ -20,223 +20,167 @@ variables:
   # KUBECONFIG: ~/.kube/config
 
 services:
-    - name: docker:dind
-      command: ["--privileged"] 
+  - name: docker:dind
+    command: ["--privileged"]
 
 before_script:
+  # Install required dependencies
   - dnf install -y wget make git dnf-plugins-core
-  - dnf config-manager --add-repo=https://download.docker.com/linux/fedora/docker-ce.repo
+
+  # Add Docker repository
+  - curl -fsSL https://download.docker.com/linux/fedora/docker-ce.repo -o /etc/yum.repos.d/docker-ce.repo
+  # Install Docker CLI
   - dnf install -y docker-ce-cli
+
+  # Install Go (required for controller-gen)
   - wget https://go.dev/dl/go1.21.9.linux-amd64.tar.gz
   - tar -C /usr/local -xzf go1.21.9.linux-amd64.tar.gz
   - export PATH=$PATH:/usr/local/go/bin
   - go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
   - export PATH=$PATH:$(go env GOPATH)/bin
+  - dnf install -y curl wget git make
+
+  # Install kubectl
+  - echo "Installing kubectl..."
+  - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  - chmod +x kubectl
+  - mv kubectl /usr/local/bin/
+  - kubectl version --client  # Verify kubectl installation
+
+  # Install helm
+  - echo "Installing helm ..."
+  - export VERIFY_CHECKSUM=false
+  - curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+  - chmod 700 get_helm.sh
+  - ./get_helm.sh
+  # - mv linux-amd64/helm /usr/local/bin/helm
+  - helm version  # Verify helm installation
+
+  # Log into Quay
   - echo "Logging into Quay..."
   - echo "$QUAY_PASS" | docker login quay.io -u "$QUAY_USER" --password-stdin
-  - echo "Logging into Docker"
-  - docker login -u $DOCK_USER -p $DOCK_PASS
+  # - docker login -u $DOCK_USER -p $DOCK_PASS
+  # Clone the repository
+  # - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git
 
-  # - curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
-  # - mv ./kustomize /usr/local/bin/kustomize  # Move it to a location in PATH
-  # - chmod +x ./scripts/pre_deploy.sh ./scripts/post_deploy.sh
-
-
-build:
-  stage: build
-  image: fedora:latest
-  services:
-    - name: docker:dind
-      command: ["--privileged"]  # Enable privileged mode
-  script:
-    - docker info  # Check Docker connection
-    - controller-gen object paths=./api/...  # Generate controller object files
-    - docker build -t ${IMG} .  # Build Docker image
-    - echo "Build complete."
-
-build-cluster:
-  stage: build-cluster
-  image: fedora:latest
-  services:
-    - name: docker:dind
-      command: ["--privileged"]  # Enable privileged mode
-  script:
-    - export PATH=$PATH:/usr/local/go/bin
-    - echo "Installing Kind and kubectl..."
-    - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
-    - chmod +x ./kind
-    - mv ./kind /usr/local/bin/kind
-    - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
-    - chmod +x ./kubectl
-    - mv ./kubectl /usr/local/bin/kubectl
-    - echo "Creating Kind cluster..."
-    - kind create cluster --config ./config/cluster/kind-config.yaml
-    - echo "Test cluster created."
-
-test-build:
-  stage: test-build
-  image: fedora:latest
-  services:
-    - name: docker:dind
-      command: ["--privileged"]  # Enable privileged mode
-  script:
-    - echo "Running tests..."
-    - ./scripts/pre_deploy.sh  # Run pre-deployment script
-    # - cd config/manager && kustomize edit set image controller=$IMG  # Set the controller image in the Kustomize file
-    # - kustomize build config/default | kubectl apply -f -  # Build and deploy using kubectl
-    # - ./scripts/post_deploy.sh 
-
-    # - kubectl create -f codecosampleapp
-    # - sleep 60
-
-    # - kubectl get po - - if status = FAILED, get name of pod status FAILED, kubectl describe pod POD_NAME, loop through all status fails
-
-test-logs:
-  stage: test-logs
-  image: fedora:latest
-  services:
-    - name: docker:dind
-      command: ["--privileged"]
-  script:
-    - sleep 30
-    - kubectl get po -A
-
-clean-up: 
-    stage: clean-up
+build-deployment:
+    stage: build-deployment
+    tags:
+        - icom-runner-codeco
     image: fedora:latest
     services:
       - name: docker:dind
         command: ["--privileged"]  # Enable privileged mode
     script:
-      - echo "Deleting cluster ..."
-      - kind delete cluster
+      - export PATH=$PATH:/usr/local/go/bin
+      - echo "Installing Kind and kubectl..."
+      - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
+      - chmod +x ./kind
+      - mv ./kind /usr/local/bin/kind
+      - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
+      - chmod +x ./kubectl
+      - mv ./kubectl /usr/local/bin/kubectl
+      - echo "Removing previous clusters if present..."
+      - kind delete cluster --name kind
+      - echo "Creating Kind cluster..."
+      - kind create cluster --config ./config/cluster/kind-config.yaml 
+      - echo "Test cluster created."
+      - kubectl config get-contexts  # Check available contexts, should show 'kind-kind'
+      - kubectl config use-context kind-kind  # Ensure we are using the correct context 
+      # - cat $HOME/.kube/config 
+      - export KUBECONFIG=$HOME/.kube/config
+      # - kubectl get pods -A --context kind-kind
+      # - echo "Deploying CODECO to pods ..."
+      # - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
+    artifacts:
+     paths:
+      - $HOME/.kube/config 
 
-    
+test-build:
+    stage: test-build
+    tags:
+      - icom-runner-codeco
+    image: fedora:latest
+    services:
+      - name: docker:dind
+        command: ["--privileged"]  # Enable privileged mode
+    dependencies:
+      - build-deployment
+    script:
+      - echo "Running tests..."
+      - echo KUBECONFIG=$HOME/.kube/config
+      - kubectl config get-contexts
+      - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
 
-# Further stages like test and push can be uncommented and configured as needed.
-
-# test:
-#   stage: test
+# test-logs:
+#   stage: test-logs
 #   tags:
-#     - acm-runner
-#   image: golang:1.21   # Or use an image with kubectl/kind pre-installed
+#     - saas-linux-small-amd64
+#   image: fedora:latest
 #   services:
-#     - docker:dind
-#   before_script:
-#     # Install kubectl
-#     - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-#     - chmod +x ./kubectl
-#     - mv ./kubectl /usr/local/bin/kubectl
-#     # Install Kind
-#     - curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
-#     - chmod +x ./kind
-#     - mv ./kind /usr/local/bin/kind
-#     # Create a Kubernetes cluster with Kind
-#     - kind create cluster --config $KIND_CONFIG
-#     # Set kubeconfig for kubectl
-#     - export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
+#     - name: docker:dind
+#       command: ["--privileged"]
 #   script:
-#     # Build the operator's container image (or use pre-built)
-#     - echo "Deploying operator..."
-#     - make docker-build IMG="pipeline-build:v0.0.1"
-#     # Wait for the operator deployment to be ready
-#     - make deploy IMG="pipeline-build:v0.0.1"
-#     # Check if the operator pod is running successfully
-#     - sleep 120
-#     - kubectl get pods
+#     - sleep 30
+#     - kubectl get po -A
 
-push:
-   stage: push
-   image: fedora:latest
-   services:
-     - name: docker:dind
-       command: ["--privileged"]
-   variables:
-     DOCKER_TLS_CERTDIR: ""
-   script:
-     - export PATH=$PATH:/usr/local/go/bin
-     - echo "Pushing image named $IMG to Quay.io..."
-     - docker info  # Check if the Docker daemon is running
-     - docker push "${IMG}"
-     - echo "Push complete"
-   only:
-     - rht-integration
+# clean-up: 
+#     stage: clean-up
+#     image: fedora:latest
+#     services:
+#       - name: docker:dind
+#         command: ["--privileged"]  # Enable privileged mode
+#     script:
+#       - echo "Deleting cluster ..."
+#       - kind delete cluster
 
-integration_build:
-  stage: integration_build
-  image: docker:26.1.2
-  services:
-    - docker:26.1.2-dind
-  variables:
-    DOCKER_TLS_CERTDIR: "/certs"
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/integration
-    IMAGE_TAG: 2.0.1
-  only:
-    - icom-integration-testing
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-  script:
-    - echo "Building docker image with CODECO requirements"
-    - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/gitlab-profile.git
-    - docker build -t $CI_REGISTRY_IMAGE/integration:2.0.1 -f gitlab-profile/Dockerfile-integration .
-    - docker push $CI_REGISTRY_IMAGE/integration:2.0.1 # pushing to intermediate private repository
-
-integration:
-  stage: integration
-  image: docker:26.1.2
-  services:
-    - docker:26.1.2-dind
-  variables:
-    DOCKER_TLS_CERTDIR: "/certs"
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/integration
-    IMAGE_TAG: 2.0.1
-  only:
-    - icom-integration-testing
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker rm integ --force
-    - docker rmi $CI_REGISTRY_IMAGE/integration:2.0.1
-  script:
-    - |
-      docker run -t -v /var/run/docker.sock:/var/run/docker.sock -e DOCKERHUB_USER=$DOCKERHUB_USER -e DOCKERHUB_PASS=$DOCKERHUB_PASS --network host --name integ --rm $CI_REGISTRY_IMAGE/integration:2.0.1 bash -c -i "
     
-      git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git 
 
-      kind delete cluster
-      kind create cluster --config ./acm/config/cluster/kind-config.yaml
+# # Further stages like test and push can be uncommented and configured as needed.
 
-      cd acm
-      echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
-      make docker-build docker-push IMG=$DOCKERHUB_USER/codecoapp-operator:2.0.0
-      make deploy IMG=$DOCKERHUB_USER/codecoapp-operator:2.0.0
+# # test:
+# #   stage: test
+# #   tags:
+# #     - acm-runner
+# #   image: golang:1.21   # Or use an image with kubectl/kind pre-installed
+# #   services:
+# #     - docker:dind
+# #   before_script:
+# #     # Install kubectl
+# #     - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+# #     - chmod +x ./kubectl
+# #     - mv ./kubectl /usr/local/bin/kubectl
+# #     # Install Kind
+# #     - curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
+# #     - chmod +x ./kind
+# #     - mv ./kind /usr/local/bin/kind
+# #     # Create a Kubernetes cluster with Kind
+# #     - kind create cluster --config $KIND_CONFIG
+# #     # Set kubeconfig for kubectl
+# #     - export KUBECONFIG="$(kind get kubeconfig-path --name="kind")"
+# #   script:
+# #     # Build the operator's container image (or use pre-built)
+# #     - echo "Deploying operator..."
+# #     - make docker-build IMG="pipeline-build:v0.0.1"
+# #     # Wait for the operator deployment to be ready
+# #     - make deploy IMG="pipeline-build:v0.0.1"
+# #     # Check if the operator pod is running successfully
+# #     - sleep 120
+# #     - kubectl get pods
 
-      kubectl apply -f ./config/samples/codeco_v1alpha1_codecoapp_ver3.yaml
-
-      # Wait for 20 minutes, if Codeco Application Pods are not running, then the test is Failed!
-      # Note that the kubectl wait command will continue the script execution earlier than the timeout if the condition is satisfied
-      if kubectl wait --for=condition=Ready pod --all -n he-codeco-acm --timeout=20m; then 
-          echo "Application pods are in Running state"
-          kubectl get pods -A; 
-          exit 0; # success
-      else
-          kubectl get pods -A; 
-          exit 1; # error
-      fi
-
-      # Verify that all CODECO pods are in the Running state, or else, fail the test
-      if kubectl wait --for=condition=Ready pod --all --all-namespaces --timeout=20m; then 
-          echo "Application pods are in Running state"
-          kubectl get pods -A; 
-          exit 0; # success
-      else
-          kubectl get pods -A; 
-          exit 1; # error
-      fi
-
-      # [In-progress] Other integration tests: Verify correct input and output for every codeco component
-
-      "
-
-
-
-
+# push:
+#    stage: push
+#    image: fedora:latest
+#    services:
+#      - name: docker:dind
+#        command: ["--privileged"]
+#    variables:
+#      DOCKER_TLS_CERTDIR: ""
+#    script:
+#      - export PATH=$PATH:/usr/local/go/bin
+#      - echo "Pushing image named $IMG to Quay.io..."
+#      - docker info  # Check if the Docker daemon is running
+#      - docker push "${IMG}"
+#      - echo "Push complete"
+#    only:
+#      - rht-integration
