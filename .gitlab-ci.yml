@@ -121,9 +121,9 @@ test-build:
       - build-deployment
     script:
       - echo "Running tests..."
-      - import KUBECONFIG=$HOME/.kube/config
-      - kubectl config get-contexts
-      - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
+      - echo KUBECONFIG=$HOME/.kube/config
+      - sudo kubectl config get-contexts
+      - sudo make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
      
 
 # test-logs:
