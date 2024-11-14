@@ -33,7 +33,7 @@ before_script:
   - wget https://go.dev/dl/go1.21.9.linux-amd64.tar.gz
   - sudo tar -C /usr/local -xzf go1.21.9.linux-amd64.tar.gz
   - export PATH=$PATH:/usr/local/go/bin
-  - sudo go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
+  - go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.10.0
   - export PATH=$PATH:$(go env GOPATH)/bin
   - sudo dnf install -y curl wget git make
 
