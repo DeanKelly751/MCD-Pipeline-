@@ -63,7 +63,7 @@ before_script:
 build-deployment:
     stage: build-deployment
     tags:
-        - rhat-runner
+        - icom-runner-codeco
     image: fedora:latest
     services:
       - name: docker:dind
@@ -96,7 +96,7 @@ build-deployment:
 test-build:
     stage: test-build
     tags:
-      - rhat-runner
+      - icom-runner-codeco
     image: fedora:latest
     services:
       - name: docker:dind
