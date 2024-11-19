@@ -108,21 +108,29 @@ test-build:
       - build-deployment
     script:
       - echo "Running tests..."
-      - echo KUBECONFIG=$HOME/.kube/config
-      - kubectl config get-contexts
+      # - echo KUBECONFIG=$HOME/.kube/config
+      # - kubectl config get-contexts
       - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
 
-# test-logs:
-#   stage: test-logs
-#   tags:
-#     - saas-linux-small-amd64
-#   image: fedora:latest
-#   services:
-#     - name: docker:dind
-#       command: ["--privileged"]
-#   script:
-#     - sleep 30
-#     - kubectl get po -A
+test-logs:
+  stage: test-logs
+  tags:
+    - saas-linux-small-amd64
+  image: fedora:latest
+  services:
+    - name: docker:dind
+      command: ["--privileged"]
+  script:
+    - sleep 200
+    # check expected pods are running
+    - kubectl get po -A
+    - echo "Number of running pods (expect 78):"
+    - NumPo= kubectl get po -A | grep Running )
+    - echo $NumPo
+    - echo "Number of served running pods (expect 78):"
+    - SERVED_PODS=$(kubectl get po -A | grep served | grep Running | wc -l)
+    - echo $SERVED_PODS
+    - if [ $SERVED_PODS != 78 ]  then ; echo "Incorrect number of objects" ; exit 1 ; fi
 
 # clean-up: 
 #     stage: clean-up
