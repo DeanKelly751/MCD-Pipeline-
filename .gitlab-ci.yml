@@ -115,7 +115,7 @@ test-build:
 test-logs:
   stage: test-logs
   tags:
-    - saas-linux-small-amd64
+    - icom-runner-codeco
   image: fedora:latest
   services:
     - name: docker:dind
