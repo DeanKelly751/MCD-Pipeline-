@@ -36,11 +36,11 @@ cd ..
 echo "........................................Prometheus Installed..............................................."
 echo "........................................Installing Primary CNI: Flannel..............................................."
 
-# clone and build plugins that kind needs in order to use our custom cni
-git clone https://github.com/containernetworking/plugins.git 
-sed -i "s/go 1.23/go 1.23.0/g" ./plugins/go.mod # to avoid error after recent update
-cd plugins && ./build_linux.sh
-cd ..
+# Download binaries for CNI Plugins
+mkdir -p plugins/bin
+wget https://github.com/containernetworking/plugins/releases/download/v1.6.0/cni-plugins-linux-amd64-v1.6.0.tgz
+tar -xf cni-plugins-linux-amd64-v1.6.0.tgz -C ./plugins/bin
+
 
 # copy necessary plugins into all nodes
 docker cp ./plugins/bin/. kind-control-plane:/opt/cni/bin
