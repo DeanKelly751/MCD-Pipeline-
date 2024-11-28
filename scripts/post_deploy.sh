@@ -22,6 +22,11 @@
 ## components and to perform any other post-deployment tasks.
 echo "Executing post deployment tasks..."
 ##TODO(user): Add your post deployment tasks here
+echo "........................................Kustomize Installing..............................................."
+
+curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+
+echo "........................................Kustomize Install Finished..............................................."
 
 echo "........................................Prometheus Installing..............................................."
 cd ..
