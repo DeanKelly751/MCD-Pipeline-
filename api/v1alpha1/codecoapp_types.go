@@ -177,7 +177,7 @@ type CodecoAppSpec struct {
 
 	//+kubebuilder:validation:Enum=High;Good;Medium;Low; None
 	// SecurityClass is used to identify the CODECO application security class. Edit codecoapp_types.go to remove/update
-	SecurityClass CocdcoSecurityClass `json:"securityClass,omitempty"`
+	SecurityClass CodecoSecurityClass `json:"securityClass,omitempty"`
 	//expected level of compliance, based on a scale
 	ComplianceClass CodecoComplianceClass `json:"complianceClass,omitempty"`
 	// Maximum desired level of energy expenditure for the overall k8s infrastructure associated with an application (percent)
