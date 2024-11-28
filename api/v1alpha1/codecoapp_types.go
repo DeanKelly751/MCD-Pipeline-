@@ -48,14 +48,14 @@ const (
 	LowCompliance CodecoComplianceClass = "Low"
 )
 
-type CocdcoSecurityClass string
+type CodecoSecurityClass string
 
 const (
-	High   CocdcoSecurityClass = "High"
-	Good   CocdcoSecurityClass = "Good"
-	Medium CocdcoSecurityClass = "Medium"
-	Low    CocdcoSecurityClass = "Low"
-	None   CocdcoSecurityClass = "None"
+	High   CodecoSecurityClass = "High"
+	Good   CodecoSecurityClass = "Good"
+	Medium CodecoSecurityClass = "Medium"
+	Low    CodecoSecurityClass = "Low"
+	None   CodecoSecurityClass = "None"
 )
 
 type CodecoStatus string
