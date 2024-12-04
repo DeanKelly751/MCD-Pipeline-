@@ -82,11 +82,11 @@ build-deployment:
       - mv ./kubectl /usr/local/bin/kubectl
       - echo "Removing previous clusters if present..."
       - kind delete cluster --name kind
-      - echo "Creating Kind cluster..."
-      - kind create cluster --config ./config/cluster/kind-config.yaml 
-      - echo "Test cluster created."
-      - kubectl config get-contexts  # Check available contexts, should show 'kind-kind'
-      - kubectl config use-context kind-kind  # Ensure we are using the correct context 
+      # - echo "Creating Kind cluster..."
+      # - kind create cluster --config ./config/cluster/kind-config.yaml 
+      # - echo "Test cluster created."
+      # - kubectl config get-contexts  # Check available contexts, should show 'kind-kind'
+      # - kubectl config use-context kind-kind  # Ensure we are using the correct context 
       # - cat $HOME/.kube/config 
       - export KUBECONFIG=$HOME/.kube/config
       # - kubectl get pods -A --context kind-kind
@@ -110,6 +110,11 @@ test-build:
       - echo "Running tests..."
       # - echo KUBECONFIG=$HOME/.kube/config
       # - kubectl config get-contexts
+      - echo "Creating Kind cluster..."
+      - kind create cluster --config ./config/cluster/kind-config.yaml 
+      - echo "Test cluster created."
+      - kubectl config get-contexts  # Check available contexts, should show 'kind-kind'
+      - kubectl config use-context kind-kind
       - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
 
 test-logs:
