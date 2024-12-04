@@ -111,8 +111,10 @@ The pod should be in _Running_ state and ready
 3. Install Instances of Custom Resources:
 
 ```sh
-> kubectl apply -f config/samples/
+> kubectl apply -f config/samples/codeco_v1alpha1_codecoapp_ver3.yaml
 ```
+
+"codeco_v1alpha1_codecoapp_ver3.yaml" is our most up to date sample deployment.
 
 #### Checking that the operator works (temp)
 
