@@ -62,6 +62,20 @@ before_script:
   # - docker login -u $DOCK_USER -p $DOCK_PASS
   # Clone the repository
   # - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git
+  #  Set up cluster
+  - export PATH=$PATH:/usr/local/go/bin
+  - echo "Installing Kind and kubectl..."
+  - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
+  - chmod +x ./kind
+  - mv ./kind /usr/local/bin/kind
+  - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
+  - chmod +x ./kubectl
+  - mv ./kubectl /usr/local/bin/kubectl
+  - echo "Removing previous clusters if present..."
+  - kind delete cluster --name kind
+  - echo "Creating Kind cluster..."
+  - kind create cluster --config ./config/cluster/kind-config.yaml 
+  - echo "Test cluster created."
 
 build-deployment:
     stage: build-deployment
@@ -72,23 +86,24 @@ build-deployment:
       - name: docker:dind
         command: ["--privileged"]  # Enable privileged mode
     script:
-      - export PATH=$PATH:/usr/local/go/bin
-      - echo "Installing Kind and kubectl..."
-      - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
-      - chmod +x ./kind
-      - mv ./kind /usr/local/bin/kind
-      - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
-      - chmod +x ./kubectl
-      - mv ./kubectl /usr/local/bin/kubectl
-      - echo "Removing previous clusters if present..."
-      - kind delete cluster --name kind
-      # - echo "Creating Kind cluster..."
-      # - kind create cluster --config ./config/cluster/kind-config.yaml 
-      # - echo "Test cluster created."
-      # - kubectl config get-contexts  # Check available contexts, should show 'kind-kind'
-      # - kubectl config use-context kind-kind  # Ensure we are using the correct context 
-      # - cat $HOME/.kube/config 
-      - export KUBECONFIG=$HOME/.kube/config
+      - echo "skip for now"
+      # - export PATH=$PATH:/usr/local/go/bin
+      # - echo "Installing Kind and kubectl..."
+      # - curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.18.0/kind-linux-amd64
+      # - chmod +x ./kind
+      # - mv ./kind /usr/local/bin/kind
+      # - curl -Lo ./kubectl https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl
+      # - chmod +x ./kubectl
+      # - mv ./kubectl /usr/local/bin/kubectl
+      # - echo "Removing previous clusters if present..."
+      #  - kind delete cluster --name kind
+      #  - echo "Creating Kind cluster..."
+      #  - kind create cluster --config ./config/cluster/kind-config.yaml 
+      #  - echo "Test cluster created."
+      # # - kubectl config get-contexts  # Check available contexts, should show 'kind-kind'
+      # # - kubectl config use-context kind-kind  # Ensure we are using the correct context 
+      # # - cat $HOME/.kube/config 
+      # - export KUBECONFIG=$HOME/.kube/config
       # - kubectl get pods -A --context kind-kind
       # - echo "Deploying CODECO to pods ..."
       # - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
@@ -110,11 +125,11 @@ test-build:
       - echo "Running tests..."
       # - echo KUBECONFIG=$HOME/.kube/config
       # - kubectl config get-contexts
-      - echo "Creating Kind cluster..."
-      - kind create cluster --config ./config/cluster/kind-config.yaml 
-      - echo "Test cluster created."
-      - kubectl config get-contexts  # Check available contexts, should show 'kind-kind'
-      - kubectl config use-context kind-kind
+      # - echo "Creating Kind cluster..."
+      # - kind create cluster --config ./config/cluster/kind-config.yaml 
+      # - echo "Test cluster created."
+      # - kubectl config get-contexts  # Check available contexts, should show 'kind-kind'
+      # - kubectl config use-context kind-kind
       - make deploy IMG="quay.io/dekelly/codecov21:v0.0.1"
 
 test-logs:
