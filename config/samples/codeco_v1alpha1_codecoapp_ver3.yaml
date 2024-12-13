@@ -51,7 +51,7 @@ spec:
         maxDelay: "1"
         sendInterval: "10"
       channelName: frontend
-      serviceClass: "ASSURED"
+      serviceClass: ASSURED
       otherService:
         appName: acm-swm-app
         port: 9090
@@ -73,7 +73,7 @@ spec:
         maxDelay: "1"
         sendInterval: "10"
       channelName: backend
-      serviceClass: "ASSURED"
+      serviceClass: ASSURED
       otherService:
         appName: acm-swm-app
         port: 8080
