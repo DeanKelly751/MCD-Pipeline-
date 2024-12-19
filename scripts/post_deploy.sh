@@ -55,7 +55,7 @@ docker cp ./plugins/bin/. kind-worker2:/opt/cni/bin
 # fix by Alex UC3M
 docker exec -it kind-control-plane modprobe br_netfilter
 docker exec -it kind-worker modprobe br_netfilter
-docker exec -it kind-control-plane modprobe br_netfilter
+docker exec -it kind-worker2 modprobe br_netfilter
 
 docker exec -it kind-control-plane sysctl -p /etc/sysctl.conf
 docker exec -it kind-worker sysctl -p /etc/sysctl.conf
