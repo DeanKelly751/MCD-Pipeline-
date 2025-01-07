@@ -58,7 +58,7 @@ before_script:
 
   # Log into Quay
   - echo "Logging into Quay..."
-  - echo "$QUAY_PASS" | docker login quay.io -u "$QUAY_USER" --password-stdin
+  - echo "$QUAY_PASS" | docker login quay.io -username "$QUAY_USER" --password-stdin
   # - docker login -u $DOCK_USER -p $DOCK_PASS
   # Clone the repository
   # - git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm.git
