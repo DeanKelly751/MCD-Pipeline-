@@ -116,6 +116,7 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add neo4j https://helm.neo4j.com/neo4j
 sed -i "s/<storageclassName>/$STORAGECLASSNAME/g" "./deployment/zookeeper-helm.yaml"
 sed -i "s/<storageclassName>/$STORAGECLASSNAME/g" "./deployment/neo4j-helm.yaml"
+sed -i "s/<storageclassName>/$STORAGECLASSNAME/g" "./deployment/kafka-helm.yaml"
 helm --kube-context=$MDM_CONTEXT install mdm-zookeeper -n $MDM_NAMESPACE  bitnami/zookeeper  -f ./deployment/zookeeper-helm.yaml
 helm --kube-context=$MDM_CONTEXT install mdm-kafka -n $MDM_NAMESPACE bitnami/kafka --version 21.1.1 -f ./deployment/kafka-helm.yaml
 helm --kube-context=$MDM_CONTEXT install mdm-neo4j -n $MDM_NAMESPACE neo4j/neo4j-standalone -f ./deployment/neo4j-helm.yaml
