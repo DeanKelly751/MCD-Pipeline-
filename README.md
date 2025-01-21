@@ -52,7 +52,7 @@ We also advise increasing watcher limits, which is used to configure user-level 
 We advise increasing the limit to 100000 to ensure all pods come up. This must be done as a pre-requisit each time u deploy CODECO using the command:
 
 ```sh
-> ulimit -n 104000
+ulimit -n 104000
 ```
 
 
