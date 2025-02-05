@@ -90,6 +90,7 @@ cd ..
 
 cd network-exposure/
 kubectl apply -f kuberfiles/00_namespace.yaml
+kubectl wait --for=condition=Ready pod --all -A --timeout=20m
 kubectl apply -f kuberfiles/01_netma-topology-crd.yaml
 cd ..
 
