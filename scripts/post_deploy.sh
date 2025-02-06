@@ -83,6 +83,7 @@ kubectl create -f ./deployments/l2sm-deployment.yaml -n=he-codeco-netma
 
 # Fix by Alejandro de Cock Buning for proper l2sm function
 kubectl wait --for=condition=Ready pod --all -A --timeout=20m
+kubectl apply -f ../network-exposure/kuberfiles/00_namespace.yaml
 chmod +x ../acm/scripts/after_netma_deployment.sh
 ../acm/scripts/after_netma_deployment.sh
 
