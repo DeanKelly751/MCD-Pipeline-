@@ -97,9 +97,7 @@ cd ..
 
 cd network-state-management/netma-nsm-mon/k8s-netperf
 kubectl apply -f k8s-netperf.yaml
-cd ..
-sudo python3 Monitoring/network_probe.py
-cd ../..
+cd ../../..
 
 kubectl apply -f network-exposure/kuberfiles/02_nemesys-deployment.yaml
 
