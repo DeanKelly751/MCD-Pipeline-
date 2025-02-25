@@ -355,8 +355,24 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	if err := r.Get(ctx, req.NamespacedName, codecoAppCR); err != nil {
 		fmt.Printf("Error getting Codeco CR \n")
+		// Request object not found, could have been deleted after reconcile request.
 		if errors.IsNotFound(err) {
-			// Request object not found, could have been deleted after reconcile request.
+			// Delete SWM Application group if it exists
+			qos_scheduler_application_group := &swmv1alpha1.ApplicationGroup{}
+
+			err := r.Get(ctx, client.ObjectKey{Namespace: req.NamespacedName.Namespace, Name: "acm-applicationgroup"}, qos_scheduler_application_group)
+			if err != nil {
+				if errors.IsNotFound(err) {
+					fmt.Println("SWM application group not found")
+					return ctrl.Result{}, nil
+				}
+				return ctrl.Result{}, err
+			}
+			fmt.Println("Deleting SWM application group")
+			if err := r.Delete(ctx, qos_scheduler_application_group, client.GracePeriodSeconds(5)); err != nil {
+				fmt.Println("Error deleting SWM application group")
+				return ctrl.Result{}, err
+			}
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, err
