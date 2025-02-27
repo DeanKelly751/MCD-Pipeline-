@@ -1,8 +1,8 @@
 module gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm
 
-go 1.21
+go 1.22
 
-toolchain go1.21.10
+toolchain go1.23.5
 
 require (
 	github.com/fluidtruck/deepcopy v1.0.0
