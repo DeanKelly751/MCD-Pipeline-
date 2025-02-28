@@ -20,11 +20,13 @@
 package controllers
 
 import (
+	"context"
 	"path/filepath"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	swm "siemens.com/qos-scheduler/api/v1alpha1"
 
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -54,7 +56,9 @@ var _ = BeforeSuite(func() {
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
-		CRDDirectoryPaths:     []string{filepath.Join("..", "config", "crd", "bases")},
+		CRDDirectoryPaths: []string{
+			filepath.Join("..", "config", "crd", "bases"),
+			filepath.Join("..", "internal", "qos-scheduler", "crds")},
 		ErrorIfCRDPathMissing: true,
 	}
 
@@ -65,6 +69,8 @@ var _ = BeforeSuite(func() {
 	Expect(cfg).NotTo(BeNil())
 
 	err = codecov1alpha1.AddToScheme(scheme.Scheme)
+	Expect(err).NotTo(HaveOccurred())
+	err = swm.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 
 	//+kubebuilder:scaffold:scheme
@@ -77,6 +83,31 @@ var _ = BeforeSuite(func() {
 
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
-	err := testEnv.Stop()
-	Expect(err).NotTo(HaveOccurred())
+	if testEnv != nil {
+		Expect(testEnv.Stop()).NotTo(HaveOccurred())
+	}
+})
+
+var _ = Describe("SWM Data", func() {
+	BeforeEach(func(ctx context.Context) {
+		setUpEnvironment(ctx)
+	})
+	It("saves node recommendations for SWM", func(ctx context.Context) {
+		swmApp := makeApp(noGroup, "app", "w1", "w2")
+		Expect(k8sClient.Create(ctx, swmApp)).Should(Succeed())
+		Expect(swmApp.Spec.Workloads[0].NodeRecommendations).To(BeNil())
+		Expect(swmApp.Spec.Workloads[1].NodeRecommendations).To(BeNil())
+
+		SetRecomms(swmApp, "w1:n2", "w2:n1")
+		Expect(k8sClient.Update(ctx, swmApp)).Should(Succeed())
+
+		var app swm.Application // start with a fresh copy
+		app.Name, app.Namespace = swmApp.Name, swmApp.Namespace
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(&app), &app)).
+			Should(Succeed())
+		Expect(app.Spec.Workloads[0].NodeRecommendations).
+			To(Equal(map[string]float64{"n2": 0.9}))
+		Expect(app.Spec.Workloads[1].NodeRecommendations).
+			To(Equal(map[string]float64{"n1": 0.9}))
+	})
 })

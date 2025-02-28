@@ -1,0 +1,109 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+# SPDX-License-Identifier: Apache-2.0
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.5
+  name: networkpaths.qos-scheduler.siemens.com
+spec:
+  group: qos-scheduler.siemens.com
+  names:
+    kind: NetworkPath
+    listKind: NetworkPathList
+    plural: networkpaths
+    singular: networkpath
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: start
+      jsonPath: .spec.start.name
+      name: start
+      type: string
+    - description: end
+      jsonPath: .spec.end.name
+      name: end
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: |-
+          NetworkPath is a list of NetworkLinks. It connects
+          endpoints, which must be NetworkEndpoints.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              end:
+                description: The linknode (should be a NetworkEndpoint) where this
+                  path ends.
+                properties:
+                  name:
+                    description: |-
+                      The node's name. Must not be empty.
+                      For ComputeNodes, this should be the same as the NodeName
+                      on the corresponding NetworkEndpoint object.
+                      For NetworkNodes, the name is not evaluated by our code, but it
+                      makes sense to use a unique device id.
+                    type: string
+                  type:
+                    default: COMPUTE
+                    description: Values are COMPUTE or NETWORK.
+                    type: string
+                required:
+                - name
+                type: object
+              links:
+                description: The names of the NetworkLinks along this path spec.
+                items:
+                  type: string
+                type: array
+              start:
+                description: The linknode (should be a NetworkEndpoint) where this
+                  path starts.
+                properties:
+                  name:
+                    description: |-
+                      The node's name. Must not be empty.
+                      For ComputeNodes, this should be the same as the NodeName
+                      on the corresponding NetworkEndpoint object.
+                      For NetworkNodes, the name is not evaluated by our code, but it
+                      makes sense to use a unique device id.
+                    type: string
+                  type:
+                    default: COMPUTE
+                    description: Values are COMPUTE or NETWORK.
+                    type: string
+                required:
+                - name
+                type: object
+            required:
+            - end
+            - links
+            - start
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

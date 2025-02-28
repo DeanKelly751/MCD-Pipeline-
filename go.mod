@@ -15,9 +15,12 @@ require (
 	k8s.io/api v0.29.5
 	k8s.io/apimachinery v0.29.5
 	k8s.io/client-go v0.29.5
+	siemens.com/qos-scheduler v1.4.0
 	sigs.k8s.io/controller-runtime v0.17.2
 	sigs.k8s.io/yaml v1.4.0
 )
+
+replace siemens.com/qos-scheduler v1.4.0 => ./internal/qos-scheduler
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect

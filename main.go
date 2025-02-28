@@ -27,11 +27,12 @@ import (
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	codecov1alpha1 "gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm/api/v1alpha1"
 	"gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm/controllers"
-	swmv1alpha1 "gitlab.eclipse.org/rcarrollred/qos-scheduler/scheduler/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
+
+	swmApi "siemens.com/qos-scheduler/api/v1alpha1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -47,7 +48,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(codecov1alpha1.AddToScheme(scheme))
-	utilruntime.Must(swmv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(swmApi.AddToScheme(scheme))
 	monitoringv1.AddToScheme(scheme)
 	//+kubebuilder:scaffold:scheme
 }

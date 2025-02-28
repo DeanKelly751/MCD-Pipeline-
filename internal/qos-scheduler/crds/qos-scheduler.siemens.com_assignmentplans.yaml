@@ -1,0 +1,434 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+# SPDX-License-Identifier: Apache-2.0
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.5
+  name: assignmentplans.qos-scheduler.siemens.com
+spec:
+  group: qos-scheduler.siemens.com
+  names:
+    kind: AssignmentPlan
+    listKind: AssignmentPlanList
+    plural: assignmentplans
+    shortNames:
+    - ap
+    singular: assignmentplan
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: Status of pods
+      jsonPath: .status.podStatus
+      name: PodStatus
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: |-
+          AssignmentPlan describes the placement of the workloads and channels of an ApplicationGroup
+          on the cluster nodes.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              qoSModel:
+                properties:
+                  app_group:
+                    properties:
+                      applications:
+                        items:
+                          properties:
+                            id:
+                              type: string
+                            workloads:
+                              items:
+                                properties:
+                                  CPU:
+                                    format: int32
+                                    type: integer
+                                  fixed:
+                                    type: boolean
+                                  forbidden_labels:
+                                    description: |-
+                                      Labels express additional constraints for where a workload
+                                      can run. If a workload has labels, it will only run on nodes
+                                      with matching labels (all labels must match).
+                                    items:
+                                      type: string
+                                    type: array
+                                  id:
+                                    type: string
+                                  memory:
+                                    format: int64
+                                    type: integer
+                                  node:
+                                    type: string
+                                  required_labels:
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              type: array
+                          type: object
+                        type: array
+                      channels:
+                        items:
+                          properties:
+                            bandwidth:
+                              format: int64
+                              type: integer
+                            fixed:
+                              type: boolean
+                            frame_size:
+                              format: int32
+                              type: integer
+                            id:
+                              type: string
+                            latency:
+                              format: int64
+                              type: integer
+                            network:
+                              type: string
+                            path:
+                              type: string
+                            qos:
+                              format: int32
+                              type: integer
+                            send_interval:
+                              format: int32
+                              type: integer
+                            source_application:
+                              type: string
+                            source_workload:
+                              type: string
+                            target_application:
+                              type: string
+                            target_port:
+                              format: int32
+                              type: integer
+                            target_workload:
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  costs:
+                    description: Node-specific costs for workloads
+                    properties:
+                      nodes:
+                        items:
+                          properties:
+                            node:
+                              type: string
+                            value:
+                              type: number
+                          type: object
+                        type: array
+                      workloads:
+                        items:
+                          properties:
+                            application:
+                              type: string
+                            nodes:
+                              items:
+                                properties:
+                                  node:
+                                    type: string
+                                  value:
+                                    type: number
+                                type: object
+                              type: array
+                            workload:
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  infrastructure:
+                    properties:
+                      networks:
+                        items:
+                          properties:
+                            bearer:
+                              type: string
+                            id:
+                              type: string
+                            links:
+                              items:
+                                description: There is at most one link in a network
+                                  between any pair of nodes.
+                                properties:
+                                  id:
+                                    type: string
+                                  latency:
+                                    format: int64
+                                    type: integer
+                                  medium:
+                                    type: string
+                                  source:
+                                    type: string
+                                  target:
+                                    type: string
+                                type: object
+                              type: array
+                            media:
+                              items:
+                                description: Transport medium (e.g., a WLAN channel
+                                  or a wire)
+                                properties:
+                                  bandwidth:
+                                    properties:
+                                      capacity:
+                                        format: int64
+                                        type: integer
+                                      used:
+                                        format: int64
+                                        type: integer
+                                    type: object
+                                  id:
+                                    type: string
+                                type: object
+                              type: array
+                            paths:
+                              items:
+                                description: |-
+                                  Path between two compute nodes.  It has no cycles.
+                                  A path’s attributes are derived from its constituent links.
+                                properties:
+                                  id:
+                                    type: string
+                                  links:
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              type: array
+                            qos:
+                              format: int32
+                              type: integer
+                          type: object
+                        type: array
+                      nodes:
+                        items:
+                          properties:
+                            CPU:
+                              description: COMPUTE
+                              properties:
+                                capacity:
+                                  format: int64
+                                  type: integer
+                                used:
+                                  format: int64
+                                  type: integer
+                              type: object
+                            bandwidth:
+                              properties:
+                                capacity:
+                                  format: int64
+                                  type: integer
+                                used:
+                                  format: int64
+                                  type: integer
+                              type: object
+                            id:
+                              type: string
+                            labels:
+                              description: |-
+                                Nodes can be labelled to indicate capabilities, architecture,
+                                maybe the security zone.
+                              items:
+                                type: string
+                              type: array
+                            latency:
+                              description: NETWORK
+                              format: int64
+                              type: integer
+                            memory:
+                              properties:
+                                capacity:
+                                  format: int64
+                                  type: integer
+                                used:
+                                  format: int64
+                                  type: integer
+                              type: object
+                            node_type:
+                              format: int32
+                              type: integer
+                          type: object
+                        type: array
+                    type: object
+                  recommendations:
+                    description: Node recommendations for workloads
+                    properties:
+                      workloads:
+                        items:
+                          properties:
+                            application:
+                              type: string
+                            nodes:
+                              items:
+                                properties:
+                                  node:
+                                    type: string
+                                  value:
+                                    type: number
+                                type: object
+                              type: array
+                            workload:
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                type: object
+            type: object
+          status:
+            description: AssignmentPlanStatus describes the current state of an assignment
+              plan.
+            properties:
+              actionInfo:
+                description: list of actions results
+                items:
+                  properties:
+                    done:
+                      description: is the corresponding action done?
+                      type: boolean
+                    error:
+                      description: if not empty indicates that there was an error
+                      type: string
+                  required:
+                  - done
+                  type: object
+                type: array
+              actions:
+                description: list of actions for assignment
+                items:
+                  properties:
+                    action:
+                      description: what is to be done
+                      type: integer
+                    object:
+                      description: name of target object
+                      type: string
+                    param:
+                      description: name of parameter object
+                      type: string
+                    proto:
+                      description: what object is the base of the base new object
+                      type: string
+                  required:
+                  - action
+                  - object
+                  type: object
+                type: array
+              clusterNames:
+                additionalProperties:
+                  properties:
+                    location:
+                      description: Location of pod or channels (node or path)
+                      type: string
+                    name:
+                      description: Name of pod or channel in cluster
+                      type: string
+                  required:
+                  - location
+                  - name
+                  type: object
+                description: map workload or channel to name of pod or channel in
+                  cluster
+                type: object
+              modelHash:
+                description: hash of model fields after model was updated with assignment
+                type: string
+              phase:
+                description: |-
+                  One of {"Idle", "Placing", "Scheduling"}.  Indicates whether the plan
+                  waits for Solver to finish (Placing) or implements the plan in the
+                  cluster (Scheduling).
+                type: string
+              reply:
+                description: Solver’s reply for assignment plan
+                properties:
+                  assignment:
+                    properties:
+                      channels:
+                        items:
+                          properties:
+                            channel:
+                              type: string
+                            network:
+                              type: string
+                            oldNetwork:
+                              type: string
+                            oldPath:
+                              type: string
+                            path:
+                              type: string
+                            source:
+                              description: fields below needed for implicit reverse
+                                path
+                              type: string
+                            target:
+                              type: string
+                          type: object
+                        type: array
+                      workloads:
+                        items:
+                          properties:
+                            application:
+                              type: string
+                            node:
+                              type: string
+                            oldNode:
+                              type: string
+                            workload:
+                              type: string
+                          type: object
+                        type: array
+                    type: object
+                  errors:
+                    items:
+                      properties:
+                        details:
+                          type: string
+                        kind:
+                          type: string
+                      type: object
+                    type: array
+                  feasible:
+                    type: boolean
+                  messages:
+                    type: string
+                type: object
+              solveHash:
+                description: hash of model fields relevant to scheduling as Solver
+                  saw it
+                type: string
+              solverCalled:
+                description: SolverCalled contains the time Solver was called.
+                format: date-time
+                type: string
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

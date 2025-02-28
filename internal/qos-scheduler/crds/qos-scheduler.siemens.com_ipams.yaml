@@ -1,0 +1,85 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+# SPDX-License-Identifier: Apache-2.0
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.5
+  name: ipams.qos-scheduler.siemens.com
+spec:
+  group: qos-scheduler.siemens.com
+  names:
+    kind: Ipam
+    listKind: IpamList
+    plural: ipams
+    shortNames:
+    - ipam
+    singular: ipam
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Ipam describes an IP Address range reservation.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: |-
+              An IpamSpec describes an IP address allocation.
+              You can create an IpamSpec with just the number of addresses
+              filled in. A controller will then reserve a CIDR for you and
+              add it to the spec, if possible.
+              If no CIDR can be reserved, the Ipam's status will be updated
+              to "unfulfillable".
+            properties:
+              numberOfAddresses:
+                description: NumberOfAddresses is the minimum number of addresses
+                  this ipam spec should cover.
+                type: integer
+              purpose:
+                description: |-
+                  Purpose is a text field for your own use, in case you have multiple IPAMs and
+                  want to tell them apart, and encoding the purpose in the name does not work for you.
+                type: string
+            required:
+            - numberOfAddresses
+            type: object
+          status:
+            properties:
+              code:
+                default: REQUESTED
+                description: The current status code of the ipam.
+                type: string
+              error:
+                description: |-
+                  An error message for an unsuccessful ipam reservation attempt.
+                  This should only be set when the status code is Unfulfillable.
+                type: string
+              ipv4Cidr:
+                description: An Ipv4 CIDR range with at least numberOfAddresses addresses.
+                type: string
+            required:
+            - code
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
