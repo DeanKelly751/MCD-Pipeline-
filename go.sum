@@ -116,8 +116,6 @@ github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcU
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
-gitlab.eclipse.org/rcarrollred/qos-scheduler/scheduler v0.0.0-20240219170912-c9f23bbc0192 h1:2qjhAseuZFpajo+hDypu7mDkKcHACg1UfyU/8LMIDOo=
-gitlab.eclipse.org/rcarrollred/qos-scheduler/scheduler v0.0.0-20240219170912-c9f23bbc0192/go.mod h1:U0CVJ24EgWcuPXvn8ESF1eFo2OmN30u6iG4Rf5Xdh8I=
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=
 go.uber.org/goleak v1.3.0/go.mod h1:CoHD4mav9JJNrW/WLlf7HGZPjdw8EucARQHekz1X6bE=
 go.uber.org/multierr v1.11.0 h1:blXXJkSxSSfBVBlC76pxqeO+LN3aDfLQo+309xJstO0=

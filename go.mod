@@ -11,7 +11,6 @@ require (
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.74.0
 	github.com/prometheus/client_golang v1.18.0
 	github.com/prometheus/common v0.45.0
-	gitlab.eclipse.org/rcarrollred/qos-scheduler/scheduler v0.0.0-20240219170912-c9f23bbc0192
 	k8s.io/api v0.29.5
 	k8s.io/apimachinery v0.29.5
 	k8s.io/client-go v0.29.5
