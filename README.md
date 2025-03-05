@@ -48,6 +48,14 @@ Our post_deploy.sh script will then configure the cluster to suit the needs of n
 - Helm
 - Make
 
+We also advise increasing watcher limits, which is used to configure user-level limits on system resources, including the maximum number of open files.
+We advise increasing the limit to 100000 to ensure all pods come up. This must be done as a pre-requisit each time u deploy CODECO using the command:
+
+```sh
+ulimit -n 104000
+```
+
+
 ## Cluster creation
 We advise anyone who wishes to deploy CODECO use the kind-config.yaml file located in ACM/config/cluster directory. This config file has been created to configure the cluster for all CODECO components.
 
