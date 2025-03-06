@@ -35,6 +35,7 @@ COPY go.sum go.sum
 COPY main.go main.go
 COPY api/ api/
 COPY controllers/ controllers/
+COPY internal/qos-scheduler/ internal/qos-scheduler/
 
 # Build
 # the GOARCH has not a default value to allow the binary be built according to the host where the command
