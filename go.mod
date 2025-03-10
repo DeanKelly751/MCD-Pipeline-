@@ -1,8 +1,8 @@
 module gitlab.eclipse.org/eclipse-research-labs/codeco-project/acm
 
-go 1.21
+go 1.22
 
-toolchain go1.21.10
+toolchain go1.23.5
 
 require (
 	github.com/fluidtruck/deepcopy v1.0.0
@@ -11,13 +11,15 @@ require (
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.74.0
 	github.com/prometheus/client_golang v1.18.0
 	github.com/prometheus/common v0.45.0
-	gitlab.eclipse.org/rcarrollred/qos-scheduler/scheduler v0.0.0-20240219170912-c9f23bbc0192
 	k8s.io/api v0.29.5
 	k8s.io/apimachinery v0.29.5
 	k8s.io/client-go v0.29.5
+	siemens.com/qos-scheduler v1.4.0
 	sigs.k8s.io/controller-runtime v0.17.2
 	sigs.k8s.io/yaml v1.4.0
 )
+
+replace siemens.com/qos-scheduler v1.4.0 => ./internal/qos-scheduler
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect

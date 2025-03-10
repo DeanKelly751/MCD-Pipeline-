@@ -1,0 +1,149 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+# SPDX-License-Identifier: Apache-2.0
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.5
+  name: networklinks.qos-scheduler.siemens.com
+spec:
+  group: qos-scheduler.siemens.com
+  names:
+    kind: NetworkLink
+    listKind: NetworkLinkList
+    plural: networklinks
+    shortNames:
+    - nwl
+    singular: networklink
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: bandwidth
+      jsonPath: .spec.bandWidthBits
+      name: BWspec
+      type: integer
+    - description: Available bandwidth
+      jsonPath: .status.bandWidthAvailable
+      name: BWAvail
+      type: integer
+    - description: Latency
+      jsonPath: .spec.latencyNanos
+      name: Latency Spec
+      type: integer
+    - description: Current Latency
+      jsonPath: .status.latencyNanos
+      name: Latency
+      type: integer
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: NetworkLink is the Schema for the networklinks API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: |-
+              NetworkLinkSpec represents a link between two nodes. These can be
+              k8s compute nodes or network nodes, for instance those that represent
+              network routers or switches.
+            properties:
+              bandWidthBits:
+                description: |-
+                  Bandwidth capacity in bit/s on the link from LinkFrom to LinkTo.
+                  This is the total capacity, regardless of how much is
+                  in use.
+                format: int64
+                type: integer
+              latencyNanos:
+                description: Worst-case delay in nanoseconds.
+                format: int64
+                type: integer
+              linkFrom:
+                description: The 'from' node of the link.
+                properties:
+                  name:
+                    description: |-
+                      The node's name. Must not be empty.
+                      For ComputeNodes, this should be the same as the NodeName
+                      on the corresponding NetworkEndpoint object.
+                      For NetworkNodes, the name is not evaluated by our code, but it
+                      makes sense to use a unique device id.
+                    type: string
+                  type:
+                    default: COMPUTE
+                    description: Values are COMPUTE or NETWORK.
+                    type: string
+                required:
+                - name
+                type: object
+              linkTo:
+                description: The 'to' node of the link.
+                properties:
+                  name:
+                    description: |-
+                      The node's name. Must not be empty.
+                      For ComputeNodes, this should be the same as the NodeName
+                      on the corresponding NetworkEndpoint object.
+                      For NetworkNodes, the name is not evaluated by our code, but it
+                      makes sense to use a unique device id.
+                    type: string
+                  type:
+                    default: COMPUTE
+                    description: Values are COMPUTE or NETWORK.
+                    type: string
+                required:
+                - name
+                type: object
+              physicalBase:
+                description: |-
+                  If set, the name of the physical network that this is built on.
+                  If this value is set, then this link is a logical link.
+                  If this value is empty, then this link is a physical link.
+                type: string
+            required:
+            - linkFrom
+            - linkTo
+            type: object
+          status:
+            description: NetworkLinkStatus defines the observed state of NetworkLink
+            properties:
+              bandWidthAvailable:
+                description: |-
+                  How much of the spec bandwidth is currently available.
+                  Like the bandwidth, this is in bits per second.
+                format: int64
+                type: integer
+              embeddedChannels:
+                description: The ids of channels that traverse this link.
+                items:
+                  type: string
+                type: array
+              latencyNanos:
+                description: Average latency on the link from node1 to node2 in nanoseconds.
+                format: int64
+                type: integer
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

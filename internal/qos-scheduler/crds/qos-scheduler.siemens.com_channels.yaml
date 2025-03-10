@@ -1,0 +1,235 @@
+# SPDX-FileCopyrightText: 2023 Siemens AG
+# SPDX-License-Identifier: Apache-2.0
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.5
+  name: channels.qos-scheduler.siemens.com
+spec:
+  group: qos-scheduler.siemens.com
+  names:
+    kind: Channel
+    listKind: ChannelList
+    plural: channels
+    singular: channel
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - description: Status
+      jsonPath: .status.status
+      name: Status
+      type: string
+    - description: source node
+      jsonPath: .spec.channelFrom
+      name: source
+      type: string
+    - description: target node
+      jsonPath: .spec.channelTo
+      name: target
+      type: string
+    - description: (framesize in bytes)
+      jsonPath: .spec.frameSize
+      name: Framesize
+      type: string
+    - description: interval (nanos)
+      jsonPath: .spec.interval
+      name: Interval
+      type: string
+    - description: latency (nanos)
+      jsonPath: .spec.latency
+      name: Latency
+      type: string
+    - description: Earliest Transmission Offset
+      jsonPath: .spec.earliestTransmissionOffset
+      name: OffsetFrom
+      type: string
+    - description: Latest Transmission Offset
+      jsonPath: .spec.latestTransmissionOffset
+      name: OffsetTo
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Channel is the Schema for the channels API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: |-
+              ChannelSpec is a channel that the scheduler requests on behalf of an application.
+              The ChannelSpec is computed from the NetworkInterfaces in the application's workloads,
+              together with scheduling information that says which workload will run on which node.
+            properties:
+              bandwidthBits:
+                description: Bandwidth (in bit/s)
+                format: int64
+                type: integer
+              channelFrom:
+                description: |-
+                  ChannelFrom identifies the compute node where the channel originates.
+                  The endpoints of a channel are always compute nodes (as opposed to network nodes).
+                type: string
+              channelPath:
+                description: |-
+                  ChannelPath is the list of network links to use for
+                  implementing the route from ChannelFrom to ChannelTo.
+                properties:
+                  name:
+                    description: The name of the path.
+                    type: string
+                  namespace:
+                    description: The namespace of the path.
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              channelTo:
+                type: string
+              framesize:
+                description: Framesize (in Bytes)
+                format: int32
+                type: integer
+              maxDelayNanos:
+                description: This is the maximum latency, in nanoseconds.
+                format: int64
+                type: integer
+              sendInterval:
+                description: Interval (in nanoseconds)
+                format: int32
+                type: integer
+              serviceClass:
+                description: |-
+                  The quality of service requested for this channel.
+                  The network implementation class (network type) will be determined from this
+                  and stored in the "network-implementation" label.
+                type: string
+              sourceWorkload:
+                description: |-
+                  SourceWorkload and TargetWorkload identify the workloads (pods) that
+                  this channel connects. The values are pod names.
+                type: string
+              targetPort:
+                description: |-
+                  TargetPort is the port where the target workload listens for channel traffic.
+                  If you want to specify a name and a protocol as well, they need to be added
+                  here and in the channel spec and in the service generation code.
+                format: int32
+                type: integer
+              targetWorkload:
+                type: string
+            required:
+            - channelFrom
+            - channelTo
+            - sourceWorkload
+            - targetPort
+            - targetWorkload
+            type: object
+          status:
+            description: ChannelStatus defines the state of a channel.
+            properties:
+              cniMetadata:
+                description: Information about this channel for use in configuring
+                  cni plugins.
+                properties:
+                  channelPath:
+                    description: The path to take from source to target.
+                    properties:
+                      name:
+                        description: The name of the path.
+                        type: string
+                      namespace:
+                        description: The namespace of the path.
+                        type: string
+                    required:
+                    - name
+                    - namespace
+                    type: object
+                  containerInterfaceId:
+                    description: The ID of the container network interface.
+                    type: integer
+                  ipRange:
+                    description: |-
+                      The Ip address range associated with this channel.
+                      The network operator has to request a range containing this
+                      ip range from the global ipam controller.
+                    type: string
+                  networkAttachmentName:
+                    description: The name of the network attachment definition resource
+                      to use, if any.
+                    type: string
+                  nodeIpRange:
+                    description: |-
+                      The Node ip range for this channel.
+                      This is for channels that wish to assign a custom IP to both the
+                      nodes and the pods.
+                    type: string
+                  qosPriority:
+                    description: |-
+                      The QoS Egress priority to attach to packets traversing this
+                      channel.
+                    type: integer
+                  sourceip:
+                    description: The Ip address assigned to the source Pod
+                    type: string
+                  targetip:
+                    description: The Ip address assigned to the target Pod
+                    type: string
+                  vlanId:
+                    description: The VLAN ID to use for setup of virtual overlay network
+                      with sub interface on k8s nodes
+                    type: integer
+                  vlinkName:
+                    description: Name of the L2S-M Vlink that is associated with the
+                      channel
+                    type: string
+                type: object
+              earliestTransmissionOffset:
+                description: Earliest Transmission Offset (in nanoseconds)
+                format: int32
+                type: integer
+              frameSize:
+                description: Framesize (in bytes)
+                format: int32
+                type: integer
+              interval:
+                description: Interval (in nanoseconds)
+                format: int32
+                type: integer
+              latency:
+                description: Latency (in nanoseconds)
+                format: int64
+                type: integer
+              latestTransmissionOffset:
+                description: Latest Transmission Offset (in nanoseconds)
+                format: int32
+                type: integer
+              status:
+                description: Status of the channel inside the cluster.
+                type: string
+            required:
+            - cniMetadata
+            - status
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
