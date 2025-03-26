@@ -224,6 +224,7 @@ cd ..
 echo "........................................Finished installing PDLC..............................................."
 echo ".....................Installing SWM....................................."
 cd qos-scheduler
+# Install yq 
 sed -i '59s/enabled: true/enabled: false/' ./helm/qos-scheduler/values.yaml
 make chart
 helm install qostest --namespace=he-codeco-swm --create-namespace tmp/helm
