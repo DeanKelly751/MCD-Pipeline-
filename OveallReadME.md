@@ -103,56 +103,12 @@ The **Context-awareness agent (CA)** monitors application requirements, user beh
 - Grafana
 - Helm
 
-# Cluster Setup
-
-## Local Testing - Kind
-
-Assuming you have `kind` installed, create a cluster using this configuration file:
-
-```yaml
-kind: Cluster
-apiVersion: kind.x-k8s.io/v1alpha4
-containerdConfigPatches:
-- |-
-  [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5001"]
-    endpoint = ["http://kind-registry:5000"]
-networking:
-  podSubnet: "10.100.0.0/16"
-#    disableDefaultCNI: true
-nodes:
-- role: control-plane
-  image: kindest/node:v1.26.6
-  labels:
-    siemens.com.qosscheduler.master: true
-    dedicated: master # Add this line to assign the dedicated=master label
-- role: worker
-  image: kindest/node:v1.26.6
-  extraMounts:
-  - hostPath: /tmp/nwapidb
-    containerPath: /nwapidb
-  kubeadmConfigPatches:
-  - |
-    kind: JoinConfiguration
-    nodeRegistration:
-      name: "C1"
-      kubeletExtraArgs:
-        node-labels: "mac-address=5e0d.6660.a485,siemens.com.qosscheduler.c1=true"
-- role: worker
-  image: kindest/node:v1.26.6
-  kubeadmConfigPatches:
-  - |
-    kind: JoinConfiguration
-    nodeRegistration:
-      name: "C2"
-      kubeletExtraArgs:
-        node-labels: "mac-address=da69.022b.c8fc,siemens.com.qosscheduler.c2=true"
-```
 ## Cluster Setup
 
 Once you have created this config file, reference it when creating your cluster:
 
 ```bash
-kind create cluster --config <your-config-file-name>.yaml
+kind create cluster --config config/cluster/kind-config.yaml
 ```
 To ensure your 3 node cluster has come up run:
 ```bash
