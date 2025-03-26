@@ -464,16 +464,25 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	qos_scheduler_new_app.Spec.Workloads = []swmv1alpha1.ApplicationWorkloadSpec{}
 
 	// Map from Codeco Application Model to SWM Application Model
-	MapToSWMApplicationModel(codecoAppCR, qos_scheduler_new_app)
 	fmt.Println(time.Now().Format(time.UnixDate), " ------------------- SWM APP ------------------------- ")
 	jsonswm, error := json.MarshalIndent(qos_scheduler_new_app, "", "   ")
 	fmt.Println(string(jsonswm))
 	if err != nil {
 		fmt.Println(error)
 	}
-	err = r.Get(ctx, client.ObjectKey{Namespace: codecoAppCR.Namespace, Name: "acm-swm-app"}, qos_scheduler_new_app)
+	found := &swmv1alpha1.Application{}
+	err = r.Get(ctx, client.ObjectKey{Namespace: codecoAppCR.Namespace, Name: "acm-swm-app"}, found)
+
+	fmt.Print("AFTER GET METHOD...........................................")
+	jsonswm, error = json.MarshalIndent(found, "", "   ")
+	fmt.Println(string(jsonswm))
+	if error != nil {
+		fmt.Println(error)
+	}
+
 	if err != nil {
 		fmt.Println("Creating new SWM app")
+		MapToSWMApplicationModel(codecoAppCR, qos_scheduler_new_app)
 		if err := r.Create(ctx, qos_scheduler_new_app); err != nil {
 			fmt.Println("Error creating SWM")
 			return ctrl.Result{}, err
@@ -481,10 +490,10 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	} else {
 		// Update SWM Application if already exists
 		fmt.Println("Already exists: Updating SWM app")
-		err = r.Update(ctx, qos_scheduler_new_app)
-
-		if err != nil {
-			fmt.Print("Error updating swm")
+		patch := client.MergeFrom(found.DeepCopy())
+		MapToSWMApplicationModel(codecoAppCR, found)
+		if err := r.Patch(ctx, found, patch); err != nil {
+			fmt.Println("Error patching SWM")
 			return ctrl.Result{}, err
 		}
 	}
