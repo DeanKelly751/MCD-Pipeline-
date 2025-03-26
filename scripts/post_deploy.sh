@@ -227,7 +227,7 @@ cd qos-scheduler
 # Install yq 
 sed -i '59s/enabled: true/enabled: false/' ./helm/qos-scheduler/values.yaml
 make chart
-helm install qostest --namespace=he-codeco-swm --create-namespace tmp/helm
+helm install qostest --namespace=he-codeco-swm --create-namespace --set multus-cni.enabled=false tmp/helm
 cd ..
 echo "......................................Finished installing SWM.................................."
 
