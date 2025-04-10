@@ -208,6 +208,8 @@ echo ".....................Installing PDLC....................................."
 # cd ..
 #PDLC
 
+WORKER_NODE_1=${WORKER_NODES[0]}    # Getting the first node
+echo "Selected WORKER_NODE_1: $WORKER_NODE_1"   # Printing this as well
 cd pdlc-integration
 sed -i "s/sonem-worker/$WORKER_NODE_1/" data_preprocessing/pdlc-dp-deployment.yaml
 sed -i "s/test-namespace/he-codeco-acm/" data_preprocessing/pdlc-dp-deployment.yaml
