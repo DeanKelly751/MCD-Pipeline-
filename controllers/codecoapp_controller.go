@@ -26,7 +26,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	dc "github.com/fluidtruck/deepcopy"
+	"github.com/jinzhu/copier"
 
 	// "github.com/tidwall/pretty"
 	"encoding/json"
@@ -465,16 +465,11 @@ func (r *CodecoAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// Map from Codeco Application Model to SWM Application Model
 	fmt.Println(time.Now().Format(time.UnixDate), " ------------------- SWM APP ------------------------- ")
-	jsonswm, error := json.MarshalIndent(qos_scheduler_new_app, "", "   ")
-	fmt.Println(string(jsonswm))
-	if err != nil {
-		fmt.Println(error)
-	}
 	found := &swmv1alpha1.Application{}
 	err = r.Get(ctx, client.ObjectKey{Namespace: codecoAppCR.Namespace, Name: "acm-swm-app"}, found)
 
 	fmt.Print("AFTER GET METHOD...........................................")
-	jsonswm, error = json.MarshalIndent(found, "", "   ")
+	jsonswm, error := json.MarshalIndent(found, "", "   ")
 	fmt.Println(string(jsonswm))
 	if error != nil {
 		fmt.Println(error)
@@ -560,13 +555,12 @@ func CreateNewSWMApplicationModel() {
 // Function to Map from Codeco Application Model to SWM Application Model
 func MapToSWMApplicationModel(codecoApp *codecov1alpha1.CodecoApp, swmApp *swmv1alpha1.Application) {
 
-	dc.DeepCopy(codecoApp.Spec, &swmApp.Spec)
+    copier.CopyWithOption(&swmApp.Spec, &codecoApp.Spec, copier.Option{DeepCopy: true})
 
 	for i := range codecoApp.Spec.Workloads {
-		dc.DeepCopy(codecoApp.Spec.Workloads[i].Template, &swmApp.Spec.Workloads[i].Template.Spec)
-		dc.DeepCopy(codecoApp.Spec.Workloads[i].Channels, &swmApp.Spec.Workloads[i].Channels)
+		copier.Copy(&swmApp.Spec.Workloads[i].Template.Spec, &codecoApp.Spec.Workloads[i].Template)
 		for j := range codecoApp.Spec.Workloads[i].Channels {
-			dc.DeepCopy(codecoApp.Spec.Workloads[i].Channels[j].AdvancedChannelSettings, &swmApp.Spec.Workloads[i].Channels[j])
+			copier.Copy(&swmApp.Spec.Workloads[i].Channels[j], &codecoApp.Spec.Workloads[i].Channels[j].AdvancedChannelSettings)
 		}
 	}
 
