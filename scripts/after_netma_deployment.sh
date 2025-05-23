@@ -46,6 +46,9 @@ unset deployment_count
 unset doc
 unset in_deployment
 unset file_name
+unset SPREAD_FACTOR
+
+SPREAD_FACTOR=0.1
 cd ../secure-connectivity
 # Filename for the JSON config
 jsonConfigPath="./configs/switchConfig.json"
@@ -176,10 +179,11 @@ for node in "${nodes[@]}"; do
   cat >> "$output_file" << EOF
     - name: $node
       ip: 10.0.0.$ip_counter/24
+      spreadFactor: $SPREAD_FACTOR
       metrics:
         rttInterval: 10
         throughputInterval: 20
-        jitterInterval: 5
+        jitterInterval: -1
 EOF
   ip_counter=$((ip_counter + 1))
 done
