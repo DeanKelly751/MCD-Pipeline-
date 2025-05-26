@@ -119,6 +119,7 @@ kubectl taint nodes $CONTROL_PLANE_NODE node-role.kubernetes.io/control-plane:No
 # kubectl create namespace he-codeco-netma
 # kubectl get nodes
 
+# !! I needed to run this in the IBM kubeadm deployment !! kubectl label node ip-10-0-131-251 dedicated=control-plane
 kubectl wait --for=condition=Ready pod --all -A --timeout=20m # wait until everything is running before we continue
 kubectl create -f ./deployments/l2sm-deployment.yaml -n=he-codeco-netma
 
