@@ -38,6 +38,8 @@ for label in "${control_plane_labels[@]}"; do
     CONTROL_PLANE_NODE=$(kubectl get nodes -o custom-columns=NAME:.metadata.name --no-headers -l "$label")
     if [ -n "$CONTROL_PLANE_NODE" ]; then
         WORKER_NODES=($(kubectl get nodes -o custom-columns=NAME:.metadata.name --no-headers -l '!'$label))
+
+        # ensures that all control-plane nodes are clearly labeled with dedicated=control-plane - necessary for NetMA
         kubectl get nodes -l $label -o name  | xargs -r -I{} kubectl label {} dedicated=control-plane --overwrite
         break
     fi
