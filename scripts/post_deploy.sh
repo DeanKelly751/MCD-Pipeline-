@@ -127,16 +127,22 @@ kubectl wait --for=condition=Ready pod --all -n he-codeco-netma --timeout=20m
 echo "........................................Finished installing NetMA..............................................."
 echo ".....................Installing MDM....................................."
 
-kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
-
+# Check if storageclasses exist in the cluster and get STORAGECLASSNAMEs
 STORAGE_CLASSES=($(kubectl get storageclass -o jsonpath='{.items[*].metadata.name}'))
 echo "All StorageClasses: ${STORAGE_CLASSES[@]}"
 
+# Pick one of the existing STORAGECLASSNAMEs if existent
 for sc in "${STORAGE_CLASSES[@]}"; do
   export STORAGECLASSNAME="$sc"
 done
 
-echo "Processing StorageClass: $sc"
+# If storageclasses do not exist apply the local-path storageclass and export the required STORAGECLASSNAME variable
+if [ -z "$STORAGECLASSNAME" ] then;
+  kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+  export STORAGECLASSNAME="local-path"
+fi
+
+echo "Using Storage Class: $STORAGECLASSNAME"
 
 cd mdm-api
 # export STORAGECLASSNAME=standard
