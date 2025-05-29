@@ -152,8 +152,20 @@ kubectl wait --for=condition=Ready pod --all -n he-codeco-netma --timeout=20m
 ## kubectl get netma-topology netma-sample -o yaml -n he-codeco-netma
 echo "........................................Finished installing NetMA..............................................."
 echo ".....................Installing MDM....................................."
+
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+
+STORAGE_CLASSES=($(kubectl get storageclass -o jsonpath='{.items[*].metadata.name}'))
+echo "All StorageClasses: ${STORAGE_CLASSES[@]}"
+
+for sc in "${STORAGE_CLASSES[@]}"; do
+  export STORAGECLASSNAME="$sc"
+done
+
+echo "Processing StorageClass: $sc"
+
 cd mdm-api
-export STORAGECLASSNAME=standard
+# export STORAGECLASSNAME=standard
 export MDM_NAMESPACE=he-codeco-mdm
 export MDM_CONTEXT=$CURRENT_CONTEXT
 export PROMETHEUS_URL="http://prometheus-k8s.monitoring.svc.cluster.local"
