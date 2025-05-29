@@ -79,32 +79,6 @@ cd ..
 echo "........................................Prometheus Installed..............................................."
 echo "........................................Installing Primary CNI: Flannel..............................................."
 
-## Following bundle of commands should be required only for KinD - to be verified
-# Download binaries for CNI Plugins
-mkdir -p plugins/bin
-wget https://github.com/containernetworking/plugins/releases/download/v1.6.0/cni-plugins-linux-amd64-v1.6.0.tgz
-tar -xf cni-plugins-linux-amd64-v1.6.0.tgz -C ./plugins/bin
-# copy necessary plugins into all nodes
-docker cp ./plugins/bin/. kind-control-plane:/opt/cni/bin
-docker cp ./plugins/bin/. kind-worker:/opt/cni/bin
-docker cp ./plugins/bin/. kind-worker2:/opt/cni/bin
-# fix by Alex UC3M
-docker exec -it kind-control-plane modprobe br_netfilter
-docker exec -it kind-worker modprobe br_netfilter
-docker exec -it kind-worker2 modprobe br_netfilter
-# fix
-docker exec -it kind-control-plane sysctl -p /etc/sysctl.conf
-docker exec -it kind-worker sysctl -p /etc/sysctl.conf
-docker exec -it kind-worker2 sysctl -p /etc/sysctl.conf
-# File limit workaround
-docker exec -it kind-control-plane bash -c "sysctl -w fs.inotify.max_user_watches=2099999999; sysctl -w fs.inotify.max_user_instances=2099999999; sysctl -w fs.inotify.max_queued_events=2099999999"
-docker exec -it kind-worker bash -c "sysctl -w fs.inotify.max_user_watches=2099999999; sysctl -w fs.inotify.max_user_instances=2099999999; sysctl -w fs.inotify.max_queued_events=2099999999"
-docker exec -it kind-worker2 bash -c "sysctl -w fs.inotify.max_user_watches=2099999999; sysctl -w fs.inotify.max_user_instances=2099999999; sysctl -w fs.inotify.max_queued_events=2099999999"
-sysctl -w fs.inotify.max_user_watches=2099999999
-sysctl -w fs.inotify.max_user_instances=2099999999
-sysctl -w fs.inotify.max_queued_events=2099999999
-
-
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml 
 sleep 20
 
