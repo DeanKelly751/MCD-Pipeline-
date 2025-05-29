@@ -137,7 +137,7 @@ for sc in "${STORAGE_CLASSES[@]}"; do
 done
 
 # If storageclasses do not exist apply the local-path storageclass and export the required STORAGECLASSNAME variable
-if [ -z "$STORAGECLASSNAME" ] then;
+if [ -z "$STORAGECLASSNAME" ]; then
   kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
   export STORAGECLASSNAME="local-path"
 fi
