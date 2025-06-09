@@ -45,8 +45,6 @@ spec:
           limits:
             memory: 4Gi
             cpu: "2"
-    nwbandwidth: "1.2" #Mbs
-    nwlatency: "3" # Ms
     serviceChannels:
     - channelName: ""
       advancedChannelSettings:
@@ -65,8 +63,6 @@ spec:
         image: nginx:1.14.2
         ports:
         - containerPort: 80
-    nwbandwidth: "1.2" #Mbs
-    nwlatency: "3" # Ms
     serviceChannels:
     - channelName: "fe-db-channel"
       advancedChannelSettings:

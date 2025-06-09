@@ -87,12 +87,6 @@ type CodecoAppMSSpec struct {
 
 	// A reference to the PodSpec of the microservice. Edit codecoapp_types.go to remove/update
 	Template v1.PodSpec `json:"podspec,omitempty"`
-
-	//+kubebuilder:validation:default=25
-	NWBandwidthMbs string `json:"nwbandwidth,omitempty"`
-
-	//+kubebuilder:validation:default=10
-	NWLatencyMs string `json:"nwlatency,omitempty"`
 }
 
 // ServiceId is a combination of a service name and an application name.
