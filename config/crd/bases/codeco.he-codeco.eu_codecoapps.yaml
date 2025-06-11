@@ -76,10 +76,6 @@ spec:
                   description: CodecoAppMSSpec defines the desired state of CodecoApp
                     micro service
                   properties:
-                    nwbandwidth:
-                      type: string
-                    nwlatency:
-                      type: string
                     podspec:
                       description: A reference to the PodSpec of the microservice.
                         Edit codecoapp_types.go to remove/update

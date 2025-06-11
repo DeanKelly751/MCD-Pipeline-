@@ -30,9 +30,7 @@ spec:
   appFailureTolerance: ""
   appName: acm-swm-app
   codecoapp-msspec:
-  - nwbandwidth: "1.2"
-    nwlatency: "3"
-    podspec:
+  - podspec:
       containers:
       - image: quay.io/skupper/hello-world-backend:latest
         name: skupper-backend
@@ -56,9 +54,7 @@ spec:
         port: 9090
         serviceName: front-end
     serviceName: backend
-  - nwbandwidth: "1.2"
-    nwlatency: "3"
-    podspec:
+  - podspec:
       containers:
       - image: quay.io/dekelly/frontend-app:v0.0.2
         name: front-end

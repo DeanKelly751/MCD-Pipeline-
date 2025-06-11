@@ -51,14 +51,6 @@
 - A reference to the PodSpec of the microservice.
 - **Optional**
 
-### NWBandwidthMbs (String)
-- Desired network bandwidth.
-- **Optional**
-
-### NWLatencyMs (String)
-- Desired network latency.
-- **Optional**
-
 ## Channels
 
 ### BaseName (String)
