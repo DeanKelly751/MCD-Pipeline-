@@ -79,11 +79,22 @@ IMG= "quay.io/johndoe/acm-image:v0.0.1"
 ```sh
 > make docker-build docker-push IMG=<some-registry>/codecoapp-operator:tag
 ```
+
+To use our pre-built image, run:
+```sh
+> make docker-build docker-push IMG=quay.io/dekelly/codecoapp-operator:v0.0.1
+```
+
 ### Multi Architecture Build command
 If you are trying to build CODECO for Multi Arch, use the 'docker-buildx' command:
 
 ```sh
 > make docker-buildx docker-push IMG=<some-registry>/codecoapp-operator:tag
+```
+
+To use our pre-built image, run:
+```sh
+> make docker-buildx docker-push IMG=quay.io/dekelly/codecoapp-operator-buildx:v0.0.1
 ```
 
 
