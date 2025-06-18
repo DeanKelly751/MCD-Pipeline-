@@ -77,13 +77,13 @@ Example IMG:
 IMG= "quay.io/johndoe/acm-image:v0.0.1"
 
 ```sh
-> make docker-buildx docker-push IMG=<some-registry>/codecoapp-operator:tag
+> make docker-build docker-push IMG=<some-registry>/codecoapp-operator:tag
 ```
 ### Multi Architecture Build command
 If you are trying to build CODECO for Multi Arch, use the 'docker-buildx' command:
 
 ```sh
-> make docker-build docker-push IMG=<some-registry>/codecoapp-operator:tag
+> make docker-buildx docker-push IMG=<some-registry>/codecoapp-operator:tag
 ```
 
 
