@@ -79,6 +79,13 @@ IMG= "quay.io/johndoe/acm-image:v0.0.1"
 ```sh
 > make docker-build docker-push IMG=<some-registry>/codecoapp-operator:tag
 ```
+### Multi Architecture Build command
+If you are trying to build CODECO for Multi Arch, use the 'docker-buildx' command:
+
+```sh
+> make docker-build docker-push IMG=<some-registry>/codecoapp-operator:tag
+```
+
 
 **Note I:** This is required only after code changes in the operator.  
 **Note II:** For `<some-registry>`, choose from a local registry, which also needs to be made visible in your cluster, to a remote registry, e.g., Docker hub or Podman.  
