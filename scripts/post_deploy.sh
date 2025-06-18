@@ -38,6 +38,9 @@ for label in "${control_plane_labels[@]}"; do
     CONTROL_PLANE_NODE=$(kubectl get nodes -o custom-columns=NAME:.metadata.name --no-headers -l "$label")
     if [ -n "$CONTROL_PLANE_NODE" ]; then
         WORKER_NODES=($(kubectl get nodes -o custom-columns=NAME:.metadata.name --no-headers -l '!'$label))
+
+        # ensures that all control-plane nodes are clearly labeled with dedicated=control-plane - necessary for NetMA
+        kubectl get nodes -l $label -o name  | xargs -r -I{} kubectl label {} dedicated=control-plane --overwrite
         break
     fi
 done
@@ -75,32 +78,6 @@ kubectl apply -f manifests/
 cd ..
 echo "........................................Prometheus Installed..............................................."
 echo "........................................Installing Primary CNI: Flannel..............................................."
-
-## Following bundle of commands should be required only for KinD - to be verified
-# Download binaries for CNI Plugins
-mkdir -p plugins/bin
-wget https://github.com/containernetworking/plugins/releases/download/v1.6.0/cni-plugins-linux-amd64-v1.6.0.tgz
-tar -xf cni-plugins-linux-amd64-v1.6.0.tgz -C ./plugins/bin
-# copy necessary plugins into all nodes
-docker cp ./plugins/bin/. kind-control-plane:/opt/cni/bin
-docker cp ./plugins/bin/. kind-worker:/opt/cni/bin
-docker cp ./plugins/bin/. kind-worker2:/opt/cni/bin
-# fix by Alex UC3M
-docker exec -it kind-control-plane modprobe br_netfilter
-docker exec -it kind-worker modprobe br_netfilter
-docker exec -it kind-worker2 modprobe br_netfilter
-# fix
-docker exec -it kind-control-plane sysctl -p /etc/sysctl.conf
-docker exec -it kind-worker sysctl -p /etc/sysctl.conf
-docker exec -it kind-worker2 sysctl -p /etc/sysctl.conf
-# File limit workaround
-docker exec -it kind-control-plane bash -c "sysctl -w fs.inotify.max_user_watches=2099999999; sysctl -w fs.inotify.max_user_instances=2099999999; sysctl -w fs.inotify.max_queued_events=2099999999"
-docker exec -it kind-worker bash -c "sysctl -w fs.inotify.max_user_watches=2099999999; sysctl -w fs.inotify.max_user_instances=2099999999; sysctl -w fs.inotify.max_queued_events=2099999999"
-docker exec -it kind-worker2 bash -c "sysctl -w fs.inotify.max_user_watches=2099999999; sysctl -w fs.inotify.max_user_instances=2099999999; sysctl -w fs.inotify.max_queued_events=2099999999"
-sysctl -w fs.inotify.max_user_watches=2099999999
-sysctl -w fs.inotify.max_user_instances=2099999999
-sysctl -w fs.inotify.max_queued_events=2099999999
-
 
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml 
 sleep 20
@@ -149,8 +126,26 @@ kubectl wait --for=condition=Ready pod --all -n he-codeco-netma --timeout=20m
 ## kubectl get netma-topology netma-sample -o yaml -n he-codeco-netma
 echo "........................................Finished installing NetMA..............................................."
 echo ".....................Installing MDM....................................."
+
+# Check if storageclasses exist in the cluster and get STORAGECLASSNAMEs
+STORAGE_CLASSES=($(kubectl get storageclass -o jsonpath='{.items[*].metadata.name}'))
+echo "All StorageClasses: ${STORAGE_CLASSES[@]}"
+
+# Pick one of the existing STORAGECLASSNAMEs if existent
+for sc in "${STORAGE_CLASSES[@]}"; do
+  export STORAGECLASSNAME="$sc"
+done
+
+# If storageclasses do not exist apply the local-path storageclass and export the required STORAGECLASSNAME variable
+if [ -z "$STORAGECLASSNAME" ]; then
+  kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+  export STORAGECLASSNAME="local-path"
+fi
+
+echo "Using Storage Class: $STORAGECLASSNAME"
+
 cd mdm-api
-export STORAGECLASSNAME=standard
+# export STORAGECLASSNAME=standard
 export MDM_NAMESPACE=he-codeco-mdm
 export MDM_CONTEXT=$CURRENT_CONTEXT
 export PROMETHEUS_URL="http://prometheus-k8s.monitoring.svc.cluster.local"
