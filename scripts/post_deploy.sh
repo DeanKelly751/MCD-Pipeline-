@@ -156,6 +156,15 @@ helm repo add neo4j https://helm.neo4j.com/neo4j
 sed -i "s/<storageclassName>/$STORAGECLASSNAME/g" "./deployment/zookeeper-helm.yaml"
 sed -i "s/<storageclassName>/$STORAGECLASSNAME/g" "./deployment/neo4j-helm.yaml"
 sed -i "s/<storageclassName>/$STORAGECLASSNAME/g" "./deployment/kafka-helm.yaml"
+
+# issue mdm-api/6, image bitnami/bitnami-shell is depreciated 
+yq eval '.volumePermissions.image = {
+  "registry": "docker.io",
+  "repository": "bitnami/os-shell",
+  "tag": "11-debian-11-r90"
+}' -i ./deployment/kafka-helm.yaml
+#
+
 helm --kube-context=$MDM_CONTEXT install mdm-zookeeper -n $MDM_NAMESPACE  bitnami/zookeeper  -f ./deployment/zookeeper-helm.yaml
 helm --kube-context=$MDM_CONTEXT install mdm-kafka -n $MDM_NAMESPACE bitnami/kafka --version 21.1.1 -f ./deployment/kafka-helm.yaml
 helm --kube-context=$MDM_CONTEXT install mdm-neo4j -n $MDM_NAMESPACE neo4j/neo4j-standalone -f ./deployment/neo4j-helm.yaml
