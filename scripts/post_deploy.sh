@@ -144,6 +144,13 @@ fi
 
 echo "Using Storage Class: $STORAGECLASSNAME"
 
+# network policy fix - mdm access to prometheus - for k3s installations
+kubectl label namespace he-codeco-mdm namespace=he-codeco-mdm
+yq '.spec.ingress += load("acm/scripts/new-rule.yaml")' \
+  kube-prometheus/manifests/prometheus-networkPolicy.yaml > new-prometheus-networkPolicy.yaml
+kubectl apply -f new-prometheus-networkPolicy.yaml
+#
+
 cd mdm-api
 # export STORAGECLASSNAME=standard
 export MDM_NAMESPACE=he-codeco-mdm
