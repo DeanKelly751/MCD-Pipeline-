@@ -1,0 +1,19 @@
+# new network-policy rule for the k3s deployment
+# prometheus access to mdm
+# fix by dalal
+
+- from:
+  - podSelector:
+      matchLabels:
+        app.kubernetes.io/instance: freshness-connector
+    namespaceSelector:
+      matchExpressions:
+      - key: namespace
+        operator: In
+        values:
+        - he-codeco-mdm
+  ports:
+  - port: 9090
+    protocol: TCP
+  - port: 8080
+    protocol: TCP
