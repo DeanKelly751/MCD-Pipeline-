@@ -144,13 +144,6 @@ fi
 
 echo "Using Storage Class: $STORAGECLASSNAME"
 
-# network policy fix - mdm access to prometheus - for k3s installations
-kubectl label namespace he-codeco-mdm namespace=he-codeco-mdm
-yq '.spec.ingress += load("acm/scripts/new-rule.yaml")' \
-  kube-prometheus/manifests/prometheus-networkPolicy.yaml > new-prometheus-networkPolicy.yaml
-kubectl apply -f new-prometheus-networkPolicy.yaml
-#
-
 cd mdm-api
 # export STORAGECLASSNAME=standard
 export MDM_NAMESPACE=he-codeco-mdm
@@ -170,6 +163,13 @@ yq eval '.volumePermissions.image = {
   "repository": "bitnami/os-shell",
   "tag": "11-debian-11-r90"
 }' -i ./deployment/kafka-helm.yaml
+#
+
+# network policy fix - mdm access to prometheus - for k3s installations
+kubectl label namespace he-codeco-mdm namespace=he-codeco-mdm
+yq '.spec.ingress += load("acm/scripts/new-rule.yaml")' \
+  kube-prometheus/manifests/prometheus-networkPolicy.yaml > new-prometheus-networkPolicy.yaml
+kubectl apply -f new-prometheus-networkPolicy.yaml
 #
 
 helm --kube-context=$MDM_CONTEXT install mdm-zookeeper -n $MDM_NAMESPACE  bitnami/zookeeper  -f ./deployment/zookeeper-helm.yaml
