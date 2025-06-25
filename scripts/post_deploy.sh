@@ -59,7 +59,7 @@ for n in $(kubectl get no -o jsonpath="{.items[*].metadata.name}")
 do
   kubectl label --overwrite nodes "${n}" "${NODE_LABEL_PREFIX}.${n}="
 done
-# kubectl label nodes "$CONTROL_PLANE_NODE" node-role.kubernetes.io/control-plane="" --overwrite
+kubectl label nodes "$CONTROL_PLANE_NODE" node-role.kubernetes.io/control-plane="" --overwrite
 
 echo "........................................Kustomize Installing..............................................."
 
