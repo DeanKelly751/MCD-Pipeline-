@@ -23,13 +23,6 @@
 echo "Executing post deployment tasks..."
 ##TODO(user): Add your post deployment tasks here
 
-# network policy fix - mdm access to prometheus - for k3s installations
-kubectl label namespace he-codeco-acm namespace=he-codeco-acm
-yq '.spec.ingress += load("acm/scripts/new-rule-acm.yaml")' \
-  kube-prometheus/manifests/prometheus-networkPolicy.yaml > new-prometheus-networkPolicy.yaml
-kubectl apply -f new-prometheus-networkPolicy.yaml
-#
-
 echo "........................................ GETTING CLUSTER INFORMATION ..............................................."
 # This will get node names to avoid hardcoding variables 
 
@@ -86,6 +79,14 @@ kubectl wait \
 kubectl apply -f manifests/
 cd ..
 echo "........................................Prometheus Installed..............................................."
+
+# network policy fix - ACM access to prometheus - for k3s installations
+kubectl label namespace he-codeco-acm namespace=he-codeco-acm
+yq '.spec.ingress += load("acm/scripts/new-rule-acm.yaml")' \
+  kube-prometheus/manifests/prometheus-networkPolicy.yaml > new-prometheus-networkPolicy.yaml
+kubectl apply -f new-prometheus-networkPolicy.yaml
+#
+
 echo "........................................Installing Primary CNI: Flannel..............................................."
 
 kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml 
