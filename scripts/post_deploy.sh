@@ -22,6 +22,14 @@
 ## components and to perform any other post-deployment tasks.
 echo "Executing post deployment tasks..."
 ##TODO(user): Add your post deployment tasks here
+
+# network policy fix - mdm access to prometheus - for k3s installations
+kubectl label namespace he-codeco-acm namespace=he-codeco-acm
+yq '.spec.ingress += load("acm/scripts/new-rule-acm.yaml")' \
+  kube-prometheus/manifests/prometheus-networkPolicy.yaml > new-prometheus-networkPolicy.yaml
+kubectl apply -f new-prometheus-networkPolicy.yaml
+#
+
 echo "........................................ GETTING CLUSTER INFORMATION ..............................................."
 # This will get node names to avoid hardcoding variables 
 
@@ -168,8 +176,8 @@ yq eval '.volumePermissions.image = {
 
 # network policy fix - mdm access to prometheus - for k3s installations
 kubectl label namespace he-codeco-mdm namespace=he-codeco-mdm
-yq '.spec.ingress += load("acm/scripts/new-rule.yaml")' \
-  kube-prometheus/manifests/prometheus-networkPolicy.yaml > new-prometheus-networkPolicy.yaml
+yq '.spec.ingress += load("acm/scripts/new-rule-mdm.yaml")' \
+  new-prometheus-networkPolicy.yaml > new-prometheus-networkPolicy.yaml
 kubectl apply -f new-prometheus-networkPolicy.yaml
 #
 
