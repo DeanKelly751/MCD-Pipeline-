@@ -1,0 +1,11 @@
+  - from:  # Allow ACM operator to access Prometheus
+    - podSelector:
+        matchLabels:
+          control-plane: controller-manager
+      namespaceSelector:
+        matchLabels:
+          namespace: he-codeco-acm
+    ports:
+    - port: 9090
+      protocol: TCP
+
