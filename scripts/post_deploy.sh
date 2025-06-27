@@ -177,7 +177,7 @@ yq eval '.volumePermissions.image = {
 
 # network policy fix - mdm access to prometheus - for k3s installations
 kubectl label namespace he-codeco-mdm namespace=he-codeco-mdm
-yq '.spec.ingress += load("acm/scripts/network-rule-mdm.yaml")' \
+yq '.spec.ingress += load("../acm/scripts/network-rule-mdm.yaml")' \
   new-prometheus-networkPolicy.yaml > new-prometheus-networkPolicy.yaml
 kubectl apply -f new-prometheus-networkPolicy.yaml
 #
