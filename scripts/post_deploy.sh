@@ -124,9 +124,10 @@ kubectl wait --for=condition=Ready pod --all -A --timeout=20m
 kubectl apply -f kuberfiles/01_netma-topology-crd.yaml
 cd ..
 
-cd network-state-management/k8s-netperf
+cd network-state-management/netma-nsm-mon/k8s-netperf
 kubectl apply -f k8s-netperf.yaml
-cd ../..
+cd ../../..
+
 
 kubectl apply -f network-exposure/kuberfiles/02_nemesys-deployment.yaml
 
