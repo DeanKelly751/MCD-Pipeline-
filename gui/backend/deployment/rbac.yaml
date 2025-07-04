@@ -35,4 +35,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: codeco-gui-backend
-  namespace: default 
+  namespace: he-codeco-acm
