@@ -40,6 +40,31 @@ We will then use ACM to install the other 4 project components; SWM, MDM, PDLC &
 
 Our post_deploy.sh script will then configure the cluster to suit the needs of not only ACM, but of all CODECO components
 
+## 🌐 Web GUI (NEW)
+
+The ACM operator now includes a comprehensive web-based GUI for managing CodecoApp resources:
+
+- **Frontend**: React application with PatternFly UI
+- **Backend**: Node.js API with Kubernetes integration
+- **Features**: YAML generation, resource upload, monitoring, and CRD management
+
+### Quick Start with GUI
+
+```bash
+# Deploy ACM operator with GUI
+make deploy-with-gui IMG=<your-registry>/codecoapp-operator:tag
+
+# Or deploy GUI separately after ACM
+kubectl apply -f gui/backend/deployment/
+kubectl apply -f gui/frontend/deployment/
+
+# Access GUI (after port-forwarding)
+kubectl port-forward svc/acm-codeco-gui-frontend-service 3000:3000
+# Open http://localhost:3000
+```
+
+For detailed GUI documentation, see [gui/README.md](gui/README.md).
+
 ## Prerequisites
 - Golang v1.21<
 - Kind (or some other cluster creator)
@@ -63,7 +88,7 @@ To create a cluster cd into the ACM directory and with kind run:
 > kind create cluster --config ./config/cluster/kind-config.yaml
 
 ## Getting Started
-You’ll need a Kind installed on your machine. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.  
+You'll need a Kind installed on your machine. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.  
 **Note:** Your controller will automatically use the current context in your kubeconfig file (i.e. whatever cluster `kubectl cluster-info` shows).
 
 
@@ -114,6 +139,16 @@ Run the following step as a one time step (tested with Docker hub) - this is nee
 > make deploy IMG=<some-registry>/controller:latest
 ```
 
+### Deploy with GUI
+
+To deploy the ACM operator with the web GUI:
+
+```sh
+> make deploy-with-gui IMG=<some-registry>/controller:latest
+```
+
+This will deploy both the operator and the GUI components.
+
 After successful deployment you should see a pod, a service, a deployment and a replicaset in the odecoapp-operator-system namespace - for example:
 ```sh
   > kubectl get all -n codecoapp-operator-system
@@ -141,6 +176,23 @@ The pod should be in _Running_ state and ready
 ```
 
 "codeco_v1alpha1_codecoapp_ver3.yaml" is our most up to date sample deployment.
+
+#### Using the Web GUI
+
+Access the web GUI to manage CodecoApp resources:
+
+1. Port-forward the GUI service:
+   ```sh
+   kubectl port-forward svc/acm-codeco-gui-frontend-service 3000:3000 -n he-codeco-acm
+   ```
+
+2. Open your browser to: http://localhost:3000
+
+3. Use the GUI to:
+   - Generate CodecoApp YAML configurations
+   - Upload and deploy YAML files
+   - Monitor deployed resources
+   - View cluster status and CRDs
 
 #### Checking that the operator works (temp)
 
@@ -200,28 +252,29 @@ UnDeploy the controller from the cluster:
 > make undeploy
 ```
 
-### Customizing the deployment/undeployment process
+### Undeploy with GUI
+To undeploy both operator and GUI:
 
-If you need to customize the deployment process (for example, deploy your own component with the CODECO operator), you can add your customization to the scripts in the ./scripts directory. These are shell scripts that are executed during the deployment and undeployment process.
+```sh
+> make undeploy-with-gui
+```
 
-- `post_deploy.sh` is executed before the deployment and can be used to install dependencies  
->**Note:** This script is executed before the namespace `codecoapp-operator-system` is created
-- `post_undeploy.sh` is executed after the CODECO operator deplyment and can be used to install additional components, for example CODECO platform sub components (so the `make deploy` command installs the entire CPDECO platform)
-- `pre_undeploy.sh` is executed before removing the CODECO operator and is the best place to uninstall additional compoenent that were installed in the `post_undeploy.sh` script.
-- `post_undeploy.sh` is executed after the CODECO operator was removes and is a good place for last minutes cleanups.  
->**Note:** This script is executed after the namespace `codecoapp-operator-system` is removed
+## Development
 
-## Prometheus Rules Aspect
-To add a prometheus rule you wish to deploy reference the 'acm/config/rules' file. You will add your rules.yaml (it may be a good idea to reference your component in this file name e.g acm-rules.yaml, swm-rules.yaml, etc) file to this directory, which our monitoring code will then read and pass to prometheus. Coupled with the prometheus-operator you should then be able to access these rules and see the metrics on the Grafana UI through port forwarding the pod.
+### GUI Development
+For developing the web GUI components:
 
-## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
+```bash
+# Start GUI in development mode
+cd gui
+docker-compose up
 
-### How it works
-This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/).
+# Or start components separately
+cd gui/backend && npm install && npm start
+cd gui/frontend && npm install && npm start
+```
 
-It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/),
-which provide a reconcile function responsible for synchronizing resources until the desired state is reached on the cluster.
+See [gui/README.md](gui/README.md) for detailed GUI development instructions.
 
 ### Test It Out (Development only, not a real K8s cluster deployment)
 1. Install the CRDs into the cluster:
@@ -248,6 +301,19 @@ If you are editing the API definitions, generate the manifests such as CRs or CR
 **NOTE:** Run `make --help` for more information on all potential `make` targets
 
 More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
+
+### Adding Prometheus Rules
+
+To add a prometheus rule you wish to deploy reference the 'acm/config/rules' file. You will add your rules.yaml (it may be a good idea to reference your component in this file name e.g acm-rules.yaml, swm-rules.yaml, etc) file to this directory, which our monitoring code will then read and pass to prometheus. Coupled with the prometheus-operator you should then be able to access these rules and see the metrics on the Grafana UI through port forwarding the pod.
+
+## Contributing
+// TODO(user): Add detailed information on how you would like others to contribute to this project
+
+### How it works
+This project aims to follow the Kubernetes [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/).
+
+It uses [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/),
+which provide a reconcile function responsible for synchronizing resources until the desired state is reached on the cluster.
 
 ### Exploring the APIs
 
