@@ -58,6 +58,9 @@ const Navigation = ({ children }) => {
         <NavItem isActive={location.pathname === '/upload'}>
           <Link to="/upload">Upload YAML</Link>
         </NavItem>
+        <NavItem isActive={location.pathname === '/monitoring'}>
+          <Link to="/monitoring">Monitoring</Link>
+        </NavItem>
         <NavItem isActive={location.pathname === '/docs'}>
           <Link to="/docs">Documentation</Link>
         </NavItem>

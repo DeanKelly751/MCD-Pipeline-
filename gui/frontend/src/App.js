@@ -7,6 +7,7 @@ import { Documentation } from './pages/Documentation';
 import YamlLanding from './pages/Yaml/YamlLanding';
 import YamlGenerator from './pages/Yaml/YamlGenerator';
 import YamlUpload from './pages/Yaml/YamlUpload';
+import MonitoringDashboard from './pages/Monitoring/MonitoringDashboard';
 import '@patternfly/react-core/dist/styles/base.css';
 import './App.css';
 
@@ -21,6 +22,7 @@ function App() {
                 <Route path="/" element={<YamlLanding />} />
                 <Route path="/yaml" element={<YamlGenerator />} />
                 <Route path="/upload" element={<YamlUpload />} />
+                <Route path="/monitoring" element={<MonitoringDashboard />} />
                 <Route path="/docs" element={<Documentation />} />
               </Routes>
             </ErrorBoundary>
