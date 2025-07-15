@@ -37,10 +37,7 @@ const Navigation = ({ children }) => {
           >
             <BarsIcon />
           </PageToggleButton>
-          <Brand src={codecoLogo} alt="CODECO" heights={{ default: '36px' }}>
-            <source media="(min-width: 768px)" srcSet={codecoLogo} />
-            <img src={codecoLogo} alt="CODECO" />
-          </Brand>
+          <Brand src={codecoLogo} alt="CODECO" heights={{ default: '36px' }} />
         </MastheadBrand>
       </MastheadMain>
     </Masthead>
