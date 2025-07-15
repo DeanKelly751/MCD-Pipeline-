@@ -126,6 +126,11 @@ cd ..
 
 cd network-state-management/netma-nsm-mon/k8s-netperf
 kubectl apply -f k8s-netperf.yaml
+
+cd ../Monitoring
+kubectl apply -f serviceaccount.yaml
+kubectl apply -f test-automation.yaml
+
 cd ../../..
 
 
