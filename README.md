@@ -50,18 +50,23 @@ The ACM operator now includes a comprehensive web-based GUI for managing CodecoA
 
 ### Quick Start with GUI
 
-```bash
-# Deploy ACM operator with GUI
-make deploy-with-gui IMG=<your-registry>/codecoapp-operator:tag
+####  Development Mode
 
-# Or deploy GUI separately after ACM
-kubectl apply -f gui/backend/deployment/
-kubectl apply -f gui/frontend/deployment/
+1. **Start the Backend**:
+   ```bash
+   cd gui/backend
+   npm install
+   npm start
+   ```
 
-# Access GUI (after port-forwarding)
-kubectl port-forward svc/acm-codeco-gui-frontend-service 3000:3000
-# Open http://localhost:3000
-```
+2. **Start the Frontend**:
+   ```bash
+   cd gui/frontend
+   npm install
+   npm start
+   ```
+
+3. **Access the GUI**: http://localhost:3000
 
 For detailed GUI documentation, see [gui/README.md](gui/README.md).
 
