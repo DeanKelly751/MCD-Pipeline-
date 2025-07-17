@@ -280,7 +280,7 @@ func getNodeMetricsFromPrometheus(acmApp *codecov1alpha1.CodecoApp, v1api v1.API
 	queries := map[string]string{
 		"AvgCpuUsage":              "instance:node_cpu:rate1m",
 		"AvgMemoryUsage":           "instance:node_memory:avg1m",
-		"AvgNodeEnergyExpenditure": "instance:node_energy:irate1m",
+		"AvgNodeEnergyExpenditure": "instance:node_energy:increase1m",
 		"AvgNodeFailureTolerance":  "instance:node_status:avg1m",
 	}
 
