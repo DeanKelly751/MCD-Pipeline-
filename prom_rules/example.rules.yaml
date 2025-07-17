@@ -37,8 +37,8 @@ spec:
     - record: instance:node_memory:avg1m
       expr: avg_over_time(node_memory_MemTotal_bytes[1m]) - (avg_over_time(node_memory_MemFree_bytes[1m]) + avg_over_time(node_memory_Cached_bytes[1m]) + avg_over_time(node_memory_Buffers_bytes[1m]))
       # Average node energy
-    - record: instance:node_energy:irate1m
-      expr: avg by (instance) (irate(kepler_node_platform_joules_total{mode="dynamic"}[1m]))
+    - record: instance:node_energy:increase1m
+      expr: avg by (instance) (increase(kepler_node_platform_joules_total{mode="dynamic"}[1m]))
       # Average node failure
     - record: instance:node_status:avg1m
       expr: sum(avg_over_time(kube_node_status_condition{condition="Ready", status!="true"}[1m])) by (node)
