@@ -267,6 +267,7 @@ echo "......................................Finished installing SWM.............
 
 echo ".....................Installing Kepler....................................."
 cd kepler
+git checkout release-0.7.8
 sed -i 's/IMAGE_TAG          ?= latest/export IMAGE_TAG   ?= release-0.7.8/g' Makefile
 make build-manifest OPTS="PROMETHEUS_DEPLOY"
 kubectl create -f _output/generated-manifest/deployment.yaml
