@@ -258,8 +258,10 @@ cd qos-scheduler
 # wget https://github.com/mikefarah/yq/releases/download/v4.34.2/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq
 # make chart
 # helm install qostest --namespace=he-codeco-swm --create-namespace --set multus-cni.enabled=false tmp/helm
-docker run hecodeco/swm-chart-dh:2.0.4 >chart.tgz
-( fn=$(mktemp "/tmp/chart-XXXXXX") && docker run --rm "hecodeco/swm-chart-dh:2.0.4" >"${fn}" && helm install "qos" "${fn}" --namespace="he-codeco-swm" --create-namespace && rm -f "${fn}" )
+
+REGISTRY_PREFIX=hecodeco/swm-
+eval "$(docker run --rm "${REGISTRY_PREFIX}chart-dh:$(cat VERSION)" install --release=qos)"
+
 cd ..
 echo "......................................Finished installing SWM.................................."
 
