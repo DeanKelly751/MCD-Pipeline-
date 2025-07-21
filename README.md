@@ -40,6 +40,36 @@ We will then use ACM to install the other 4 project components; SWM, MDM, PDLC &
 
 Our post_deploy.sh script will then configure the cluster to suit the needs of not only ACM, but of all CODECO components
 
+## 🌐 Web GUI (NEW)
+
+The ACM operator now includes a comprehensive web-based GUI for managing CodecoApp resources:
+
+- **Frontend**: React application with PatternFly UI
+- **Backend**: Node.js API with Kubernetes integration
+- **Features**: YAML generation, resource upload, monitoring, and CRD management
+
+### Quick Start with GUI
+
+####  Development Mode
+
+1. **Start the Backend**:
+   ```bash
+   cd gui/backend
+   npm install
+   npm start
+   ```
+
+2. **Start the Frontend**:
+   ```bash
+   cd gui/frontend
+   npm install
+   npm start
+   ```
+
+3. **Access the GUI**: http://localhost:3000
+
+For detailed GUI documentation, see [gui/README.md](gui/README.md).
+
 ## Prerequisites
 - Golang v1.21<
 - Kind (or some other cluster creator)
@@ -141,6 +171,23 @@ The pod should be in _Running_ state and ready
 ```
 
 "codeco_v1alpha1_codecoapp_ver3.yaml" is our most up to date sample deployment.
+
+#### Using the Web GUI
+
+Access the web GUI to manage CodecoApp resources:
+
+1. Port-forward the GUI service:
+   ```sh
+   kubectl port-forward svc/acm-codeco-gui-frontend-service 3000:3000 -n he-codeco-acm
+   ```
+
+2. Open your browser to: http://localhost:3000
+
+3. Use the GUI to:
+   - Generate CodecoApp YAML configurations
+   - Upload and deploy YAML files
+   - Monitor deployed resources
+   - View cluster status and CRDs
 
 #### Checking that the operator works (temp)
 

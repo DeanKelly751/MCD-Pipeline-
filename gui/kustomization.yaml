@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: acm-gui
+  namespace: he-codeco-acm
+
+# Add namespace to all resources
+namespace: he-codeco-acm
+
+# Add common labels
+commonLabels:
+  app.kubernetes.io/part-of: acm-operator
+  app.kubernetes.io/component: gui
+
+resources:
+  - backend/deployment/rbac.yaml
+  - backend/deployment/deployment.yaml
+  - backend/deployment/backend-service.yaml
+  - frontend/deployment/deployment.yaml
+  - frontend/deployment/front-service.yaml
+
+# Add prefix to avoid naming conflicts
+namePrefix: acm-
+
+# Images to use (can be overridden)
+images:
+  - name: quay.io/dekelly/gui-backend
+    newTag: v1.0.0
+  - name: quay.io/dekelly/gui-frontend
+    newTag: v1.0.0 

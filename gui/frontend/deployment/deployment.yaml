@@ -1,0 +1,26 @@
+apiVersion: apps/v1 # Specifies the API version for the Deployment object
+kind: Deployment # Specifies the kind of Kubernetes object, which is a Deployment
+metadata:
+  name: codeco-gui-frontend # The name of your deployment. Conventionally, append "-deployment".
+  labels:
+    app: codeco-gui-frontend # Labels to apply to this deployment. Useful for organization and selection.
+spec:
+  replicas: 1 # Number of desired pods. Kubernetes will ensure this many pods are running.
+  selector:
+    matchLabels:
+      app: codeco-gui-frontend # This selector tells the Deployment which Pods to manage. It must match the labels in the Pod template.
+  template: # This is the template for the Pods that will be created.
+    metadata:
+      labels:
+        app: codeco-gui-frontend # Labels to apply to each Pod created by this deployment. Must match the selector above.
+    spec:
+      containers:
+        - name: codeco-gui-frontend # Name of the container within the Pod.
+          image: "quay.io/dekelly/gui-frontend:v1.0.0" # The Docker image to use for this container (e.g., "nginx:latest" or "yourusername/your-image:tag").
+          ports:
+            - containerPort: 3000
+          env:
+            - name: REACT_APP_API_URL
+              value: "http://codeco-gui-backend-service:5000"
+            - name: NODE_ENV
+              value: "development"

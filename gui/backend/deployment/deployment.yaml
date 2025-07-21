@@ -1,0 +1,33 @@
+apiVersion: apps/v1 # Specifies the API version for the Deployment object
+kind: Deployment # Specifies the kind of Kubernetes object, which is a Deployment
+metadata:
+  name: codeco-gui-backend # The name of your deployment. Conventionally, append "-deployment".
+  labels:
+    app: codeco-gui-backend # Labels to apply to this deployment. Useful for organization and selection.
+    component: backend # Additional label for component identification
+    version: v1.0.0 # Additional label for version identification
+spec:
+  replicas: 1 # Number of desired pods. Kubernetes will ensure this many pods are running.
+  selector:
+    matchLabels:
+      app: codeco-gui-backend # This selector tells the Deployment which Pods to manage. It must match the labels in the Pod template.
+  template: # This is the template for the Pods that will be created.
+    metadata:
+      labels:
+        app: codeco-gui-backend # Labels to apply to each Pod created by this deployment. Must match the selector above.
+        component: backend # Additional label for component identification
+        version: v1.0.0 # Additional label for version identification
+    spec:
+      serviceAccountName: codeco-gui-backend # Specifies the name of the service account to use for this deployment
+      containers:
+        - name: codeco-gui-backend # Name of the container within the Pod.
+          image: "quay.io/dekelly/gui-backend:v1.0.0" # The Docker image to use for this container (e.g., "nginx:latest" or "yourusername/your-image:tag").
+          ports:
+            - containerPort: 5000 # Specifies the port number to expose on the container
+          env:
+            - name: NODE_ENV # Specifies the name of the environment variable
+              value: "development" # Specifies the value of the environment variable
+            - name: PORT # Specifies the name of the environment variable
+              value: "5000" # Specifies the value of the environment variable
+            - name: ALLOWED_ORIGINS # Specifies the name of the environment variable
+              value: "http://localhost:3000,http://codeco-gui-frontend-service:3000" # Specifies the value of the environment variable
