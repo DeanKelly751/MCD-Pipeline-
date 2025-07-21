@@ -32,6 +32,14 @@ const (
 	BestEffort CodecoQosClass = "BestEffort"
 )
 
+type CodecoPerformanceProfile string
+
+const (
+	Greenness   CodecoPerformanceProfile = "Greenness"
+	Resilience  CodecoPerformanceProfile = "Resilience"
+	UserDefined CodecoPerformanceProfile = "UserDefined"
+)
+
 type CodecoFailureTolerance string
 
 const (
@@ -178,6 +186,9 @@ type CodecoAppSpec struct {
 	AppEnergyLimit string `json:"appEnergyLimit,omitempty"`
 	//Desired tolerance to infrastructure failures, percentage
 	FailureTolerance CodecoFailureTolerance `json:"appFailureTolerance,omitempty"`
+	//+kubebuilder:validation:Enum=Greenness;Resilience;UserDefined
+	//Desired performance profile for the application
+	PerformanceProfile CodecoPerformanceProfile `json:"performanceProfile,omitempty"`
 }
 
 // ServiceStatusMetrics defines the observed metrics of CODECO micro services
