@@ -37,6 +37,10 @@
 - Possible values: `High`, `Medium`, `Low`
 - **Optional**
 
+### PerformanceProfile (String)
+- Desired performance profile for the application.
+- Possible values: `Greenness`, `Resilience`, `UserDefined`
+
 ## Workloads
 
 ### BaseName (String)
