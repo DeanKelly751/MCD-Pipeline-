@@ -28,6 +28,7 @@ metadata:
 spec:
   appEnergyLimit: "20"
   appFailureTolerance: ""
+  performanceProfile: Greenness
   appName: acm-swm-app
   codecoapp-msspec:
   - podspec:
