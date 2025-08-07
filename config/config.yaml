@@ -1,0 +1,5 @@
+# ACM Deployment Configuration
+# Generated automatically by make deploy
+deployment:
+  mode: single
+  timestamp: 2025-08-07T13:22:51Z

@@ -91,11 +91,11 @@ help: ## Display this help.
 
 .PHONY: manifests
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./api/v1alpha1" output:crd:artifacts:config=config/crd/bases
+	"$(CONTROLLER_GEN)" rbac:roleName=manager-role crd webhook paths="./api/v1alpha1" output:crd:artifacts:config=config/crd/bases
 
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
-	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./api/v1alpha1"
+	"$(CONTROLLER_GEN)" object:headerFile="hack/boilerplate.go.txt" paths="./api/v1alpha1"
 
 .PHONY: fmt
 fmt: ## Run go fmt against code.
@@ -107,7 +107,7 @@ vet: ## Run go vet against code.
 
 .PHONY: test
 test: manifests generate fmt vet envtest ## Run tests.
-	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" go test ./... -coverprofile cover.out
+	KUBEBUILDER_ASSETS="$(shell "$(ENVTEST)" use $(ENVTEST_K8S_VERSION) --bin-dir "$(LOCALBIN)" -p path)" go test ./... -coverprofile cover.out
 
 ##@ Build
 
@@ -157,31 +157,53 @@ endif
 
 .PHONY: install
 install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build config/crd | kubectl apply -f -
+	"$(KUSTOMIZE)" build config/crd | kubectl apply -f -
 
 .PHONY: uninstall
 uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
-	$(KUSTOMIZE) build config/crd | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
+	"$(KUSTOMIZE)" build config/crd | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
 
 .PHONY: deploy
-deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	./scripts/pre_deploy.sh
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
-	$(KUSTOMIZE) build config/default | kubectl create -f -
-	./scripts/post_deploy.sh
+deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config. Prompts for single/multi cluster mode.
+	@echo "ACM Deployment Configuration"
+	@echo "Please select deployment mode:"
+	@echo "1) single - Single cluster mode"
+	@echo "2) multi  - Multi cluster mode"
+	@read -p "Enter your choice (single/multi): " user_mode; \
+	if [ "$$user_mode" != "single" ] && [ "$$user_mode" != "multi" ]; then \
+		echo "Error: Please enter 'single' or 'multi'"; \
+		exit 1; \
+	fi; \
+	echo "Deploying in $$user_mode cluster mode"; \
+	echo "# ACM Deployment Configuration" > config/config.yaml; \
+	echo "# Generated automatically by make deploy" >> config/config.yaml; \
+	echo "deployment:" >> config/config.yaml; \
+	echo "  mode: $$user_mode" >> config/config.yaml; \
+	echo "  timestamp: $$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> config/config.yaml; \
+	echo "Configuration saved to config/config.yaml"; \
+	./scripts/pre_deploy.sh; \
+	cd config/manager && "$(KUSTOMIZE)" edit set image controller=${IMG}:latest && cd ../..; \
+	"$(KUSTOMIZE)" build config/default | kubectl create -f -; \
+	./scripts/post_deploy.sh; \
+	if [ "$$user_mode" = "single" ]; then \
+		./scripts/single.sh; \
+	else \
+		./scripts/multi.sh; \
+	fi
 
 .PHONY: undeploy
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	./scripts/pre_undeploy.sh
-	$(KUSTOMIZE) build config/default | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
+	"$(KUSTOMIZE)" build config/default | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
 	./scripts/post_undeploy.sh
 
 ##@ Build Dependencies
 
 ## Location to install dependencies to
 LOCALBIN ?= $(shell pwd)/bin
-$(LOCALBIN):
-	mkdir -p $(LOCALBIN)
+.PHONY: create-localbin
+create-localbin:
+	mkdir -p "$(LOCALBIN)"
 
 ## Tool Binaries
 KUSTOMIZE ?= $(LOCALBIN)/kustomize
@@ -196,35 +218,35 @@ CONTROLLER_TOOLS_VERSION ?= v0.16.4
 KUSTOMIZE_INSTALL_SCRIPT ?= "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
 .PHONY: kustomize
 kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary. If wrong version is installed, it will be removed before downloading.
-$(KUSTOMIZE): $(LOCALBIN)
-	@if test -x $(LOCALBIN)/kustomize && ! $(LOCALBIN)/kustomize version | grep -q $(KUSTOMIZE_VERSION); then \
+$(KUSTOMIZE): create-localbin
+	@if test -x "$(LOCALBIN)/kustomize" && ! "$(LOCALBIN)/kustomize" version | grep -q $(KUSTOMIZE_VERSION); then \
 		echo "$(LOCALBIN)/kustomize version is not expected $(KUSTOMIZE_VERSION). Removing it before installing."; \
-		rm -rf $(LOCALBIN)/kustomize; \
+		rm -rf "$(LOCALBIN)/kustomize"; \
 	fi
-	test -s $(LOCALBIN)/kustomize || { curl -Ss $(KUSTOMIZE_INSTALL_SCRIPT) | bash -s -- $(subst v,,$(KUSTOMIZE_VERSION)) $(LOCALBIN); }
+	test -s "$(LOCALBIN)/kustomize" || { curl -Ss $(KUSTOMIZE_INSTALL_SCRIPT) | bash -s -- $(subst v,,$(KUSTOMIZE_VERSION)) "$(LOCALBIN)"; }
 
 .PHONY: controller-gen
 controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary. If wrong version is installed, it will be overwritten.
-$(CONTROLLER_GEN): $(LOCALBIN)
-	test -s $(LOCALBIN)/controller-gen && $(LOCALBIN)/controller-gen --version | grep -q $(CONTROLLER_TOOLS_VERSION) || \
-	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
+$(CONTROLLER_GEN): create-localbin
+	test -s "$(LOCALBIN)/controller-gen" && "$(LOCALBIN)/controller-gen" --version | grep -q $(CONTROLLER_TOOLS_VERSION) || \
+	GOBIN="$(LOCALBIN)" go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
 
 .PHONY: envtest
 envtest: $(ENVTEST) ## Download envtest-setup locally if necessary.
-$(ENVTEST): $(LOCALBIN)
-	test -s $(LOCALBIN)/setup-envtest || GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+$(ENVTEST): create-localbin
+	test -s "$(LOCALBIN)/setup-envtest" || GOBIN="$(LOCALBIN)" go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
 
 .PHONY: operator-sdk
 OPERATOR_SDK ?= $(LOCALBIN)/operator-sdk
 operator-sdk: ## Download operator-sdk locally if necessary.
-ifeq (,$(wildcard $(OPERATOR_SDK)))
+ifeq (,$(wildcard "$(OPERATOR_SDK)"))
 ifeq (, $(shell which operator-sdk 2>/dev/null))
 	@{ \
 	set -e ;\
-	mkdir -p $(dir $(OPERATOR_SDK)) ;\
+	mkdir -p "$(dir $(OPERATOR_SDK))" ;\
 	OS=$(shell go env GOOS) && ARCH=$(shell go env GOARCH) && \
-	curl -sSLo $(OPERATOR_SDK) https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$${OS}_$${ARCH} ;\
-	chmod +x $(OPERATOR_SDK) ;\
+	curl -sSLo "$(OPERATOR_SDK)" https://github.com/operator-framework/operator-sdk/releases/download/$(OPERATOR_SDK_VERSION)/operator-sdk_$${OS}_$${ARCH} ;\
+	chmod +x "$(OPERATOR_SDK)" ;\
 	}
 else
 OPERATOR_SDK = $(shell which operator-sdk)
@@ -233,10 +255,10 @@ endif
 
 .PHONY: bundle
 bundle: manifests kustomize operator-sdk ## Generate bundle manifests and metadata, then validate generated files.
-	$(OPERATOR_SDK) generate kustomize manifests -q
-	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
-	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle $(BUNDLE_GEN_FLAGS)
-	$(OPERATOR_SDK) bundle validate ./bundle
+	"$(OPERATOR_SDK)" generate kustomize manifests -q
+	cd config/manager && "$(KUSTOMIZE)" edit set image controller=$(IMG):latest && cd ../..
+	"$(KUSTOMIZE)" build config/manifests | "$(OPERATOR_SDK)" generate bundle $(BUNDLE_GEN_FLAGS)
+	"$(OPERATOR_SDK)" bundle validate ./bundle
 
 .PHONY: bundle-build
 bundle-build: ## Build the bundle image.
