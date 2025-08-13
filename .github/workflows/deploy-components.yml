@@ -1,0 +1,296 @@
+name: Deploy SxM Components via OCM Policies
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: 'Target environment (kind/openshift)'
+        required: true
+        default: 'kind'
+        type: choice
+        options:
+        - kind
+        - openshift
+      components:
+        description: 'Components to deploy (comma-separated: mdm,kepler,qos,pdlc,prometheus)'
+        required: true
+        default: 'mdm,kepler,qos,pdlc,prometheus'
+        type: string
+      hub_cluster_context:
+        description: 'Hub cluster kubectl context'
+        required: true
+        default: 'kind-hub'
+        type: string
+      managed_cluster_contexts:
+        description: 'Managed cluster contexts (comma-separated)'
+        required: true
+        default: 'kind-managed-1,kind-managed-2'
+        type: string
+
+env:
+  KUBECONFIG: ${{ github.workspace }}/kubeconfig
+  POLICY_GENERATOR_VERSION: "v1.12.0"
+  
+jobs:
+  prepare-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      components: ${{ steps.parse-inputs.outputs.components }}
+      hub_context: ${{ steps.parse-inputs.outputs.hub_context }}
+      managed_contexts: ${{ steps.parse-inputs.outputs.managed_contexts }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Parse inputs
+      id: parse-inputs
+      run: |
+        echo "components=${{ github.event.inputs.components }}" >> $GITHUB_OUTPUT
+        echo "hub_context=${{ github.event.inputs.hub_cluster_context }}" >> $GITHUB_OUTPUT
+        echo "managed_contexts=${{ github.event.inputs.managed_cluster_contexts }}" >> $GITHUB_OUTPUT
+        
+    - name: Setup environment info
+      run: |
+        echo "🚀 Starting SxM Component Deployment Pipeline"
+        echo "Target Environment: ${{ github.event.inputs.target_environment }}"
+        echo "Components: ${{ github.event.inputs.components }}"
+        echo "Hub Cluster: ${{ github.event.inputs.hub_cluster_context }}"
+        echo "Managed Clusters: ${{ github.event.inputs.managed_cluster_contexts }}"
+
+  clone-repositories:
+    runs-on: ubuntu-latest
+    needs: prepare-environment
+    steps:
+    - name: Checkout ACM repository
+      uses: actions/checkout@v4
+      
+    - name: Clone component repositories
+      run: |
+        echo "🔄 Cloning component repositories..."
+        cd ..
+        
+        # Clone all required repositories
+        git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/scheduling-and-workload-migration-swm/qos-scheduler.git qos-scheduler
+        git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/metadata-manager-mdm/mdm-api.git mdm-api
+        git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/metadata-manager-mdm/connectors.git mdm-connectors
+        git clone https://gitlab.eclipse.org/eclipse-research-labs/codeco-project/privacy-preserving-decentralised-learning-and-context-awareness-pdlc/pdlc-integration.git pdlc-integration
+        git clone https://github.com/k8snetworkplumbingwg/multus-cni.git multus-cni
+        git clone https://github.com/sustainable-computing-io/kepler.git kepler
+        git clone https://github.com/prometheus-operator/kube-prometheus.git kube-prometheus
+        
+        echo "✅ Repository cloning completed"
+        
+    - name: Cache cloned repositories
+      uses: actions/cache@v3
+      with:
+        path: |
+          ../qos-scheduler
+          ../mdm-api
+          ../mdm-connectors
+          ../pdlc-integration
+          ../multus-cni
+          ../kepler
+          ../kube-prometheus
+        key: component-repos-${{ github.sha }}
+        
+  extract-helm-yaml:
+    runs-on: ubuntu-latest
+    needs: [prepare-environment, clone-repositories]
+    steps:
+    - name: Checkout ACM repository
+      uses: actions/checkout@v4
+      
+    - name: Restore cached repositories
+      uses: actions/cache@v3
+      with:
+        path: |
+          ../qos-scheduler
+          ../mdm-api
+          ../mdm-connectors
+          ../pdlc-integration
+          ../multus-cni
+          ../kepler
+          ../kube-prometheus
+        key: component-repos-${{ github.sha }}
+        
+    - name: Setup Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: '3.12.0'
+        
+    - name: Extract YAML from Helm charts
+      run: |
+        echo "🔧 Extracting YAML from Helm charts..."
+        mkdir -p manifests/extracted-yaml
+        
+        # Source the extraction script
+        chmod +x scripts/extract-helm-yaml.sh
+        ./scripts/extract-helm-yaml.sh "${{ needs.prepare-environment.outputs.components }}"
+        
+        echo "✅ YAML extraction completed"
+        
+    - name: Upload extracted YAML
+      uses: actions/upload-artifact@v3
+      with:
+        name: extracted-yaml
+        path: manifests/extracted-yaml/
+        retention-days: 1
+
+  generate-policies:
+    runs-on: ubuntu-latest
+    needs: [prepare-environment, extract-helm-yaml]
+    steps:
+    - name: Checkout ACM repository
+      uses: actions/checkout@v4
+      
+    - name: Download extracted YAML
+      uses: actions/download-artifact@v3
+      with:
+        name: extracted-yaml
+        path: manifests/extracted-yaml/
+        
+    - name: Setup Policy Generator
+      run: |
+        echo "🔧 Setting up OCM Policy Generator..."
+        
+        # Download policy generator
+        wget -O policy-generator https://github.com/open-cluster-management-io/policy-generator-plugin/releases/download/${{ env.POLICY_GENERATOR_VERSION }}/linux-amd64-PolicyGenerator
+        chmod +x policy-generator
+        sudo mv policy-generator /usr/local/bin/
+        
+        # Verify installation
+        policy-generator --version
+        
+    - name: Generate OCM policies
+      run: |
+        echo "🏗️ Generating OCM policies..."
+        
+        # Create policy generator configuration
+        chmod +x scripts/generate-policies.sh
+        ./scripts/generate-policies.sh "${{ needs.prepare-environment.outputs.components }}"
+        
+        echo "✅ Policy generation completed"
+        
+    - name: Upload generated policies
+      uses: actions/upload-artifact@v3
+      with:
+        name: generated-policies
+        path: manifests/policies/
+        retention-days: 1
+
+  deploy-to-hub:
+    runs-on: ubuntu-latest
+    needs: [prepare-environment, generate-policies]
+    steps:
+    - name: Checkout ACM repository
+      uses: actions/checkout@v4
+      
+    - name: Download generated policies
+      uses: actions/download-artifact@v3
+      with:
+        name: generated-policies
+        path: manifests/policies/
+        
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+        
+    - name: Configure kubeconfig
+      run: |
+        echo "🔧 Configuring kubeconfig..."
+        # Note: In real implementation, you'd get this from secrets
+        # For now, this is a placeholder for the kubeconfig setup
+        echo "Kubeconfig should be provided via GitHub secrets"
+        
+    - name: Deploy policies to hub cluster
+      run: |
+        echo "🚀 Deploying policies to hub cluster..."
+        
+        # Switch to hub cluster context
+        kubectl config use-context ${{ needs.prepare-environment.outputs.hub_context }}
+        
+        # Apply all generated policies
+        kubectl apply -f manifests/policies/ --recursive
+        
+        echo "✅ Policies deployed to hub cluster"
+        
+    - name: Wait for policy propagation
+      run: |
+        echo "⏳ Waiting for policy propagation..."
+        
+        # Wait for policies to be created and propagated
+        sleep 30
+        
+        # Check policy status
+        kubectl get policies -A
+        kubectl get placementbindings -A
+        
+        echo "✅ Policy propagation check completed"
+
+  verify-deployment:
+    runs-on: ubuntu-latest
+    needs: [prepare-environment, deploy-to-hub]
+    steps:
+    - name: Checkout ACM repository
+      uses: actions/checkout@v4
+      
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+        
+    - name: Verify hub cluster deployment
+      run: |
+        echo "🔍 Verifying hub cluster deployment..."
+        
+        kubectl config use-context ${{ needs.prepare-environment.outputs.hub_context }}
+        
+        # Check hub components
+        chmod +x scripts/verify-deployment.sh
+        ./scripts/verify-deployment.sh hub "${{ needs.prepare-environment.outputs.components }}"
+        
+    - name: Verify managed cluster deployments
+      run: |
+        echo "🔍 Verifying managed cluster deployments..."
+        
+        IFS=',' read -ra CONTEXTS <<< "${{ needs.prepare-environment.outputs.managed_contexts }}"
+        for context in "${CONTEXTS[@]}"; do
+          echo "Checking managed cluster: $context"
+          kubectl config use-context "$context"
+          ./scripts/verify-deployment.sh managed "${{ needs.prepare-environment.outputs.components }}"
+        done
+        
+    - name: Generate deployment report
+      run: |
+        echo "📊 Generating deployment report..."
+        
+        # Create deployment summary
+        echo "# SxM Component Deployment Report" > deployment-report.md
+        echo "## Deployment Details" >> deployment-report.md
+        echo "- **Date**: $(date)" >> deployment-report.md
+        echo "- **Components**: ${{ needs.prepare-environment.outputs.components }}" >> deployment-report.md
+        echo "- **Hub Cluster**: ${{ needs.prepare-environment.outputs.hub_context }}" >> deployment-report.md
+        echo "- **Managed Clusters**: ${{ needs.prepare-environment.outputs.managed_contexts }}" >> deployment-report.md
+        echo "" >> deployment-report.md
+        
+        # Add component status
+        chmod +x scripts/generate-report.sh
+        ./scripts/generate-report.sh >> deployment-report.md
+        
+    - name: Upload deployment report
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-report
+        path: deployment-report.md
+        retention-days: 7
+
+  cleanup:
+    runs-on: ubuntu-latest
+    needs: [verify-deployment]
+    if: always()
+    steps:
+    - name: Cleanup artifacts
+      run: |
+        echo "🧹 Cleanup completed"
+        echo "Deployment pipeline finished"
